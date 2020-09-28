@@ -21,6 +21,14 @@ client.on("message", async (message) => {
     message.channel.send(
       leaderboard.map((entry) => `${entry.name}: ${entry.score}`).join("\n")
     );
+  } else if (command === "schedule") {
+    const schedule = await sheet.getSchedule();
+    const dayNumber = args[0];
+    message.channel.send(
+      schedule
+        .find((day) => day.number === parseInt(dayNumber))
+        .games.map((game) => `Game ${game.number} (${game.type}): ${game.time}`)
+    );
   }
 });
 
