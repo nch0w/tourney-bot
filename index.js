@@ -2,7 +2,7 @@ require("dotenv").config();
 const Discord = require("discord.js");
 const sheet = require("./sheet");
 const client = new Discord.Client();
-
+const { format } = require("date-fns");
 const PREFIX = process.env.PREFIX;
 
 client.once("ready", () => {
@@ -22,13 +22,29 @@ client.on("message", async (message) => {
       leaderboard.map((entry) => `${entry.name}: ${entry.score}`).join("\n")
     );
   } else if (command === "schedule") {
-    const schedule = await sheet.getSchedule();
     const dayNumber = args[0];
-    message.channel.send(
-      schedule
-        .find((day) => day.number === parseInt(dayNumber))
-        .games.map((game) => `Game ${game.number} (${game.type}): ${game.time}`)
+    if (!dayNumber) {
+      message.channel.send("Please enter a day (e.g. 1).");
+      return;
+    }
+    const schedule = await sheet.getSchedule();
+
+    const daySchedule = schedule.find(
+      (day) => day.number === parseInt(dayNumber)
     );
+    if (!daySchedule) {
+      message.channel.send("Could not find a schedule for this day.");
+      return;
+    }
+    const embed = new Discord.MessageEmbed()
+      .setTitle(`Day ${dayNumber}: ${format(daySchedule.date, "eee, LLL do")}`)
+      .addFields(
+        ...daySchedule.games.map((game) => ({
+          name: `Game ${game.number} (${game.type}), ${game.time}`,
+          value: "Not played yet",
+        }))
+      );
+    message.channel.send(embed);
   }
 });
 
