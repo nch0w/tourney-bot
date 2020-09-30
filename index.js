@@ -28,6 +28,7 @@ client.on("message", async (message) => {
       return;
     }
     const schedule = await sheet.getSchedule();
+    const games = await sheet.getGames();
 
     const daySchedule = schedule.find(
       (day) => day.number === parseInt(dayNumber)
@@ -39,10 +40,15 @@ client.on("message", async (message) => {
     const embed = new Discord.MessageEmbed()
       .setTitle(`Day ${dayNumber}: ${format(daySchedule.date, "eee, LLL do")}`)
       .addFields(
-        ...daySchedule.games.map((game) => ({
-          name: `Game ${game.number} (${game.type}), ${game.time}`,
-          value: "Not played yet",
-        }))
+        ...daySchedule.games.map((game) => {
+          const gameInfo = games.find((g) => g.number === game.number);
+          return {
+            name: `Game ${game.number} (${game.type}), ${game.time}`,
+            value: gameInfo
+              ? `Winner: ${gameInfo.winner} [Replay](${gameInfo.link})`
+              : "Not played yet",
+          };
+        })
       );
     message.channel.send(embed);
   }
