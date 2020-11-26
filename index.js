@@ -2,7 +2,7 @@ require("dotenv").config();
 const Discord = require("discord.js");
 const sheet = require("./sheet");
 const client = new Discord.Client();
-const { format } = require("date-fns");
+const { format, utcToZonedTime, zonedTimeToUtc } = require("date-fns-tz");
 const PREFIX = process.env.PREFIX;
 
 client.once("ready", () => {
@@ -23,9 +23,13 @@ client.on("message", async (message) => {
     );
   } else if (command === "schedule") {
     const dayNumber = args[0];
+    let timeZone = "UTC";
     if (!dayNumber) {
       message.channel.send("Please enter a day (e.g. 1).");
       return;
+    }
+    if (args.length > 1) {
+      timeZone = args[1].toLowerCase();
     }
     const schedule = await sheet.getSchedule();
     const games = await sheet.getGames();
@@ -37,20 +41,35 @@ client.on("message", async (message) => {
       message.channel.send("Could not find a schedule for this day.");
       return;
     }
-    const embed = new Discord.MessageEmbed()
-      .setTitle(`Day ${dayNumber}: ${format(daySchedule.date, "eee, LLL do")}`)
-      .addFields(
-        ...daySchedule.games.map((game) => {
-          const gameInfo = games.find((g) => g.number === game.number);
-          return {
-            name: `Game ${game.number} (${game.type}), ${game.time}`,
-            value: gameInfo
-              ? `Winner: ${gameInfo.winner} [Replay](${gameInfo.link})`
-              : "Not played yet",
-          };
-        })
-      );
-    message.channel.send(embed);
+    try {
+      const embed = new Discord.MessageEmbed()
+        .setTitle(
+          `Day ${dayNumber}: ${format(
+            utcToZonedTime(daySchedule.date, "UTC"),
+            "eee, LLL do"
+          )}`
+        )
+        .addFields(
+          ...daySchedule.games.map((game) => {
+            const gameInfo = games.find((g) => g.number === game.number);
+            return {
+              name: `Game ${game.number} (${game.type}), ${format(
+                utcToZonedTime(game.time, timeZone),
+                "ha z",
+                {
+                  timeZone,
+                }
+              )}`,
+              value: gameInfo
+                ? `Winner: ${gameInfo.winner} - [Replay](${gameInfo.link})`
+                : "Not played yet",
+            };
+          })
+        );
+      message.channel.send(embed);
+    } catch (err) {
+      message.channel.send(err.toString());
+    }
   }
 });
 

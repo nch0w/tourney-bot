@@ -1,10 +1,12 @@
 const _ = require("lodash");
 const { GoogleSpreadsheet } = require("google-spreadsheet");
 const creds = require("./google-api-credentials.json");
+const { parse, format } = require("date-fns");
+const { zonedTimeToUtc } = require("date-fns-tz");
 
 // for now, assume the tourney games are all in the same year and month
 YEAR = 2020;
-MONTH = 8; // september
+MONTH = 10; // november
 
 // this is the 4th SH Tourney spreadsheet
 const doc = new GoogleSpreadsheet(
@@ -43,25 +45,36 @@ async function getSchedule() {
     (name) => sheet.getCell(name[0], name[1]).value
   );
 
-  const schedule = dayNames.map((name, idx) => ({
-    number: idx + 1,
-    date: new Date(YEAR, MONTH, parseInt(name.match(/\d+/)[0])),
-    games: _.range(0, 4).map((row) => ({
-      type: sheet.getCell(
-        dayNameCells[idx][0] + 1 + 2 * row,
-        dayNameCells[idx][1]
-      ).value,
-      number: parseInt(
-        sheet
-          .getCell(dayNameCells[idx][0] + 2 + 2 * row, dayNameCells[idx][1])
-          .value.match(/\d+/)[0]
-      ),
-      time: sheet.getCell(
-        dayNameCells[idx][0] + 1 + 2 * row,
-        dayNameCells[idx][1] + 1
-      ).value,
-    })),
-  }));
+  const schedule = dayNames.map((name, idx) => {
+    const day = parseInt(name.match(/\d+/)[0]);
+    const date = new Date(Date.UTC(YEAR, MONTH, day));
+    return {
+      number: idx + 1,
+      date,
+      games: _.range(0, 4).map((row) => {
+        const cellTime = sheet.getCell(
+          dayNameCells[idx][0] + 1 + 2 * row,
+          dayNameCells[idx][1] + 1
+        ).value;
+        const cellHours = parseInt(cellTime.match(/\d+/)[0]);
+        const am = cellTime.match(/AM/) != null;
+        return {
+          type: sheet.getCell(
+            dayNameCells[idx][0] + 1 + 2 * row,
+            dayNameCells[idx][1]
+          ).value,
+          number: parseInt(
+            sheet
+              .getCell(dayNameCells[idx][0] + 2 + 2 * row, dayNameCells[idx][1])
+              .value.match(/\d+/)[0]
+          ),
+          time: am
+            ? new Date(Date.UTC(YEAR, MONTH, day + 1, cellHours))
+            : new Date(Date.UTC(YEAR, MONTH, day, cellHours + 12)),
+        };
+      }),
+    };
+  });
   return schedule;
 }
 
