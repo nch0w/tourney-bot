@@ -1,9 +1,12 @@
 require("dotenv").config();
 const Discord = require("discord.js");
+const Keyv = require("keyv");
 const sheet = require("./sheet");
 const client = new Discord.Client();
-const { format, utcToZonedTime, zonedTimeToUtc } = require("date-fns-tz");
+const { format, utcToZonedTime } = require("date-fns-tz");
 const PREFIX = process.env.PREFIX;
+
+const timezones = new Keyv("sqlite://db.sqlite", { namespace: "timezone" });
 
 client.once("ready", () => {
   console.log("Ready!");
@@ -30,6 +33,11 @@ client.on("message", async (message) => {
     }
     if (args.length > 1) {
       timeZone = args[1].toLowerCase();
+    }
+    const userTimeZone = await timezones.get(message.author.id);
+    console.log(userTimeZone);
+    if (userTimeZone) {
+      timeZone = userTimeZone;
     }
     const schedule = await sheet.getSchedule();
     const games = await sheet.getGames();
@@ -70,7 +78,22 @@ client.on("message", async (message) => {
     } catch (err) {
       message.channel.send(err.toString());
     }
+  } else if (command === "timezone") {
+    const timeZone = args[0];
+    try {
+      const timeString = format(new Date(), "zzz", { timeZone });
+      timezones.set(message.author.id, timeZone);
+      message.channel.send(
+        `<@${message.author.id}>, your timezone was set to ${timeZone} (${timeString}).`
+      );
+    } catch (err) {
+      message.reply(
+        `<@${message.author.id}>, you entered an invalid timezone: ${timeZone}.\nPlease find a list of timezones at https://en.wikipedia.org/wiki/List_of_tz_database_time_zones.`
+      );
+    }
   }
 });
+
+timezones.on("error", (err) => console.error("Keyv connection error:", err));
 
 client.login(process.env.TOKEN);
