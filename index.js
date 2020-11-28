@@ -60,6 +60,7 @@ client.on("message", async (message) => {
         .addFields(
           ...daySchedule.games.map((game) => {
             const gameInfo = games.find((g) => g.number === game.number);
+            console.log(gameInfo);
             return {
               name: `Game ${game.number} (${game.type}), ${format(
                 utcToZonedTime(game.time, timeZone),
@@ -68,8 +69,12 @@ client.on("message", async (message) => {
                   timeZone,
                 }
               )}`,
-              value: gameInfo
-                ? `Winner: ${gameInfo.winner} - [Replay](${gameInfo.link})`
+              value: gameInfo.played
+                ? `${
+                    gameInfo.fasWin ? "Fascist win" : "Liberal win"
+                  }: ${gameInfo.winners.join(", ")} - [Replay](${
+                    gameInfo.link
+                  })`
                 : "Not played yet",
             };
           })
@@ -83,12 +88,10 @@ client.on("message", async (message) => {
     try {
       const timeString = format(new Date(), "zzz", { timeZone });
       timezones.set(message.author.id, timeZone);
-      message.channel.send(
-        `<@${message.author.id}>, your timezone was set to ${timeZone} (${timeString}).`
-      );
+      message.reply(`your timezone was set to ${timeZone} (${timeString}).`);
     } catch (err) {
       message.reply(
-        `<@${message.author.id}>, you entered an invalid timezone: ${timeZone}.\nPlease find a list of timezones at https://en.wikipedia.org/wiki/List_of_tz_database_time_zones.`
+        `you entered an invalid timezone: ${timeZone}.\nPlease find a list of timezones at https://en.wikipedia.org/wiki/List_of_tz_database_time_zones.`
       );
     }
   }

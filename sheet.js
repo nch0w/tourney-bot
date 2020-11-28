@@ -7,10 +7,11 @@ const { zonedTimeToUtc } = require("date-fns-tz");
 // for now, assume the tourney games are all in the same year and month
 YEAR = 2020;
 MONTH = 10; // november
+TEAM_EMOJI = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣"];
 
 // this is the 4th SH Tourney spreadsheet
 const doc = new GoogleSpreadsheet(
-  "1zVZnftxBO-kwhYwjYB2v6ri4mVpP7bDrNOdJKXUDH10"
+  "119GUu_Eeaprl5R01DZplB4Tc_vqlFeWhzaDlvg8knDI"
 );
 doc.useServiceAccountAuth(creds);
 
@@ -18,7 +19,7 @@ async function loadSheet() {
   await doc.loadInfo();
   await doc.sheetsByIndex[0].loadCells("AA2:AG15");
   await doc.sheetsByIndex[1].loadCells("A1:S23");
-  await doc.sheetsByIndex[2].loadCells("A1:R57");
+  await doc.sheetsByIndex[2].loadCells("A1:CA55");
 }
 
 setTimeout(loadSheet, 0);
@@ -81,11 +82,41 @@ async function getSchedule() {
 async function getGames() {
   const sheet = doc.sheetsByIndex[2];
   // await sheet.loadCells("A1:R57");
-  return _.range(1, 49).map((number) => ({
-    number,
-    winner: sheet.getCell(number + 2, 11).value,
-    link: sheet.getCell(number + 2, 12).value,
-  }));
+  return _.range(1, 49).map((number) => {
+    const winner = sheet.getCell(number, 9).value.replace(/\s/g, "");
+    const played = winner.length > 0;
+    const fasWin = played && winner === "F";
+    const hitler = parseInt(sheet.getCell(number, 8).value) - 1;
+    const fascist1 = parseInt(sheet.getCell(number, 6).value) - 1;
+    const fascist2 = parseInt(sheet.getCell(number, 7).value) - 1;
+    const players = _.range(0, 7).map(
+      (i) => `${TEAM_EMOJI[i]} ${sheet.getCell(number, 11 + i).value}`
+    );
+
+    const fascists = [players[hitler], players[fascist1], players[fascist2]];
+    const liberals = players.filter((p) => !fascists.includes(p));
+
+    let winners = [];
+    if (played) {
+      if (fasWin) {
+        winners = fascists;
+      } else {
+        winners = liberals;
+      }
+    }
+
+    return {
+      number,
+      played,
+      fasWin,
+      link: sheet.getCell(number, 10).value,
+      players,
+      hitler,
+      fascist1,
+      fascist2,
+      winners,
+    };
+  });
 }
 
 module.exports = { getLeaderboard, getSchedule, getGames };
