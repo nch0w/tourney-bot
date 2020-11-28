@@ -8,6 +8,42 @@ const PREFIX = process.env.PREFIX;
 
 const timezones = new Keyv("sqlite://db.sqlite", { namespace: "timezone" });
 
+async function scheduleEmbed(dayNumber, timeZone) {
+  const schedule = await sheet.getSchedule();
+
+  const daySchedule = schedule.find(
+    (day) => day.number === parseInt(dayNumber)
+  );
+  const games = await sheet.getGames();
+  return new Discord.MessageEmbed()
+    .setTitle(
+      `Day ${dayNumber}: ${format(
+        utcToZonedTime(daySchedule.date, "UTC"),
+        "eee, LLL do"
+      )}`
+    )
+    .addFields(
+      ...daySchedule.games.map((game) => {
+        const gameInfo = games.find((g) => g.number === game.number);
+
+        return {
+          name: `Game ${game.number} (${game.type}), ${format(
+            utcToZonedTime(game.time, timeZone),
+            "ha z",
+            {
+              timeZone,
+            }
+          )}`,
+          value: gameInfo.played
+            ? `${
+                gameInfo.fasWin ? "Fascist win" : "Liberal win"
+              }: ${gameInfo.winners.join(", ")} - [Replay](${gameInfo.link})`
+            : "Not played yet",
+        };
+      })
+    );
+}
+
 client.once("ready", () => {
   console.log("Ready!");
 });
@@ -25,7 +61,7 @@ client.on("message", async (message) => {
       leaderboard.map((entry) => `${entry.name}: ${entry.score}`).join("\n")
     );
   } else if (command === "schedule") {
-    const dayNumber = args[0];
+    let dayNumber = parseInt(args[0]);
     let timeZone = "UTC";
     if (!dayNumber) {
       message.channel.send("Please enter a day (e.g. 1).");
@@ -35,51 +71,44 @@ client.on("message", async (message) => {
       timeZone = args[1].toLowerCase();
     }
     const userTimeZone = await timezones.get(message.author.id);
-    console.log(userTimeZone);
+
     if (userTimeZone) {
       timeZone = userTimeZone;
     }
-    const schedule = await sheet.getSchedule();
-    const games = await sheet.getGames();
 
-    const daySchedule = schedule.find(
-      (day) => day.number === parseInt(dayNumber)
-    );
-    if (!daySchedule) {
+    if (dayNumber < 1 || dayNumber > 12) {
       message.channel.send("Could not find a schedule for this day.");
       return;
     }
     try {
-      const embed = new Discord.MessageEmbed()
-        .setTitle(
-          `Day ${dayNumber}: ${format(
-            utcToZonedTime(daySchedule.date, "UTC"),
-            "eee, LLL do"
-          )}`
-        )
-        .addFields(
-          ...daySchedule.games.map((game) => {
-            const gameInfo = games.find((g) => g.number === game.number);
-            console.log(gameInfo);
-            return {
-              name: `Game ${game.number} (${game.type}), ${format(
-                utcToZonedTime(game.time, timeZone),
-                "ha z",
-                {
-                  timeZone,
-                }
-              )}`,
-              value: gameInfo.played
-                ? `${
-                    gameInfo.fasWin ? "Fascist win" : "Liberal win"
-                  }: ${gameInfo.winners.join(", ")} - [Replay](${
-                    gameInfo.link
-                  })`
-                : "Not played yet",
-            };
-          })
+      const embed = await scheduleEmbed(dayNumber, timeZone);
+      const emb = await message.channel.send(embed);
+      await emb.react("◀");
+      await emb.react("▶");
+      const filter = (reaction, user) => {
+        return ["◀", "▶"].includes(reaction.emoji.name);
+      };
+
+      const collector = emb.createReactionCollector(filter, { time: 60000 });
+      collector.on("collect", async (reaction, user) => {
+        if (reaction.emoji.name === "◀") {
+          dayNumber = Math.max(dayNumber - 1, 1);
+        } else {
+          dayNumber = Math.min(dayNumber + 1, 12);
+        }
+        const newEmbed = await scheduleEmbed(dayNumber, timeZone);
+        emb.edit(newEmbed);
+        const userReactions = emb.reactions.cache.filter((reaction) =>
+          reaction.users.cache.has(user.id)
         );
-      message.channel.send(embed);
+        try {
+          for (const reaction of userReactions.values()) {
+            await reaction.users.remove(user.id);
+          }
+        } catch (error) {
+          console.error("Failed to remove reactions.");
+        }
+      });
     } catch (err) {
       message.channel.send(err.toString());
     }
@@ -94,6 +123,7 @@ client.on("message", async (message) => {
         `you entered an invalid timezone: ${timeZone}.\nPlease find a list of timezones at https://en.wikipedia.org/wiki/List_of_tz_database_time_zones.`
       );
     }
+  } else if (command === "mvp") {
   }
 });
 

@@ -1,8 +1,6 @@
 const _ = require("lodash");
 const { GoogleSpreadsheet } = require("google-spreadsheet");
 const creds = require("./google-api-credentials.json");
-const { parse, format } = require("date-fns");
-const { zonedTimeToUtc } = require("date-fns-tz");
 
 // for now, assume the tourney games are all in the same year and month
 YEAR = 2020;
@@ -20,6 +18,7 @@ async function loadSheet() {
   await doc.sheetsByIndex[0].loadCells("AA2:AG15");
   await doc.sheetsByIndex[1].loadCells("A1:S23");
   await doc.sheetsByIndex[2].loadCells("A1:CA55");
+  await doc.sheetsByIndex[4].loadCells("A1:S120");
 }
 
 setTimeout(loadSheet, 0);
