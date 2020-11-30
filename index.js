@@ -124,6 +124,12 @@ client.on("message", async (message) => {
     }
   } else if (command === "timezone") {
     const timeZone = args[0];
+    if (!timeZone) {
+      message.reply(
+        `you did not enter a timezone.\nPlease find a list of timezones at https://en.wikipedia.org/wiki/List_of_tz_database_time_zones.`
+      );
+      return;
+    }
     try {
       const timeString = format(new Date(), "zzz", { timeZone });
       timezones.set(message.author.id, timeZone);
