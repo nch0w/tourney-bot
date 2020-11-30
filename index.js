@@ -4,6 +4,8 @@ const Keyv = require("keyv");
 const sheet = require("./sheet");
 const client = new Discord.Client();
 const { format, utcToZonedTime } = require("date-fns-tz");
+const { formatDistanceToNow } = require("date-fns");
+const { START_DAY } = require("./constants");
 const PREFIX = process.env.PREFIX;
 
 const timezones = new Keyv("sqlite://db.sqlite", { namespace: "timezone" });
@@ -38,7 +40,7 @@ async function scheduleEmbed(dayNumber, timeZone) {
             ? `${
                 gameInfo.fasWin ? "Fascist win" : "Liberal win"
               }: ${gameInfo.winners.join(", ")} - [Replay](${gameInfo.link})`
-            : "Not played yet",
+            : `Not played yet - starts in ${formatDistanceToNow(game.time)}`,
         };
       })
     );
@@ -61,15 +63,23 @@ client.on("message", async (message) => {
       leaderboard.map((entry) => `${entry.name}: ${entry.score}`).join("\n")
     );
   } else if (command === "schedule") {
-    let dayNumber = parseInt(args[0]);
+    let dayNumber = Math.min(
+      12,
+      Math.max(1, new Date().getUTCDate() - START_DAY)
+    );
+    if (args.length > 0) {
+      dayNumber = parseInt(args[0]);
+    }
     let timeZone = "UTC";
     if (!dayNumber) {
-      message.channel.send("Please enter a day (e.g. 1).");
+      message.channel.send(
+        "Please enter a day (e.g. 1) or leave blank to use the current day."
+      );
       return;
     }
-    if (args.length > 1) {
-      timeZone = args[1].toLowerCase();
-    }
+    // if (args.length > 1) {
+    //   timeZone = args[1].toLowerCase();
+    // }
     const userTimeZone = await timezones.get(message.author.id);
 
     if (userTimeZone) {
@@ -77,7 +87,7 @@ client.on("message", async (message) => {
     }
 
     if (dayNumber < 1 || dayNumber > 12) {
-      message.channel.send("Could not find a schedule for this day.");
+      message.channel.send(`Could not find a schedule for day ${dayNumber}.`);
       return;
     }
     try {

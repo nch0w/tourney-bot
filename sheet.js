@@ -2,10 +2,7 @@ const _ = require("lodash");
 const { GoogleSpreadsheet } = require("google-spreadsheet");
 const creds = require("./google-api-credentials.json");
 
-// for now, assume the tourney games are all in the same year and month
-YEAR = 2020;
-MONTH = 10; // november
-TEAM_EMOJI = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣"];
+const { YEAR, MONTH, TEAM_EMOJI } = require("./constants");
 
 // this is the 4th SH Tourney spreadsheet
 const doc = new GoogleSpreadsheet(
@@ -82,9 +79,19 @@ async function getGames() {
   const sheet = doc.sheetsByIndex[2];
   // await sheet.loadCells("A1:R57");
   return _.range(1, 49).map((number) => {
+    const played =
+      sheet.getCell(number, 9).value &&
+      sheet.getCell(number, 9).value.length > 0;
+
+    if (!played) {
+      return {
+        number,
+        played,
+      };
+    }
+
     const winner = sheet.getCell(number, 9).value.replace(/\s/g, "");
-    const played = winner.length > 0;
-    const fasWin = played && winner === "F";
+    const fasWin = winner === "F";
     const hitler = parseInt(sheet.getCell(number, 8).value) - 1;
     const fascist1 = parseInt(sheet.getCell(number, 6).value) - 1;
     const fascist2 = parseInt(sheet.getCell(number, 7).value) - 1;
@@ -96,12 +103,10 @@ async function getGames() {
     const liberals = players.filter((p) => !fascists.includes(p));
 
     let winners = [];
-    if (played) {
-      if (fasWin) {
-        winners = fascists;
-      } else {
-        winners = liberals;
-      }
+    if (fasWin) {
+      winners = fascists;
+    } else {
+      winners = liberals;
     }
 
     return {
