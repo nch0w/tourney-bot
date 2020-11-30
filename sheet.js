@@ -66,8 +66,8 @@ async function getSchedule() {
               .value.match(/\d+/)[0]
           ),
           time: am
-            ? new Date(Date.UTC(YEAR, MONTH, day + 1, cellHours))
-            : new Date(Date.UTC(YEAR, MONTH, day, cellHours + 12)),
+            ? new Date(Date.UTC(YEAR, MONTH, day + 1, cellHours % 12))
+            : new Date(Date.UTC(YEAR, MONTH, day, (cellHours % 12) + 12)),
         };
       }),
     };
