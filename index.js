@@ -134,6 +134,31 @@ client.on("message", async (message) => {
       );
     }
   } else if (command === "mvp") {
+  } else if (command === "info" || command === "help") {
+    const embed = new Discord.MessageEmbed().setTitle("Commands").addFields(
+      {
+        name: `${PREFIX}schedule {day: optional}`,
+        value:
+          "Find the game schedule and replay links for today or another day",
+      },
+      {
+        name: `${PREFIX}leaderboard`,
+        value: "View the team leaderboard",
+      },
+      {
+        name: `${PREFIX}mvp`,
+        value: "View the MVP running",
+      },
+      {
+        name: `${PREFIX}timezone {timezone}`,
+        value: "Set your account's timezone",
+      },
+      {
+        name: `${PREFIX}sheet`,
+        value: "Send a link to the official tourney Google sheet",
+      }
+    );
+    message.channel.send(embed);
   }
 });
 
