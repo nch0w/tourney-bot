@@ -6,6 +6,7 @@ const client = new Discord.Client();
 const { format, utcToZonedTime } = require("date-fns-tz");
 const { formatDistanceToNow } = require("date-fns");
 const { START_DAY } = require("./constants");
+const { getPlayers } = require("./sheet");
 const PREFIX = process.env.PREFIX;
 
 const timezones = new Keyv("sqlite://db.sqlite", { namespace: "timezone" });
@@ -140,6 +141,21 @@ client.on("message", async (message) => {
       );
     }
   } else if (command === "mvp") {
+    let players = await getPlayers();
+    players = players.filter((p) => p.personalScore >= 0);
+    players.sort((a, b) => b.personalScore - a.personalScore);
+    const embed = new Discord.MessageEmbed()
+      .setTitle("MVP Running (Personal Score)")
+      .setDescription(
+        players
+          .slice(0, 10)
+          .map(
+            (p, i) =>
+              `${i + 1}. ${p.teamName} ${p.name} - ${p.personalScore} points `
+          )
+          .join("\n")
+      );
+    message.channel.send(embed);
   } else if (command === "info" || command === "help") {
     const embed = new Discord.MessageEmbed().setTitle("Commands").addFields(
       {
