@@ -10,7 +10,11 @@ const doc = new GoogleSpreadsheet(
 );
 doc.useServiceAccountAuth(creds);
 
+let updateTime = new Date(new Date().getTime());
+
 async function loadSheet() {
+  console.log("loading sheet");
+  updateTime = new Date(new Date().getTime());
   await doc.loadInfo();
   await doc.sheetsByIndex[0].loadCells("AA2:AG15");
   await doc.sheetsByIndex[1].loadCells("A1:S23");
@@ -20,6 +24,10 @@ async function loadSheet() {
 
 setTimeout(loadSheet, 0);
 setInterval(loadSheet, 60000);
+
+function getUpdateTime() {
+  return updateTime;
+}
 
 async function getLeaderboard() {
   const sheet = doc.sheetsByIndex[0];
@@ -144,4 +152,10 @@ async function getPlayers() {
   return players;
 }
 
-module.exports = { getLeaderboard, getSchedule, getGames, getPlayers };
+module.exports = {
+  getLeaderboard,
+  getSchedule,
+  getGames,
+  getPlayers,
+  getUpdateTime,
+};

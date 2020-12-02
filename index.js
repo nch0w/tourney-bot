@@ -57,12 +57,28 @@ client.on("message", async (message) => {
   const args = message.content.slice(PREFIX.length).trim().split(/ +/);
   const command = args.shift().toLowerCase();
 
-  if (command === "leaderboard") {
+  if (command === "leaderboard" || command === "lb") {
+    const userTimeZone = await timezones.get(message.author.id);
+    const timeZone = userTimeZone || "UTC";
+
     const leaderboard = await sheet.getLeaderboard();
     leaderboard.sort((a, b) => b.score - a.score);
-    message.channel.send(
-      leaderboard.map((entry) => `${entry.name}: ${entry.score}`).join("\n")
-    );
+
+    const embed = new Discord.MessageEmbed()
+      .setTitle("Leaderboard")
+      .setDescription(
+        leaderboard
+          .map((entry, i) => `${i + 1}. ${entry.name}: ${entry.score}`)
+          .join("\n")
+      )
+      .setFooter(
+        `Updated ${format(
+          utcToZonedTime(sheet.getUpdateTime(), timeZone),
+          "h:m a zzz",
+          { timeZone }
+        )}`
+      );
+    message.channel.send(embed);
   } else if (command === "schedule") {
     let dayNumber = Math.min(
       12,
@@ -141,21 +157,49 @@ client.on("message", async (message) => {
       );
     }
   } else if (command === "mvp") {
-    let players = await getPlayers();
-    players = players.filter((p) => p.personalScore >= 0);
-    players.sort((a, b) => b.personalScore - a.personalScore);
-    const embed = new Discord.MessageEmbed()
-      .setTitle("MVP Running (Personal Score)")
-      .setDescription(
-        players
-          .slice(0, 10)
-          .map(
-            (p, i) =>
-              `${i + 1}. ${p.teamName} ${p.name} - ${p.personalScore} points `
-          )
-          .join("\n")
+    if (args.length === 0) {
+      let players = await getPlayers();
+      players = players.filter((p) => p.name && p.personalScore >= 0);
+      players.sort((a, b) => b.personalScore - a.personalScore);
+      const embed = new Discord.MessageEmbed()
+        .setTitle("MVP Running (Personal Score)")
+        .setDescription(
+          players
+            .slice(0, 10)
+            .map(
+              (p, i) =>
+                `${i + 1}. ${p.teamName} - ${p.name} - ${
+                  p.personalScore
+                } points `
+            )
+            .join("\n")
+        )
+        .setFooter(`Use ${PREFIX}mvp wr to view the MVP running by winrate.`);
+      message.channel.send(embed);
+    } else if (args.length === 1 && ["wr", "winrate"].includes(args[0])) {
+      let players = await getPlayers();
+      players = players.filter((p) => p.name);
+      players.sort((a, b) => b.winrate - a.winrate);
+      const embed = new Discord.MessageEmbed()
+        .setTitle("MVP Running (Winrate)")
+        .setDescription(
+          players
+            .slice(0, 10)
+            .map(
+              (p, i) =>
+                `${i + 1}. ${p.teamName} - ${p.name} - ${p.winrate} (${
+                  p.gamesWon
+                }/${p.gamesPlayed} games)`
+            )
+            .join("\n")
+        )
+        .setFooter(`Use ${PREFIX}mvp to view the MVP running by points.`);
+      message.channel.send(embed);
+    } else {
+      message.channel.send(
+        `Unkown argument: ${args[0]}. Try \`${PREFIX}mvp\` or \`${PREFIX}mvp wr\`.`
       );
-    message.channel.send(embed);
+    }
   } else if (command === "info" || command === "help") {
     const embed = new Discord.MessageEmbed().setTitle("Commands").addFields(
       {
