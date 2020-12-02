@@ -13,7 +13,6 @@ doc.useServiceAccountAuth(creds);
 let updateTime = new Date(new Date().getTime());
 
 async function loadSheet() {
-  console.log("loading sheet");
   updateTime = new Date(new Date().getTime());
   await doc.loadInfo();
   await doc.sheetsByIndex[0].loadCells("AA2:AG15");

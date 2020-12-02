@@ -197,7 +197,7 @@ client.on("message", async (message) => {
       message.channel.send(embed);
     } else {
       message.channel.send(
-        `Unkown argument: ${args[0]}. Try \`${PREFIX}mvp\` or \`${PREFIX}mvp wr\`.`
+        `Unkown argument: "${args[0]}". Try \`${PREFIX}mvp\` or \`${PREFIX}mvp wr\`.`
       );
     }
   } else if (command === "info" || command === "help") {
