@@ -19,7 +19,7 @@ if (process.env.ENABLE_DB) {
   timezones = new Keyv();
 }
 
-async function scheduleEmbed(dayNumber, timeZone) {
+async function scheduleEmbed(dayNumber, timeZone, footer) {
   const schedule = await sheet.getSchedule();
 
   const daySchedule = schedule.find(
@@ -52,7 +52,8 @@ async function scheduleEmbed(dayNumber, timeZone) {
             : `Not played yet - starts in ${formatDistanceToNow(game.time)}`,
         };
       })
-    );
+    )
+    .setFooter(footer);
 }
 
 client.once("ready", () => {
@@ -64,11 +65,15 @@ client.on("message", async (message) => {
 
   const args = message.content.slice(PREFIX.length).trim().split(/ +/);
   const command = args.shift().toLowerCase();
+  const userTimeZone = await timezones.get(message.author.id);
+  const timeZone = userTimeZone || "UTC";
+  const updateTime = format(
+    utcToZonedTime(sheet.getUpdateTime(), timeZone),
+    "h:m:s a zzz",
+    { timeZone }
+  );
 
   if (["leaderboard", "lb", "le"].includes(command)) {
-    const userTimeZone = await timezones.get(message.author.id);
-    const timeZone = userTimeZone || "UTC";
-
     const leaderboard = await sheet.getLeaderboard();
     leaderboard.sort((a, b) => b.score - a.score);
 
@@ -79,13 +84,7 @@ client.on("message", async (message) => {
           .map((entry, i) => `${i + 1}. ${entry.name}: ${entry.score}`)
           .join("\n")
       )
-      .setFooter(
-        `Updated ${format(
-          utcToZonedTime(sheet.getUpdateTime(), timeZone),
-          "h:m a zzz",
-          { timeZone }
-        )}`
-      );
+      .setFooter(`Updated ${updateTime}`);
     message.channel.send(embed);
   } else if (["schedule", "sc"].includes(command)) {
     let dayNumber = Math.min(
@@ -95,7 +94,7 @@ client.on("message", async (message) => {
     if (args.length > 0) {
       dayNumber = parseInt(args[0]);
     }
-    let timeZone = "UTC";
+
     if (!dayNumber) {
       message.channel.send(
         "Please enter a day (e.g. 1) or leave blank to use the current day."
@@ -105,18 +104,16 @@ client.on("message", async (message) => {
     // if (args.length > 1) {
     //   timeZone = args[1].toLowerCase();
     // }
-    const userTimeZone = await timezones.get(message.author.id);
-
-    if (userTimeZone) {
-      timeZone = userTimeZone;
-    }
 
     if (dayNumber < 1 || dayNumber > 12) {
       message.channel.send(`Could not find a schedule for day ${dayNumber}.`);
       return;
     }
+
+    let footer = `Updated ${updateTime}`;
+
     try {
-      const embed = await scheduleEmbed(dayNumber, timeZone);
+      const embed = await scheduleEmbed(dayNumber, timeZone, footer);
       const emb = await message.channel.send(embed);
       await emb.react("◀");
       await emb.react("▶");
@@ -131,7 +128,7 @@ client.on("message", async (message) => {
         } else {
           dayNumber = Math.min(dayNumber + 1, 12);
         }
-        const newEmbed = await scheduleEmbed(dayNumber, timeZone);
+        const newEmbed = await scheduleEmbed(dayNumber, timeZone, footer);
         emb.edit(newEmbed);
         const userReactions = emb.reactions.cache.filter((reaction) =>
           reaction.users.cache.has(user.id)
@@ -148,20 +145,20 @@ client.on("message", async (message) => {
       message.channel.send(err.toString());
     }
   } else if (command === "timezone") {
-    const timeZone = args[0];
-    if (!timeZone) {
+    const newTimeZone = args[0];
+    if (!newTimeZone) {
       message.reply(
         `you did not enter a timezone.\nPlease find a list of timezones at https://en.wikipedia.org/wiki/List_of_tz_database_time_zones.`
       );
       return;
     }
     try {
-      const timeString = format(new Date(), "zzz", { timeZone });
-      timezones.set(message.author.id, timeZone);
-      message.reply(`your timezone was set to ${timeZone} (${timeString}).`);
+      const timeString = format(new Date(), "zzz", { timeZone: newTimeZone });
+      timezones.set(message.author.id, newTimeZone);
+      message.reply(`your timezone was set to ${newTimeZone} (${timeString}).`);
     } catch (err) {
       message.reply(
-        `you entered an invalid timezone: ${timeZone}.\nPlease find a list of timezones at https://en.wikipedia.org/wiki/List_of_tz_database_time_zones.`
+        `you entered an invalid timezone: ${newTimeZone}.\nPlease find a list of timezones at https://en.wikipedia.org/wiki/List_of_tz_database_time_zones.`
       );
     }
   } else if (command === "mvp") {
@@ -182,7 +179,9 @@ client.on("message", async (message) => {
             )
             .join("\n")
         )
-        .setFooter(`Use ${PREFIX}mvp wr to view the MVP running by winrate.`);
+        .setFooter(
+          `Use ${PREFIX}mvp wr to view the MVP running by winrate.\nUpdated ${updateTime}`
+        );
       message.channel.send(embed);
     } else if (args.length === 1 && ["wr", "winrate"].includes(args[0])) {
       let players = await getPlayers();
@@ -201,7 +200,9 @@ client.on("message", async (message) => {
             )
             .join("\n")
         )
-        .setFooter(`Use ${PREFIX}mvp to view the MVP running by points.`);
+        .setFooter(
+          `Use ${PREFIX}mvp to view the MVP running by points.\nUpdated ${updateTime}`
+        );
       message.channel.send(embed);
     } else {
       message.channel.send(
