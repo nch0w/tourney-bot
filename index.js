@@ -69,7 +69,7 @@ client.on("message", async (message) => {
   const timeZone = userTimeZone || "UTC";
   const updateTime = format(
     utcToZonedTime(sheet.getUpdateTime(), timeZone),
-    "h:m:s a zzz",
+    "h:mm:ss a zzz",
     { timeZone }
   );
 
