@@ -65,7 +65,7 @@ client.on("message", async (message) => {
   const args = message.content.slice(PREFIX.length).trim().split(/ +/);
   const command = args.shift().toLowerCase();
 
-  if (command === "leaderboard" || command === "lb") {
+  if (["leaderboard", "lb", "le"].includes(command)) {
     const userTimeZone = await timezones.get(message.author.id);
     const timeZone = userTimeZone || "UTC";
 
@@ -87,7 +87,7 @@ client.on("message", async (message) => {
         )}`
       );
     message.channel.send(embed);
-  } else if (command === "schedule") {
+  } else if (["schedule", "sc"].includes(command)) {
     let dayNumber = Math.min(
       12,
       Math.max(1, new Date().getUTCDate() - START_DAY)
@@ -208,15 +208,15 @@ client.on("message", async (message) => {
         `Unkown argument: "${args[0]}". Try \`${PREFIX}mvp\` or \`${PREFIX}mvp wr\`.`
       );
     }
-  } else if (command === "info" || command === "help") {
+  } else if (["info", "help"].includes(command)) {
     const embed = new Discord.MessageEmbed().setTitle("Commands").addFields(
       {
-        name: `${PREFIX}schedule {day: optional}`,
+        name: `${PREFIX}schedule|sc {day: optional}`,
         value:
           "Find the game schedule and replay links for today or another day",
       },
       {
-        name: `${PREFIX}leaderboard`,
+        name: `${PREFIX}leaderboard|lb`,
         value: "View the team leaderboard",
       },
       {
@@ -230,6 +230,10 @@ client.on("message", async (message) => {
       {
         name: `${PREFIX}sheet`,
         value: "Send a link to the official tourney Google sheet",
+      },
+      {
+        name: `${PREFIX}info|help`,
+        value: "Show this help message",
       }
     );
     message.channel.send(embed);
