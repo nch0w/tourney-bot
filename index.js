@@ -11,12 +11,12 @@ const PREFIX = process.env.PREFIX;
 
 let timezones;
 
-if (process.env.DISABLE_DB) {
-  timezones = new Keyv();
-} else {
+if (process.env.ENABLE_DB) {
   timezones = new Keyv("mongodb://localhost:27017/tourney-bot", {
     namespace: "timezone",
   });
+} else {
+  timezones = new Keyv();
 }
 
 async function scheduleEmbed(dayNumber, timeZone) {
