@@ -9,7 +9,15 @@ const { START_DAY } = require("./constants");
 const { getPlayers } = require("./sheet");
 const PREFIX = process.env.PREFIX;
 
-const timezones = new Keyv("sqlite://db.sqlite", { namespace: "timezone" });
+let timezones;
+
+if (process.env.DISABLE_DB) {
+  timezones = new Keyv();
+} else {
+  timezones = new Keyv("mongodb://localhost:27017/tourney-bot", {
+    namespace: "timezone",
+  });
+}
 
 async function scheduleEmbed(dayNumber, timeZone) {
   const schedule = await sheet.getSchedule();
