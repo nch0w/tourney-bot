@@ -49,15 +49,17 @@ async function getSchedule() {
   const schedule = dayNames.map((name, idx) => {
     const day = parseInt(name.match(/\d+/)[0]);
     const date = new Date(Date.UTC(YEAR, MONTH, day));
+    let cellTime;
     return {
       number: idx + 1,
       date,
       games: _.range(0, 4).map((row) => {
-        const cellTime = sheet.getCell(
-          dayNameCells[idx][0] + 1 + 2 * row,
-          dayNameCells[idx][1] + 1
-        ).value;
-        console.log(cellTime);
+        cellTime =
+          sheet.getCell(
+            dayNameCells[idx][0] + 1 + 2 * row,
+            dayNameCells[idx][1] + 1
+          ).value || cellTime; // fallback to last read cellTime
+
         const cellHours = parseInt(cellTime.match(/\d+/)[0]);
         const am = cellTime.match(/AM/) != null;
         return {

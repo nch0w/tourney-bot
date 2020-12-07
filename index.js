@@ -64,6 +64,7 @@ async function scheduleEmbed(dayNumber, timeZone, footer) {
 }
 
 client.once("ready", () => {
+  client.user.setActivity(`${PREFIX}info`, { type: "WATCHING" });
   console.log("Ready!");
 });
 
@@ -99,7 +100,7 @@ client.on("message", async (message) => {
       console.error(err);
       message.channel.send(
         errorMessage(
-          "There was an error making your request. 😔 Please try again in a bit."
+          "😔 There was an error making your request. Please try again in a bit."
         )
       );
     }
@@ -167,7 +168,7 @@ client.on("message", async (message) => {
       console.error(err);
       message.channel.send(
         errorMessage(
-          "There was an error making your request. 😔 Please try again in a bit."
+          "😔 There was an error making your request. Please try again in a bit."
         )
       );
     }
@@ -196,7 +197,7 @@ client.on("message", async (message) => {
       console.error(err);
       message.channel.send(
         errorMessage(
-          "There was an error making your request. 😔 Please try again in a bit."
+          "😔 There was an error making your request. Please try again in a bit."
         )
       );
       return;
