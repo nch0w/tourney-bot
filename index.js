@@ -42,22 +42,46 @@ async function scheduleEmbed(dayNumber, timeZone, footer) {
     )
     .addFields(
       ...daySchedule.games.map((game) => {
-        const gameInfo = games.find((g) => g.number === game.number);
-
-        return {
-          name: `Game ${game.number} (${game.type}), ${format(
-            utcToZonedTime(game.time, timeZone),
-            "ha z",
-            {
-              timeZone,
-            }
-          )}`,
-          value: gameInfo.played
-            ? `${
-                gameInfo.fasWin ? "Fascist win" : "Liberal win"
-              }: ${gameInfo.winners.join(", ")} - [Replay](${gameInfo.link})`
-            : `Not played yet - starts in ${formatDistanceToNow(game.time)}`,
-        };
+        if (game.type === "Silent") {
+          const gameInfos = games.filter((g) => g.number === game.number);
+          const played =
+            gameInfos[0].played && gameInfos[1].played && gameInfos[2].played;
+          return {
+            name: `Game ${game.number} (${game.type}), ${format(
+              utcToZonedTime(game.time, timeZone),
+              "ha z",
+              {
+                timeZone,
+              }
+            )}`,
+            value: played
+              ? gameInfos.map(
+                  (gameInfo) =>
+                    `${gameInfo.subGame}: ${
+                      gameInfo.fasWin ? "Fascist win" : "Liberal win"
+                    }: ${gameInfo.winners.join(", ")} - [Replay](${
+                      gameInfo.link
+                    })`
+                )
+              : `Not played yet - starts in ${formatDistanceToNow(game.time)}`,
+          };
+        } else {
+          const gameInfo = games.find((g) => g.number === game.number);
+          return {
+            name: `Game ${game.number} (${game.type}), ${format(
+              utcToZonedTime(game.time, timeZone),
+              "ha z",
+              {
+                timeZone,
+              }
+            )}`,
+            value: gameInfo.played
+              ? `${
+                  gameInfo.fasWin ? "Fascist win" : "Liberal win"
+                }: ${gameInfo.winners.join(", ")} - [Replay](${gameInfo.link})`
+              : `Not played yet - starts in ${formatDistanceToNow(game.time)}`,
+          };
+        }
       })
     )
     .setFooter(footer);
