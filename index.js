@@ -6,15 +6,23 @@ const { format, utcToZonedTime } = require("date-fns-tz");
 const { formatDistanceToNow } = require("date-fns");
 const { START_DAY } = require("./constants");
 const { getPlayers } = require("./sheet");
-const { PREFIX, ENABLE_DB, DISCORD_TOKEN, SENTRY_DSN } = require("./env");
-const { errorMessage } = require("./message-helpers");
+const {
+  PREFIX,
+  ENABLE_DB,
+  DISCORD_TOKEN,
+  SENTRY_DSN,
+  ENABLE_SENTRY,
+} = require("./env");
+const { errorMessage, rank } = require("./message-helpers");
 const Sentry = require("@sentry/node");
 const Tracing = require("@sentry/tracing");
 
-Sentry.init({
-  dsn: SENTRY_DSN,
-  tracesSampleRate: 1.0,
-});
+if (ENABLE_SENTRY) {
+  Sentry.init({
+    dsn: SENTRY_DSN,
+    tracesSampleRate: 1.0,
+  });
+}
 
 let timezones;
 
@@ -109,12 +117,12 @@ client.on("message", async (message) => {
     try {
       const leaderboard = await sheet.getLeaderboard();
       leaderboard.sort((a, b) => b.score - a.score);
-
+      const ranks = rank(leaderboard, "score");
       const embed = new Discord.MessageEmbed()
         .setTitle("Leaderboard")
         .setDescription(
           leaderboard
-            .map((entry, i) => `${i + 1}. ${entry.name}: ${entry.score}`)
+            .map((entry, i) => `${ranks[i]}. ${entry.name}: ${entry.score}`)
             .join("\n")
         )
         .setFooter(`Updated ${updateTime}`);
@@ -227,40 +235,48 @@ client.on("message", async (message) => {
       return;
     }
     if (args.length === 0) {
-      players = players.filter((p) => p.name && p.personalScore >= 0);
+      players = players.filter(
+        (p) => p.name && p.gamesPlayed > 0 && p.personalScore > 0
+      );
       players.sort((a, b) => b.personalScore - a.personalScore);
+      const ranks = rank(players, "personalScore");
       const embed = new Discord.MessageEmbed()
         .setTitle("MVP Running (Personal Score)")
         .setDescription(
-          players
-            .slice(0, 10)
-            .map(
-              (p, i) =>
-                `${i + 1}. ${p.teamName} - ${p.name} - ${
-                  p.personalScore
-                } points `
-            )
-            .join("\n")
+          players.length > 0
+            ? players
+                .slice(0, ranks.length)
+                .map(
+                  (p, i) =>
+                    `${ranks[i]}. ${p.teamName} - ${p.name} - ${p.personalScore} points `
+                )
+                .join("\n")
+            : "This list will populate once games have been played."
         )
         .setFooter(
           `Use ${PREFIX}mvp wr to view the MVP running by winrate.\nUpdated ${updateTime}`
         );
       message.channel.send(embed);
     } else if (args.length === 1 && ["wr", "winrate"].includes(args[0])) {
-      players = players.filter((p) => p.name);
+      players = players.filter(
+        (p) => p.name && p.gamesPlayed > 0 && p.winrate > 0
+      );
       players.sort((a, b) => b.winrate - a.winrate);
+      const ranks = rank(players, "winrate");
       const embed = new Discord.MessageEmbed()
         .setTitle("MVP Running (Winrate)")
         .setDescription(
-          players
-            .slice(0, 10)
-            .map(
-              (p, i) =>
-                `${i + 1}. ${p.teamName} - ${p.name} - ${p.winrate} (${
-                  p.gamesWon
-                }/${p.gamesPlayed} games)`
-            )
-            .join("\n")
+          players.length > 0
+            ? players
+                .slice(0, ranks.length)
+                .map(
+                  (p, i) =>
+                    `${ranks[i]}. ${p.teamName} - ${p.name} - ${(
+                      p.winrate * 100
+                    ).toFixed(2)}% (${p.gamesWon}/${p.gamesPlayed})`
+                )
+                .join("\n")
+            : "This list will populate once games have been played."
         )
         .setFooter(
           `Use ${PREFIX}mvp to view the MVP running by points.\nUpdated ${updateTime}`

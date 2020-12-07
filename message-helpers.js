@@ -4,4 +4,28 @@ const errorMessage = (message) => {
   return new Discord.MessageEmbed().setDescription(message).setColor("#ff0000");
 };
 
-module.exports = { errorMessage };
+const rank = (competitorList, column, limit = 10) => {
+  // assume competitorList is sorted by column
+  // returns rank of each competitor (i and j have the same rank if i[column] === j[column])
+  const ranks = [];
+  let lastRank = 1;
+  let lastScore = -1;
+  let reachedLimit = false;
+  competitorList.forEach((p, i) => {
+    if (reachedLimit) {
+      return;
+    }
+    if (p[column] !== lastScore) {
+      lastRank = i + 1;
+      if (lastRank > 10) {
+        reachedLimit = true;
+        return;
+      }
+    }
+    ranks.push(lastRank);
+    lastScore = p[column];
+  });
+  return ranks;
+};
+
+module.exports = { errorMessage, rank };

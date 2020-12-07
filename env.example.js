@@ -5,4 +5,5 @@ module.exports = {
   ENABLE_DB: false,
   SHEET_PRIVATE_ID: "",
   SENTRY_SDN: "",
+  ENABLE_SENTRY: false,
 };
