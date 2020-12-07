@@ -1,4 +1,3 @@
-require("dotenv").config();
 const Discord = require("discord.js");
 const Keyv = require("keyv");
 const sheet = require("./sheet");
@@ -7,11 +6,19 @@ const { format, utcToZonedTime } = require("date-fns-tz");
 const { formatDistanceToNow } = require("date-fns");
 const { START_DAY } = require("./constants");
 const { getPlayers } = require("./sheet");
-const PREFIX = process.env.PREFIX;
+const { PREFIX, ENABLE_DB, DISCORD_TOKEN, SENTRY_DSN } = require("./env");
+const { errorMessage } = require("./message-helpers");
+const Sentry = require("@sentry/node");
+const Tracing = require("@sentry/tracing");
+
+Sentry.init({
+  dsn: SENTRY_DSN,
+  tracesSampleRate: 1.0,
+});
 
 let timezones;
 
-if (process.env.ENABLE_DB) {
+if (ENABLE_DB) {
   timezones = new Keyv("mongodb://localhost:27017/tourney-bot", {
     namespace: "timezone",
   });
@@ -74,18 +81,28 @@ client.on("message", async (message) => {
   );
 
   if (["leaderboard", "lb", "le"].includes(command)) {
-    const leaderboard = await sheet.getLeaderboard();
-    leaderboard.sort((a, b) => b.score - a.score);
+    try {
+      const leaderboard = await sheet.getLeaderboard();
+      leaderboard.sort((a, b) => b.score - a.score);
 
-    const embed = new Discord.MessageEmbed()
-      .setTitle("Leaderboard")
-      .setDescription(
-        leaderboard
-          .map((entry, i) => `${i + 1}. ${entry.name}: ${entry.score}`)
-          .join("\n")
-      )
-      .setFooter(`Updated ${updateTime}`);
-    message.channel.send(embed);
+      const embed = new Discord.MessageEmbed()
+        .setTitle("Leaderboard")
+        .setDescription(
+          leaderboard
+            .map((entry, i) => `${i + 1}. ${entry.name}: ${entry.score}`)
+            .join("\n")
+        )
+        .setFooter(`Updated ${updateTime}`);
+      message.channel.send(embed);
+    } catch (err) {
+      Sentry.captureException(err);
+      console.error(err);
+      message.channel.send(
+        errorMessage(
+          "There was an error making your request. 😔 Please try again in a bit."
+        )
+      );
+    }
   } else if (["schedule", "sc"].includes(command)) {
     let dayNumber = Math.min(
       12,
@@ -97,7 +114,9 @@ client.on("message", async (message) => {
 
     if (!dayNumber) {
       message.channel.send(
-        "Please enter a day (e.g. 1) or leave blank to use the current day."
+        errorMessage(
+          "Please enter a day (e.g. 1) or leave blank to use the current day."
+        )
       );
       return;
     }
@@ -106,7 +125,9 @@ client.on("message", async (message) => {
     // }
 
     if (dayNumber < 1 || dayNumber > 12) {
-      message.channel.send(`Could not find a schedule for day ${dayNumber}.`);
+      message.channel.send(
+        errorMessage(`Could not find a schedule for day ${dayNumber}.`)
+      );
       return;
     }
 
@@ -142,7 +163,13 @@ client.on("message", async (message) => {
         }
       });
     } catch (err) {
-      message.channel.send(err.toString());
+      Sentry.captureException(err);
+      console.error(err);
+      message.channel.send(
+        errorMessage(
+          "There was an error making your request. 😔 Please try again in a bit."
+        )
+      );
     }
   } else if (command === "timezone") {
     const newTimeZone = args[0];
@@ -162,8 +189,19 @@ client.on("message", async (message) => {
       );
     }
   } else if (command === "mvp") {
+    let players;
+    try {
+      players = await getPlayers();
+    } catch (err) {
+      console.error(err);
+      message.channel.send(
+        errorMessage(
+          "There was an error making your request. 😔 Please try again in a bit."
+        )
+      );
+      return;
+    }
     if (args.length === 0) {
-      let players = await getPlayers();
       players = players.filter((p) => p.name && p.personalScore >= 0);
       players.sort((a, b) => b.personalScore - a.personalScore);
       const embed = new Discord.MessageEmbed()
@@ -184,7 +222,6 @@ client.on("message", async (message) => {
         );
       message.channel.send(embed);
     } else if (args.length === 1 && ["wr", "winrate"].includes(args[0])) {
-      let players = await getPlayers();
       players = players.filter((p) => p.name);
       players.sort((a, b) => b.winrate - a.winrate);
       const embed = new Discord.MessageEmbed()
@@ -206,7 +243,9 @@ client.on("message", async (message) => {
       message.channel.send(embed);
     } else {
       message.channel.send(
-        `Unkown argument: "${args[0]}". Try \`${PREFIX}mvp\` or \`${PREFIX}mvp wr\`.`
+        errorMessage(
+          `Unkown argument: "${args[0]}". Try \`${PREFIX}mvp\` or \`${PREFIX}mvp wr\`.`
+        )
       );
     }
   } else if (["info", "help"].includes(command)) {
@@ -238,9 +277,15 @@ client.on("message", async (message) => {
       }
     );
     message.channel.send(embed);
+  } else {
+    message.channel.send(
+      errorMessage(
+        `Unkown command: "${command}". Please use \`${PREFIX}info\` to find a list of commands.`
+      )
+    );
   }
 });
 
 timezones.on("error", (err) => console.error("Keyv connection error:", err));
 
-client.login(process.env.TOKEN);
+client.login(DISCORD_TOKEN);

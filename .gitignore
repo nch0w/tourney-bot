@@ -2,3 +2,4 @@
 google-api-credentials.json
 node_modules/
 *.sqlite 
+env.js

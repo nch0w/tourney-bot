@@ -1,14 +1,11 @@
 const _ = require("lodash");
 const { GoogleSpreadsheet } = require("google-spreadsheet");
-const creds = require("./google-api-credentials.json");
-
 const { YEAR, MONTH, TEAM_EMOJI } = require("./constants");
+const { SHEET_PRIVATE_ID, GOOGLE_API_CREDENTIALS } = require("./env");
 
 // this is the 4th SH Tourney spreadsheet
-const doc = new GoogleSpreadsheet(
-  "119GUu_Eeaprl5R01DZplB4Tc_vqlFeWhzaDlvg8knDI"
-);
-doc.useServiceAccountAuth(creds);
+const doc = new GoogleSpreadsheet(SHEET_PRIVATE_ID);
+doc.useServiceAccountAuth(GOOGLE_API_CREDENTIALS);
 
 let updateTime = new Date(new Date().getTime());
 
@@ -60,6 +57,7 @@ async function getSchedule() {
           dayNameCells[idx][0] + 1 + 2 * row,
           dayNameCells[idx][1] + 1
         ).value;
+        console.log(cellTime);
         const cellHours = parseInt(cellTime.match(/\d+/)[0]);
         const am = cellTime.match(/AM/) != null;
         return {
@@ -143,9 +141,9 @@ async function getPlayers() {
       gamesWon: sheet.getCell(i + 8, 5).value,
       winrate: sheet.getCell(i + 8, 6).value,
       personalScore: sheet.getCell(i + 8, 7).value,
-      deductionValue: sheet.getCell(i + 8, 8).value,
-      gameDeductions: sheet.getCell(i + 8, 9).value,
-      personalDeductions: sheet.getCell(i + 8, 10).value,
+      // deductionValue: sheet.getCell(i + 8, 8).value,
+      // gameDeductions: sheet.getCell(i + 8, 9).value,
+      // personalDeductions: sheet.getCell(i + 8, 10).value,
     });
   }
   return players;
