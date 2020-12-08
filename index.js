@@ -4,7 +4,7 @@ const sheet = require("./sheet");
 const client = new Discord.Client();
 const { format, utcToZonedTime } = require("date-fns-tz");
 const { formatDistanceToNow } = require("date-fns");
-const { START_DAY } = require("./constants");
+const { START_DAY, SHEET_URL } = require("./constants");
 const { getPlayers } = require("./sheet");
 const {
   PREFIX,
@@ -332,6 +332,8 @@ client.on("message", async (message) => {
       }
     );
     message.channel.send(embed);
+  } else if (command === "sheet") {
+    message.channel.send(`Official Tourney Sheet: <${SHEET_URL}>`);
   } else {
     message.channel.send(
       errorMessage(
