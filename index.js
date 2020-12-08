@@ -137,9 +137,15 @@ client.on("message", async (message) => {
       );
     }
   } else if (["schedule", "sc"].includes(command)) {
+    const currentDate = new Date();
     let dayNumber = Math.min(
       12,
-      Math.max(1, new Date().getUTCDate() - START_DAY)
+      Math.max(
+        1,
+        currentDate.getUTCHours() < 9 // day changes at 9AM UTC
+          ? currentDate.getUTCDate() - START_DAY - 1
+          : currentDate.getUTCDate() - START_DAY
+      )
     );
     if (args.length > 0) {
       dayNumber = parseInt(args[0]);
