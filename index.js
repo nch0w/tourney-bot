@@ -287,7 +287,7 @@ client.on("message", async (message) => {
                   (p, i) =>
                     `${ranks[i]}. ${p.teamName} - ${p.name} - ${(
                       p.winrate * 100
-                    ).toFixed(2)}% (${p.gamesWon}/${p.gamesPlayed})`
+                    ).toFixed(1)}% (${p.gamesWon}/${p.gamesPlayed})`
                 )
                 .join("\n")
             : "This list will populate once games have been played."
