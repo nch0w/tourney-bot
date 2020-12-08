@@ -151,8 +151,8 @@ client.on("message", async (message) => {
       Math.max(
         1,
         currentDate.getUTCHours() < 9 // day changes at 9AM UTC
-          ? currentDate.getUTCDate() - START_DAY - 1
-          : currentDate.getUTCDate() - START_DAY
+          ? currentDate.getUTCDate() - START_DAY
+          : currentDate.getUTCDate() - START_DAY + 1
       )
     );
     if (args.length > 0) {
