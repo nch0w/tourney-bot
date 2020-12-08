@@ -35,6 +35,7 @@ if (ENABLE_DB) {
 }
 
 async function scheduleEmbed(dayNumber, timeZone, footer) {
+  const currentDate = new Date();
   const schedule = await sheet.getSchedule();
 
   const daySchedule = schedule.find(
@@ -50,6 +51,13 @@ async function scheduleEmbed(dayNumber, timeZone, footer) {
     )
     .addFields(
       ...daySchedule.games.map((game) => {
+        const timeMessage = `${
+          game.time > currentDate
+            ? "Not played yet - starts"
+            : "In progress - started"
+        } ${formatDistanceToNow(game.time, {
+          addSuffix: true,
+        })}`;
         if (game.type === "Silent") {
           const gameInfos = games.filter((g) => g.number === game.number);
           const played =
@@ -71,7 +79,7 @@ async function scheduleEmbed(dayNumber, timeZone, footer) {
                       gameInfo.link
                     })`
                 )
-              : `Not played yet - starts in ${formatDistanceToNow(game.time)}`,
+              : timeMessage,
           };
         } else {
           const gameInfo = games.find((g) => g.number === game.number);
@@ -87,7 +95,7 @@ async function scheduleEmbed(dayNumber, timeZone, footer) {
               ? `${
                   gameInfo.fasWin ? "Fascist win" : "Liberal win"
                 }: ${gameInfo.winners.join(", ")} - [Replay](${gameInfo.link})`
-              : `Not played yet - starts in ${formatDistanceToNow(game.time)}`,
+              : timeMessage,
           };
         }
       })
