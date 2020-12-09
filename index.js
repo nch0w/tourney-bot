@@ -221,19 +221,20 @@ client.on("message", async (message) => {
   } else if (command === "timezone") {
     let newTimeZone = args[0];
 
-    // "invalid" timezone names
-    if (newTimeZone === "EST") {
-      newTimeZone = "America/New_York";
-    } else if (newTimeZone === "PST") {
-      newTimeZone = "America/Los_Angeles";
-    }
-
     if (!newTimeZone) {
       message.reply(
         `you did not enter a timezone.\nPlease find your timezone at https://9f9gw.csb.app/.`
       );
       return;
     }
+
+    // "invalid" timezone names
+    if (newTimeZone.toUpperCase() === "EST") {
+      newTimeZone = "America/New_York";
+    } else if (newTimeZone.toUpperCase() === "PST") {
+      newTimeZone = "America/Los_Angeles";
+    }
+
     try {
       const timeString = format(new Date(), "zzz", { timeZone: newTimeZone });
       timezones.set(message.author.id, newTimeZone);
