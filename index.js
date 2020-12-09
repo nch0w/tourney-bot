@@ -58,18 +58,23 @@ async function scheduleEmbed(dayNumber, timeZone, footer) {
         } ${formatDistanceToNow(game.time, {
           addSuffix: true,
         })}`;
+
+        const gameHeader = `Game ${game.number} (${game.type}), ${
+          utcToZonedTime(game.time, timeZone).getMinutes()
+            ? format(utcToZonedTime(game.time, timeZone), "h:mma z", {
+                timeZone,
+              })
+            : format(utcToZonedTime(game.time, timeZone), "ha z", {
+                timeZone,
+              })
+        }`;
         if (game.type === "Silent") {
           const gameInfos = games.filter((g) => g.number === game.number);
           const played =
             gameInfos[0].played && gameInfos[1].played && gameInfos[2].played;
+
           return {
-            name: `Game ${game.number} (${game.type}), ${format(
-              utcToZonedTime(game.time, timeZone),
-              "ha z",
-              {
-                timeZone,
-              }
-            )}`,
+            name: gameHeader,
             value: played
               ? gameInfos.map(
                   (gameInfo) =>
@@ -84,13 +89,7 @@ async function scheduleEmbed(dayNumber, timeZone, footer) {
         } else {
           const gameInfo = games.find((g) => g.number === game.number);
           return {
-            name: `Game ${game.number} (${game.type}), ${format(
-              utcToZonedTime(game.time, timeZone),
-              "ha z",
-              {
-                timeZone,
-              }
-            )}`,
+            name: gameHeader,
             value: gameInfo.played
               ? `${
                   gameInfo.fasWin ? "Fascist win" : "Liberal win"
@@ -113,7 +112,24 @@ client.on("message", async (message) => {
 
   const args = message.content.slice(PREFIX.length).trim().split(/ +/);
   const command = args.shift().toLowerCase();
-  const userTimeZone = await timezones.get(message.author.id);
+
+  let userTimeZone = await timezones.get(message.author.id);
+
+  // short time zones are not supported
+  if (userTimeZone) {
+    if (
+      userTimeZone.length <= 4 &&
+      !["UTC", "GMT"].includes(userTimeZone.toUpperCase())
+    ) {
+      // fallback to UTC
+      await timezones.set(message.author.id, "UTC");
+      userTimeZone = "UTC";
+      message.reply(
+        `You were using an invalid timezone which has been reset to UTC. Please set it up again using \`${PREFIX}timezone\`.`
+      );
+    }
+  }
+
   const timeZone = userTimeZone || "UTC";
   const updateTime = format(
     utcToZonedTime(sheet.getUpdateTime(), timeZone),
@@ -233,6 +249,16 @@ client.on("message", async (message) => {
       newTimeZone = "America/New_York";
     } else if (newTimeZone.toUpperCase() === "PST") {
       newTimeZone = "America/Los_Angeles";
+    }
+
+    if (
+      newTimeZone.length <= 4 &&
+      !["UTC", "GMT"].includes(newTimeZone.toUpperCase())
+    ) {
+      message.reply(
+        `Sorry, short timezone names are not supported at this time. Please find your timezone at https://9f9gw.csb.app/`
+      );
+      return;
     }
 
     try {
