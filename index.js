@@ -4,7 +4,7 @@ const sheet = require("./sheet");
 const client = new Discord.Client();
 const { format, utcToZonedTime } = require("date-fns-tz");
 const { formatDistanceToNow } = require("date-fns");
-const { START_DAY, SHEET_URL } = require("./constants");
+const { getStartDay, getSheetURL, sheet_data } = require("./constants");
 const { getPlayers } = require("./sheet");
 const {
   PREFIX,
@@ -12,6 +12,7 @@ const {
   DISCORD_TOKEN,
   SENTRY_DSN,
   ENABLE_SENTRY,
+  OWNER
 } = require("./env");
 const { errorMessage, rank } = require("./message-helpers");
 const Sentry = require("@sentry/node");
@@ -25,13 +26,18 @@ if (ENABLE_SENTRY) {
 }
 
 let timezones;
+let authorized_data_setters;
 
 if (ENABLE_DB) {
   timezones = new Keyv("mongodb://localhost:27017/tourney-bot", {
     namespace: "timezone",
   });
+  authorized_data_setters = new Keyv("mongodb://localhost:27017/tourney-bot", {
+    namespace: "authorized_data_setter",
+  });
 } else {
   timezones = new Keyv();
+  authorized_data_setters = new Keyv();
 }
 
 async function scheduleEmbed(dayNumber, timeZone, footer) {
@@ -151,8 +157,8 @@ client.on("message", async (message) => {
       Math.max(
         1,
         currentDate.getUTCHours() < 9 // day changes at 9AM UTC
-          ? currentDate.getUTCDate() - START_DAY
-          : currentDate.getUTCDate() - START_DAY + 1
+          ? currentDate.getUTCDate() - await getStartDay()
+          : currentDate.getUTCDate() - await getStartDay() + 1
       )
     );
     if (args.length > 0) {
@@ -338,11 +344,77 @@ client.on("message", async (message) => {
       {
         name: `${PREFIX}info|help`,
         value: "Show this help message",
+      },
+      {
+        name: `${PREFIX}authorize|deauthorize`,
+        value: "👀 Allows or disallows members from using admin commands.",
+      },
+      {
+        name: `${PREFIX}update`,
+        value: "👀 Updates tourney/sheet data.",
       }
     );
     message.channel.send(embed);
   } else if (command === "sheet") {
-    message.channel.send(`Official Tourney Sheet: <${SHEET_URL}>`);
+    message.channel.send(`Official Tourney Sheet: <${await getSheetURL()}>`);
+  } else if (args.length > 0 && command === "authorize") {
+    console.log(OWNER);
+    if (!(await authorized_data_setters.get("auth"))) {
+      await authorized_data_setters.set("auth", []);
+    }
+
+    let author = message.author.id;
+
+    if ((await authorized_data_setters.get("auth")).indexOf(author) >= 0 || author === OWNER) { // jules :iconic:
+      let id = args[0];
+
+      if (isNaN(id) || isNaN(parseFloat(id))) {
+        // Assume it's a mention
+        id = id.substr(3, id.length - 4);
+      }
+
+      await authorized_data_setters.set("auth", (await authorized_data_setters.get("auth")).concat([id]));
+      message.channel.send("Done!");
+    }
+  } else if (command === "deauthorize") {
+    if (!(await authorized_data_setters.get("auth"))) {
+      await authorized_data_setters.set("auth", []);
+    }
+
+    let author = message.author.id;
+
+    if ((await authorized_data_setters.get("auth")).indexOf(author) >= 0 || author === OWNER) { // jules :iconic:
+      let id = args[0];
+
+      if (isNaN(id) || isNaN(parseFloat(id))) {
+        // Assume it's a mention
+        id = id.substr(3, id.length - 4);
+      }
+
+      await authorized_data_setters.set("auth", (await authorized_data_setters.get("auth")).filter(x => x !== id));
+      message.channel.send("Done!");
+    }
+  } else if (command === "authorized") {
+    if (!(await authorized_data_setters.get("auth"))) {
+      await authorized_data_setters.set("auth", []);
+    }
+
+    let author = message.author.id;
+
+    if ((await authorized_data_setters.get("auth")).indexOf(author) >= 0 || author === OWNER) {
+      message.channel.send([...new Set(await authorized_data_setters.get("auth"))].join(', '));
+    }
+  } else if (command === "update") {
+    if (!(await authorized_data_setters.get("auth"))) {
+      await authorized_data_setters.set("auth", []);
+    }
+
+    let author = message.author.id;
+
+    if ((await authorized_data_setters.get("auth")).indexOf(author) >= 0 || author === OWNER) {
+      await sheet_data.set(args[0], args[1]);
+      message.channel.send("Done!");
+    }
   } else {
     message.channel.send(
       errorMessage(

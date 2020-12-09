@@ -1,7 +1,7 @@
 const _ = require("lodash");
 const { GoogleSpreadsheet } = require("google-spreadsheet");
-const { YEAR, MONTH, TEAM_EMOJI } = require("./constants");
 const { SHEET_PRIVATE_ID, GOOGLE_API_CREDENTIALS } = require("./env");
+const { getYear, getMonth, getTeamEmojis } = require("./constants");
 
 // this is the 4th SH Tourney spreadsheet
 const doc = new GoogleSpreadsheet(SHEET_PRIVATE_ID);
@@ -46,6 +46,9 @@ async function getSchedule() {
     (name) => sheet.getCell(name[0], name[1]).value
   );
 
+  const YEAR = await getYear();
+  const MONTH = await getMonth();
+
   const schedule = dayNames.map((name, idx) => {
     const day = parseInt(name.match(/\d+/)[0]);
     const date = new Date(Date.UTC(YEAR, MONTH, day));
@@ -84,6 +87,7 @@ async function getSchedule() {
 
 async function getGames() {
   const sheet = doc.sheetsByIndex[2];
+  const emojis = await getTeamEmojis();
   return _.range(1, 70)
     .map((row) => {
       if (sheet.getCell(row, 1).value === null) return null;
@@ -116,7 +120,7 @@ async function getGames() {
       const fascist1 = parseInt(sheet.getCell(row, 6).value) - 1;
       const fascist2 = parseInt(sheet.getCell(row, 7).value) - 1;
       const players = _.range(0, 7).map(
-        (i) => `${TEAM_EMOJI[i]} ${sheet.getCell(row, 11 + i).value}`
+        (i) => `${emojis[i]} ${sheet.getCell(row, 11 + i).value}`
       );
 
       const fascists = [players[hitler], players[fascist1], players[fascist2]];
