@@ -219,10 +219,18 @@ client.on("message", async (message) => {
       );
     }
   } else if (command === "timezone") {
-    const newTimeZone = args[0];
+    let newTimeZone = args[0];
+
+    // "invalid" timezone names
+    if (newTimeZone === "EST") {
+      newTimeZone = "America/New_York";
+    } else if (newTimeZone === "PST") {
+      newTimeZone = "America/Los_Angeles";
+    }
+
     if (!newTimeZone) {
       message.reply(
-        `you did not enter a timezone.\nPlease find a list of timezones at https://en.wikipedia.org/wiki/List_of_tz_database_time_zones.`
+        `you did not enter a timezone.\nPlease find your timezone at https://9f9gw.csb.app/.`
       );
       return;
     }
@@ -232,7 +240,7 @@ client.on("message", async (message) => {
       message.reply(`your timezone was set to ${newTimeZone} (${timeString}).`);
     } catch (err) {
       message.reply(
-        `you entered an invalid timezone: ${newTimeZone}.\nPlease find a list of timezones at https://en.wikipedia.org/wiki/List_of_tz_database_time_zones.`
+        `you entered an invalid timezone: ${newTimeZone}.\nPlease find your timezone at https://9f9gw.csb.app/.`
       );
     }
   } else if (command === "mvp") {
