@@ -221,7 +221,9 @@ client.on("message", async (message) => {
           for (const reaction of userReactions.values()) {
             await reaction.users.remove(user.id);
           }
-        } catch (error) {
+        } catch (err) {
+          Sentry.captureException(err);
+          console.error(err);
           console.error("Failed to remove reactions.");
         }
       });
