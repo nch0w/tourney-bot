@@ -251,6 +251,8 @@ client.on("message", async (message) => {
       newTimeZone = "America/New_York";
     } else if (newTimeZone.toUpperCase() === "PST") {
       newTimeZone = "America/Los_Angeles";
+    } else if (newTimeZone.toUpperCase() === "DALLAS") {
+      newTimeZone = "Antarctica/South_Pole";
     }
 
     if (
