@@ -4,14 +4,16 @@ const sheet = require("./sheet");
 const client = new Discord.Client();
 const { format, utcToZonedTime } = require("date-fns-tz");
 const { formatDistanceToNow } = require("date-fns");
-const { START_DAY, SHEET_URL } = require("./constants");
+const { getStartDay, getSheetURL, sheet_data } = require("./constants");
 const { getPlayers } = require("./sheet");
+const { recordGuess } = require ("./sheet");
 const {
   PREFIX,
   ENABLE_DB,
   DISCORD_TOKEN,
   SENTRY_DSN,
   ENABLE_SENTRY,
+  OWNER
 } = require("./env");
 const { errorMessage, rank } = require("./message-helpers");
 const Sentry = require("@sentry/node");
@@ -25,13 +27,19 @@ if (ENABLE_SENTRY) {
 }
 
 let timezones;
+let authorized_data_setters;
+let open = false;
 
 if (ENABLE_DB) {
   timezones = new Keyv("mongodb://localhost:27017/tourney-bot", {
     namespace: "timezone",
   });
+  authorized_data_setters = new Keyv("mongodb://localhost:27017/tourney-bot", {
+    namespace: "authorized_data_setter",
+  });
 } else {
   timezones = new Keyv();
+  authorized_data_setters = new Keyv();
 }
 
 async function scheduleEmbed(dayNumber, timeZone, footer) {
@@ -112,6 +120,7 @@ client.on("message", async (message) => {
 
   const args = message.content.slice(PREFIX.length).trim().split(/ +/);
   const command = args.shift().toLowerCase();
+  const regex = new RegExp('[1234567h]{3,4}');
 
   let userTimeZone = await timezones.get(message.author.id);
 
@@ -167,8 +176,8 @@ client.on("message", async (message) => {
       Math.max(
         1,
         currentDate.getUTCHours() < 9 // day changes at 9AM UTC
-          ? currentDate.getUTCDate() - START_DAY
-          : currentDate.getUTCDate() - START_DAY + 1
+          ? currentDate.getUTCDate() - await getStartDay()
+          : currentDate.getUTCDate() - await getStartDay() + 1
       )
     );
     if (args.length > 0) {
@@ -338,7 +347,7 @@ client.on("message", async (message) => {
     } else {
       message.channel.send(
         errorMessage(
-          `Unkown argument: "${args[0]}". Try \`${PREFIX}mvp\` or \`${PREFIX}mvp wr\`.`
+          `Unknown argument: "${args[0]}". Try \`${PREFIX}mvp\` or \`${PREFIX}mvp wr\`.`
         )
       );
     }
@@ -366,17 +375,123 @@ client.on("message", async (message) => {
         value: "Send a link to the official tourney Google sheet",
       },
       {
+        name: `${PREFIX}XYZh`,
+        value: "Submit a guess for a line in a game",
+      },
+      {
         name: `${PREFIX}info|help`,
         value: "Show this help message",
+      },
+      {
+        name: `${PREFIX}authorize|deauthorize`,
+        value: "👀 Allows or disallows members from using admin commands.",
+      },
+      {
+        name: `${PREFIX}update`,
+        value: "👀 Updates tourney/sheet data.",
       }
     );
     message.channel.send(embed);
   } else if (command === "sheet") {
-    message.channel.send(`Official Tourney Sheet: <${SHEET_URL}>`);
+    message.channel.send(`Official Tourney Sheet: <${await getSheetURL()}>`);
+  } else if (args.length > 0 && command === "authorize") {
+    console.log(OWNER);
+    if (!(await authorized_data_setters.get("auth"))) {
+      await authorized_data_setters.set("auth", []);
+    }
+
+    let author = message.author.id;
+
+    if ((await authorized_data_setters.get("auth")).indexOf(author) >= 0 || author === OWNER) { // jules :iconic:
+      let id = args[0];
+
+      if (isNaN(id) || isNaN(parseFloat(id))) {
+        // Assume it's a mention
+        id = id.substr(3, id.length - 4);
+      }
+
+      await authorized_data_setters.set("auth", (await authorized_data_setters.get("auth")).concat([id]));
+      message.channel.send("Done!");
+    }
+  } else if (command === "deauthorize") {
+    if (!(await authorized_data_setters.get("auth"))) {
+      await authorized_data_setters.set("auth", []);
+    }
+
+    let author = message.author.id;
+
+    if ((await authorized_data_setters.get("auth")).indexOf(author) >= 0 || author === OWNER) { // jules :iconic:
+      let id = args[0];
+
+      if (isNaN(id) || isNaN(parseFloat(id))) {
+        // Assume it's a mention
+        id = id.substr(3, id.length - 4);
+      }
+
+      await authorized_data_setters.set("auth", (await authorized_data_setters.get("auth")).filter(x => x !== id));
+      message.channel.send("Done!");
+    }
+  } else if (command === "authorized") {
+    if (!(await authorized_data_setters.get("auth"))) {
+      await authorized_data_setters.set("auth", []);
+    }
+
+    let author = message.author.id;
+
+    if ((await authorized_data_setters.get("auth")).indexOf(author) >= 0 || author === OWNER) {
+      message.channel.send([...new Set(await authorized_data_setters.get("auth"))].join(', '));
+    }
+  } else if (command === "update") {
+    if (!(await authorized_data_setters.get("auth"))) {
+      await authorized_data_setters.set("auth", []);
+    }
+
+    let author = message.author.id;
+
+    if ((await authorized_data_setters.get("auth")).indexOf(author) >= 0 || author === OWNER) {
+      await sheet_data.set(args[0], args[1]);
+      message.channel.send("Done!");
+    }
+  } else if (regex.test(command)) {
+    if (!open) {
+      message.channel.send(
+        errorMessage(
+          'Line guesses can only be made during in-progress games before the Special Election.'
+          )
+        );
+    } else if ( args.length > 0 ) {
+      recordGuess(message.author.id,command,parseInt(args[0]));
+      message.delete();
+    } else {
+    const games2 = await sheet.getGames();
+    const currentGame = games2.find((g) => !g.played );
+    recordGuess(message.author.id,command,currentGame.number);
+    message.delete();
+  }
+  } else if (command === 'open') {
+    if (!(await authorized_data_setters.get("auth"))) {
+      await authorized_data_setters.set("auth", []);
+    }
+
+    let author = message.author.id;
+
+    if (!open && ((await authorized_data_setters.get("auth")).indexOf(author) >= 0 || author === OWNER)) {
+      open = !open;
+    }
+  } else if (command === 'close') {
+    if (!(await authorized_data_setters.get("auth"))) {
+      await authorized_data_setters.set("auth", []);
+    }
+
+    let author = message.author.id;
+
+    if (open && ((await authorized_data_setters.get("auth")).indexOf(author) >= 0 || author === OWNER)) {
+      open = !open;
+    }
   } else {
     message.channel.send(
       errorMessage(
-        `Unkown command: "${command}". Please use \`${PREFIX}info\` to find a list of commands.`
+        `Unknown command: "${command}". Please use \`${PREFIX}info\` to find a list of commands.`
       )
     );
   }
