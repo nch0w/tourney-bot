@@ -19,8 +19,8 @@ async function loadSheet() {
   await doc.sheetsByIndex[2].loadCells("A1:CA100");
   await doc.sheetsByIndex[4].loadCells("A1:S113");
   await moddoc.loadInfo();
-  await moddoc.sheetsByIndex[0].loadCells("A1:K100");
-  await moddoc.sheetsByIndex[1].loadCells("A1:C100");
+  await moddoc.sheetsByIndex[0].loadCells("A1:K500");
+  await moddoc.sheetsByIndex[1].loadCells("A1:C200");
 }
 
 setTimeout(loadSheet, 0);

@@ -397,6 +397,10 @@ client.on("message", async (message) => {
         value: "View the team leaderboard",
       },
       {
+        name: `${PREFIX}guessleaderboard|glb`,
+        value: "View the line guessers leaderboard",
+      },
+      {
         name: `${PREFIX}mvp`,
         value: "View the MVP running",
       },
@@ -423,6 +427,10 @@ client.on("message", async (message) => {
       {
         name: `${PREFIX}update`,
         value: "👀 Updates tourney/sheet data.",
+      },
+      {
+        name: `${PREFIX}open|close`,
+        value: "👀 Opens or closes line guessing.",
       }
     );
     message.channel.send(embed);
@@ -481,9 +489,18 @@ client.on("message", async (message) => {
 
     let author = message.author.id;
 
-    if ((await authorized_data_setters.get("auth")).indexOf(author) >= 0 || author === OWNER) {
-      await sheet_data.set(args[0], args[1]);
-      message.channel.send("Done!");
+    try { 
+      if ((await authorized_data_setters.get("auth")).indexOf(author) >= 0 || author === OWNER) {
+
+        if ((["YEAR","MONTH","START_DAY"].includes(args[0]) && Number.isInteger(parseInt(args[1]))) || (args[0].startsWith("teamEmoji") && /\p{Emoji}/u.test(args[1]) ) || (args[0] === "SHEET_URL")) {
+          await sheet_data.set(args[0], args[1]);
+          message.channel.send(`Updated ${args[0]} to ${args[1]}!`);
+        } else { 
+          message.channel.send(errorMessage("Invalid update parameters.")); 
+        }
+      }
+    } catch (err) { 
+      message.channel.send(errorMessage("No parameters entered.")); 
     }
   } else if (command === 'guess') {
     const isdm = message.channel.type === 'dm';
