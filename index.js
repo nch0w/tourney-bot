@@ -50,7 +50,6 @@ async function scheduleEmbed(dayNumber, timeZone, footer) {
     (day) => day.number === parseInt(dayNumber)
   );
   const games = await sheet.getGames();
-  console.log(games)
   return new Discord.MessageEmbed()
     .setTitle(
       `Day ${dayNumber}: ${format(
@@ -430,7 +429,6 @@ client.on("message", async (message) => {
   } else if (command === "sheet") {
     message.channel.send(`Official Tourney Sheet: <${await getSheetURL()}>`);
   } else if (args.length > 0 && command === "authorize") {
-    console.log(OWNER);
     if (!(await authorized_data_setters.get("auth"))) {
       await authorized_data_setters.set("auth", []);
     }

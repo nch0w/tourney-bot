@@ -60,7 +60,6 @@ async function getSchedule() {
   const dayNames = dayNameCells.map(
     (name) => sheet.getCell(name[0], name[1]).value
   );
-  console.log(dayNames)
 
   const YEAR = await getYear();
   const MONTH = await getMonth();
@@ -125,7 +124,6 @@ async function getGames() {
         const subGameCell = sheet.getCell(row, 2).value;
         number = parseInt(subGameCell.replace(/[^\d]/g, ""));
         subGame = subGameCell.replace(/\s/g, "").slice(-1);
-        console.log(mode)
       } else {
         number = parseInt(number.replace(/[^\d]/g, ""));
       }
