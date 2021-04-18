@@ -1,11 +1,13 @@
 const _ = require("lodash");
 const { GoogleSpreadsheet } = require("google-spreadsheet");
-const { SHEET_PRIVATE_ID, GOOGLE_API_CREDENTIALS } = require("./env");
+const { SHEET_PRIVATE_ID, MOD_SHEET_PRIVATE_ID, GOOGLE_API_CREDENTIALS } = require("./env");
 const { getYear, getMonth, getTeamEmojis } = require("./constants");
 
 // this is the 4th SH Tourney spreadsheet
 const doc = new GoogleSpreadsheet(SHEET_PRIVATE_ID);
+const moddoc = new GoogleSpreadsheet(MOD_SHEET_PRIVATE_ID);
 doc.useServiceAccountAuth(GOOGLE_API_CREDENTIALS);
+moddoc.useServiceAccountAuth(GOOGLE_API_CREDENTIALS);
 
 let updateTime = new Date(new Date().getTime());
 
@@ -13,11 +15,12 @@ async function loadSheet() {
   updateTime = new Date(new Date().getTime());
   await doc.loadInfo();
   await doc.sheetsByIndex[0].loadCells("AA2:AG15");
-  await doc.sheetsByIndex[1].loadCells("A1:S23");
+  await doc.sheetsByIndex[1].loadCells("A1:S28");
   await doc.sheetsByIndex[2].loadCells("A1:CA100");
-  await doc.sheetsByIndex[4].loadCells("A1:S120");
-
-  await doc.sheetsByIndex[17].loadCells("A1:D100");
+  await doc.sheetsByIndex[4].loadCells("A1:S113");
+  await moddoc.loadInfo();
+  await moddoc.sheetsByIndex[0].loadCells("A1:K100");
+  await moddoc.sheetsByIndex[1].loadCells("A1:C100");
 }
 
 setTimeout(loadSheet, 0);
@@ -37,28 +40,41 @@ async function getLeaderboard() {
   return leaderboard;
 }
 
+async function getGuessLeaderboard() {
+  const sheet = moddoc.sheetsByIndex[1];
+  const leaderboard = _.range(2, 50, 1).map((row) => ({
+    name: sheet.getCellByA1(`A${row}`).value,
+    score: sheet.getCellByA1(`B${row}`).value,
+    acc: sheet.getCellByA1(`C${row}`).value,
+  }));
+  return leaderboard;
+}
+
 async function getSchedule() {
   const sheet = doc.sheetsByIndex[1];
   // await sheet.loadCells("A1:S23");
   const dayNameCells = [
     ..._.range(1, 13, 2).map((num) => [2, num]),
-    ..._.range(1, 13, 2).map((num) => [13, num]),
+    ..._.range(1, 13, 2).map((num) => [15, num]),
   ];
   const dayNames = dayNameCells.map(
     (name) => sheet.getCell(name[0], name[1]).value
   );
+  console.log(dayNames)
 
   const YEAR = await getYear();
   const MONTH = await getMonth();
 
   const schedule = dayNames.map((name, idx) => {
     const day = parseInt(name.match(/\d+/)[0]);
-    const date = new Date(Date.UTC(YEAR, MONTH, day));
+    const date = (day<20)
+      ? new Date(Date.UTC(YEAR, MONTH+1, day))
+      : new Date(Date.UTC(YEAR, MONTH, day));
     let cellTime;
     return {
       number: idx + 1,
       date,
-      games: _.range(0, 4).map((row) => {
+      games: _.range(0, 5).map((row) => {
         cellTime =
           sheet.getCell(
             dayNameCells[idx][0] + 1 + 2 * row,
@@ -78,8 +94,12 @@ async function getSchedule() {
               .value.match(/\d+/)[0]
           ),
           time: am
-            ? new Date(Date.UTC(YEAR, MONTH, day + 1, cellHours % 12))
-            : new Date(Date.UTC(YEAR, MONTH, day, (cellHours % 12) + 12)),
+            ? (day<20)
+              ? new Date(Date.UTC(YEAR, MONTH+1, day + 1, cellHours % 12))
+              : new Date(Date.UTC(YEAR, MONTH, day + 1, cellHours % 12))
+            : (day<20)
+              ? new Date(Date.UTC(YEAR, MONTH+1, day, (cellHours % 12) + 12))
+              : new Date(Date.UTC(YEAR, MONTH, day, (cellHours % 12) + 12)),
         };
       }),
     };
@@ -90,7 +110,7 @@ async function getSchedule() {
 async function getGames() {
   const sheet = doc.sheetsByIndex[2];
   const emojis = await getTeamEmojis();
-  return _.range(1, 70)
+  return _.range(1, 100)
     .map((row) => {
       if (sheet.getCell(row, 1).value === null) return null;
 
@@ -101,10 +121,11 @@ async function getGames() {
 
       let number = sheet.getCell(row, 0).value;
       let subGame;
-      if (mode === "Silent") {
+      if (mode === "Silent" || mode === 'Bullet') {
         const subGameCell = sheet.getCell(row, 2).value;
         number = parseInt(subGameCell.replace(/[^\d]/g, ""));
         subGame = subGameCell.replace(/\s/g, "").slice(-1);
+        console.log(mode)
       } else {
         number = parseInt(number.replace(/[^\d]/g, ""));
       }
@@ -156,7 +177,7 @@ async function getPlayers() {
   const sheet = doc.sheetsByIndex[4];
   const players = [];
   let teamName = "";
-  for (let i = 0; i < 16 * 7; i++) {
+  for (let i = 0; i < 15 * 7; i++) {
     teamName = sheet.getCell(i + 8, 2).value || teamName;
     players.push({
       name: sheet.getCell(i + 8, 3).value,
@@ -174,13 +195,21 @@ async function getPlayers() {
 }
 
 async function recordGuess(user,guess,game) {
-  const sheet = doc.sheetsByIndex[17];
+  const sheet = moddoc.sheetsByIndex[0];
+  const rows = await sheet.getRows();
+  for (let i = 0; i<rows.length; i++) {
+    if (rows[i]._rawData[1] === user && parseInt(rows[i]._rawData[3]) === game) {
+      await rows[i].delete();
+      break;
+    }
+  }
   timestamp = new Date(new Date().getTime())
   sheet.addRow([timestamp,user,guess,game])
 }
 
 module.exports = {
   getLeaderboard,
+  getGuessLeaderboard,
   getSchedule,
   getGames,
   getPlayers,

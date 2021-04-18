@@ -50,6 +50,7 @@ async function scheduleEmbed(dayNumber, timeZone, footer) {
     (day) => day.number === parseInt(dayNumber)
   );
   const games = await sheet.getGames();
+  console.log(games)
   return new Discord.MessageEmbed()
     .setTitle(
       `Day ${dayNumber}: ${format(
@@ -120,7 +121,7 @@ client.on("message", async (message) => {
 
   const args = message.content.slice(PREFIX.length).trim().split(/ +/);
   const command = args.shift().toLowerCase();
-  const regex = new RegExp('[1234567h]{3,4}');
+  const regex = new RegExp('[1234567hH]{3,4}');
 
   let userTimeZone = await timezones.get(message.author.id);
 
@@ -159,6 +160,40 @@ client.on("message", async (message) => {
             .join("\n")
         )
         .setFooter(`Updated ${updateTime}`);
+      message.channel.send(embed);
+    } catch (err) {
+      Sentry.captureException(err);
+      console.error(err);
+      message.channel.send(
+        errorMessage(
+          "😔 There was an error making your request. Please try again in a bit."
+        )
+      );
+    }
+  } else if (["guessleaderboard", "guesslb", "glb"].includes(command)) {
+    try {
+      const leaderboard = await sheet.getGuessLeaderboard();
+      const accuracy = (args.length === 1 && ["acc", "accuracy"].includes(args[0]))
+      accuracy
+        ? leaderboard.sort((a, b) => b.acc - a.acc)
+        : leaderboard.sort((a, b) => b.score - a.score)
+      const ranks = rank(leaderboard, "score")
+      const embed = new Discord.MessageEmbed()
+        .setTitle(
+          accuracy
+          ? "Line Guesser Accuracy Leaderboard"
+          : "Line Guesser Leaderboard")
+        .setDescription(
+          leaderboard
+            .slice(0, 10)
+            .filter((entry) => entry.name !== null)
+            .map((entry, i) => `${ranks[i]}. <@${entry.name}> Points: ${entry.score} Accuracy: ${entry.acc*100}%`)
+            .join("\n")
+        )
+        .setFooter(
+          accuracy
+            ? `Use ${PREFIX}glb to view the best line guessers by points.\nUpdated ${updateTime}`
+            : `Use ${PREFIX}glb acc to view the best line guessers by accuracy.\nUpdated ${updateTime}`)
       message.channel.send(embed);
     } catch (err) {
       Sentry.captureException(err);
@@ -375,7 +410,7 @@ client.on("message", async (message) => {
         value: "Send a link to the official tourney Google sheet",
       },
       {
-        name: `${PREFIX}XYZh`,
+        name: `${PREFIX}guess {line}`,
         value: "Submit a guess for a line in a game",
       },
       {
@@ -411,7 +446,7 @@ client.on("message", async (message) => {
       }
 
       await authorized_data_setters.set("auth", (await authorized_data_setters.get("auth")).concat([id]));
-      message.channel.send("Done!");
+      message.channel.send(`<@${id}> is now authorized.`);
     }
   } else if (command === "deauthorize") {
     if (!(await authorized_data_setters.get("auth"))) {
@@ -429,7 +464,7 @@ client.on("message", async (message) => {
       }
 
       await authorized_data_setters.set("auth", (await authorized_data_setters.get("auth")).filter(x => x !== id));
-      message.channel.send("Done!");
+      message.channel.send(`<@${id}> is now deauthorized.`);
     }
   } else if (command === "authorized") {
     if (!(await authorized_data_setters.get("auth"))) {
@@ -452,21 +487,31 @@ client.on("message", async (message) => {
       await sheet_data.set(args[0], args[1]);
       message.channel.send("Done!");
     }
-  } else if (regex.test(command)) {
+  } else if (command === 'guess') {
+    const isdm = message.channel.type === 'dm';
     if (!open) {
       message.channel.send(
         errorMessage(
-          'Line guesses can only be made during in-progress games before the Special Election.'
+          'Line guesses can only be made during in-progress games before the Special Election and/or the fourth liberal policy.'
           )
         );
-    } else if ( args.length > 0 ) {
-      recordGuess(message.author.id,command,parseInt(args[0]));
-      message.delete();
-    } else {
+    } else if ( args.length === 2 && regex.test(args[0]) ) {
+      const subIndicator = new RegExp('[abcABC]{1}')
+      if (subIndicator.test(args[1])) {
+        const games2 = await sheet.getGames();
+        const currentGame = games2.find((g) => !g.played );
+        const subIndicatorList = ['a','b','c'];
+        recordGuess(message.author.id,args[0],currentGame.number + (1 + subIndicatorList.indexOf(args[1].toLowerCase()))/10);
+        if (!isdm) { message.delete() }
+      } else {
+      recordGuess(message.author.id,args[0],parseInt(args[1]));
+      if (!isdm) { message.delete() }
+    }
+    } else if ( args.length === 1 && regex.test(args[0]) ) {
     const games2 = await sheet.getGames();
     const currentGame = games2.find((g) => !g.played );
-    recordGuess(message.author.id,command,currentGame.number);
-    message.delete();
+    recordGuess(message.author.id,args[0].toLowerCase(),currentGame.number);
+    if (!isdm) { message.delete() }
   }
   } else if (command === 'open') {
     if (!(await authorized_data_setters.get("auth"))) {
@@ -476,6 +521,7 @@ client.on("message", async (message) => {
     let author = message.author.id;
 
     if (!open && ((await authorized_data_setters.get("auth")).indexOf(author) >= 0 || author === OWNER)) {
+      message.channel.send('Guessing Opened!');
       open = !open;
     }
   } else if (command === 'close') {
@@ -486,6 +532,7 @@ client.on("message", async (message) => {
     let author = message.author.id;
 
     if (open && ((await authorized_data_setters.get("auth")).indexOf(author) >= 0 || author === OWNER)) {
+      message.channel.send('Guessing Closed.');
       open = !open;
     }
   } else {
