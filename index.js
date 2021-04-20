@@ -477,6 +477,10 @@ client.on("message", async (message) => {
         value: "View the line guessers leaderboard",
       },
       {
+        name: `${PREFIX}fantasyleaderboard|flb`,
+        value: "View the Fantasy League leaderboard",
+      },
+      {
         name: `${PREFIX}bestguess|bg {game}`,
         value: "View the best guess made for a specific game",
       },
