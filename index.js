@@ -121,7 +121,7 @@ client.on("message", async (message) => {
 
   const args = message.content.slice(PREFIX.length).trim().split(/ +/);
   const command = args.shift().toLowerCase();
-  const regex = new RegExp('^(?:([1-7hH])(?!.*\1)){3,4}$');
+  const regex = new RegExp('^[1-7hH]{3,4}$');
   const gamenums = new RegExp('^[0-9]{1,2}[ABCabc]?$')
 
   let userTimeZone = await timezones.get(message.author.id);
@@ -366,13 +366,29 @@ client.on("message", async (message) => {
     }
 
     // "invalid" timezone names
-    if (newTimeZone.toUpperCase() === "EST") {
+    if (["EST","EDT"].includes(newTimeZone.toUpperCase())) {
       newTimeZone = "America/New_York";
-    } else if (newTimeZone.toUpperCase() === "PST") {
+    } else if (["PST","PDT"].includes(newTimeZone.toUpperCase())) {
       newTimeZone = "America/Los_Angeles";
-    } else if (newTimeZone.toUpperCase() === "DALLAS") {
-      newTimeZone = "Antarctica/South_Pole";
-    }
+    } else if (["CST","CDT"].includes(newTimeZone.toUpperCase())) {
+      newTimeZone = "America/Chicago";
+    } else if (["MST","MDT"].includes(newTimeZone.toUpperCase())) {
+      newTimeZone = "America/Denver";
+    } else if (["HST"].includes(newTimeZone.toUpperCase())) {
+      newTimeZone = "Pacific/Honolulu";
+    } else if (["WET","WEST","BST"].includes(newTimeZone.toUpperCase())) {
+      newTimeZone = "Europe/London";
+    } else if (["CET","CEST","MET","MEST"].includes(newTimeZone.toUpperCase())) {
+      newTimeZone = "Europe/Paris";
+    } else if (["EET","EEST"].includes(newTimeZone.toUpperCase())) {
+      newTimeZone = "Europe/Sofia";
+    } else if (["MSK","TRT"].includes(newTimeZone.toUpperCase())) {
+      newTimeZone = "Europe/Moscow";
+    } else if (["IST"].includes(newTimeZone.toUpperCase())) {
+      newTimeZone = "Asia/Kolkata";
+    } else if (["BJT","SST","SGT","HKT"].includes(newTimeZone.toUpperCase())) {
+      newTimeZone = "Asia/Shanghai";
+    } 
 
     if (
       newTimeZone.length <= 4 &&
@@ -504,18 +520,6 @@ client.on("message", async (message) => {
         name: `${PREFIX}info|help`,
         value: "Show this help message",
       },
-      {
-        name: `${PREFIX}authorize|deauthorize`,
-        value: "👀 Allows or disallows members from using admin commands.",
-      },
-      {
-        name: `${PREFIX}update`,
-        value: "👀 Updates tourney/sheet data.",
-      },
-      {
-        name: `${PREFIX}open|close`,
-        value: "👀 Opens or closes line guessing.",
-      }
     );
     message.channel.send(embed);
   } else if (command === "sheet") {
@@ -594,7 +598,7 @@ client.on("message", async (message) => {
           'Line guesses can only be made during in-progress games before the Special Election and/or the fourth liberal policy.'
           )
         );
-    } else if ( args.length === 2 && regex.test(args[0]) ) {
+    } else if ( args.length === 2 && regex.test(args[0] && !(/([1-7hH]).*?\1/).test(args[0]) ) ) {
       const subIndicator = new RegExp('[abcABC]{1}')
       if (subIndicator.test(args[1])) {
         const games2 = await sheet.getGames();
@@ -608,7 +612,7 @@ client.on("message", async (message) => {
         if (!isdm) { message.delete() }
         message.channel.send(`<@${message.author.id}>'s guess recieved!`)
       }
-    } else if ( args.length === 1 && regex.test(args[0]) ) {
+    } else if ( args.length === 1 && regex.test(args[0]) && !(/([1-7hH]).*?\1/).test(args[0]) ) {
     const games2 = await sheet.getGames();
     const currentGame = games2.find((g) => !g.played );
     recordGuess(message.author.id,args[0].toLowerCase(),currentGame.number);
