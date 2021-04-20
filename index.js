@@ -121,7 +121,7 @@ client.on("message", async (message) => {
 
   const args = message.content.slice(PREFIX.length).trim().split(/ +/);
   const command = args.shift().toLowerCase();
-  const regex = new RegExp('^[1234567hH]{3,4}$');
+  const regex = new RegExp('^(?:([1-7hH])(?!.*\1)){3,4}$');
   const gamenums = new RegExp('^[0-9]{1,2}[ABCabc]?$')
 
   let userTimeZone = await timezones.get(message.author.id);
@@ -233,7 +233,7 @@ client.on("message", async (message) => {
     }
   } else if (["bestguess", "bg"].includes(command)) {
     if (args.length !== 1) {
-      message.channel.send(errorMessage("Must include valid game number."))
+      message.channel.send(errorMessage("Must include a valid game number, such as 1B or 27."))
     } else {
       try {
         if (gamenums.test(args[0])) {
@@ -602,20 +602,20 @@ client.on("message", async (message) => {
         const subIndicatorList = ['a','b','c'];
         recordGuess(message.author.id,args[0],currentGame.number + (1 + subIndicatorList.indexOf(args[1].toLowerCase()))/10);
         if (!isdm) { message.delete() }
-        message.channel.send("Guess recieved!")
+        message.channel.send(`<@${message.author.id}>'s guess recieved!`)
       } else {
         recordGuess(message.author.id,args[0],parseInt(args[1]));
         if (!isdm) { message.delete() }
-        message.channel.send("Guess recieved!")
+        message.channel.send(`<@${message.author.id}>'s guess recieved!`)
       }
     } else if ( args.length === 1 && regex.test(args[0]) ) {
     const games2 = await sheet.getGames();
     const currentGame = games2.find((g) => !g.played );
     recordGuess(message.author.id,args[0].toLowerCase(),currentGame.number);
     if (!isdm) { message.delete() }
-    message.channel.send("Guess recieved!")
+    message.channel.send(`<@${message.author.id}>'s guess recieved!`)
     } else {
-      message.channel.send(errorMessage("Must include valid guess."))
+      message.channel.send(errorMessage("Must include a valid guess in the form 567 or 123h, where h goes after Hitler's seat."))
     }
   } else if (command === 'open') {
     if (!(await authorized_data_setters.get("auth"))) {
