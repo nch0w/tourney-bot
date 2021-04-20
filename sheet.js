@@ -18,9 +18,11 @@ async function loadSheet() {
   await doc.sheetsByIndex[1].loadCells("A1:S28");
   await doc.sheetsByIndex[2].loadCells("A1:CA100");
   await doc.sheetsByIndex[4].loadCells("A1:S113");
+  await doc.sheetsByIndex[5].loadCells("B5:V87");
   await moddoc.loadInfo();
   await moddoc.sheetsByIndex[0].loadCells("A1:K500");
   await moddoc.sheetsByIndex[1].loadCells("A1:C200");
+  await moddoc.sheetsByIndex[2].loadCells("A1:D75");
 }
 
 setTimeout(loadSheet, 0);
@@ -42,12 +44,35 @@ async function getLeaderboard() {
 
 async function getGuessLeaderboard() {
   const sheet = moddoc.sheetsByIndex[1];
-  const leaderboard = _.range(2, 50, 1).map((row) => ({
+  const leaderboard = _.range(2, 200, 1).map((row) => ({
     name: sheet.getCellByA1(`A${row}`).value,
     score: sheet.getCellByA1(`B${row}`).value,
     acc: sheet.getCellByA1(`C${row}`).value,
   }));
   return leaderboard;
+}
+
+async function getFantasyLeaderboard() {
+  const sheet = doc.sheetsByIndex[5];
+  const leaderboard = _.range(5, 87, 1).map((row) => ({
+    mod: sheet.getCellByA1(`B${row}`).value,
+    team: sheet.getCellByA1(`D${row}`).value,
+    name: sheet.getCellByA1(`E${row}`).value,
+    score: sheet.getCellByA1(`F${row}`).value,
+    gamesWon: sheet.getCellByA1(`G${row}`).value,
+  }));
+  return leaderboard;
+}
+
+async function getBestGuess(game) {
+  const sheet = moddoc.sheetsByIndex[2]
+  const rows = await sheet.getRows();
+  for (let i = 0; i<75; i++) {
+    if (parseFloat(rows[i]._rawData[0]) === game) {
+      return rows[i]._rawData;
+      break;
+    }
+  }
 }
 
 async function getSchedule() {
@@ -80,8 +105,8 @@ async function getSchedule() {
             dayNameCells[idx][1] + 1
           ).value || cellTime; // fallback to last read cellTime
 
-        const cellHours = parseInt(cellTime.match(/\d+/)[0]);
-        const am = cellTime.match(/AM/) != null;
+        const cellHours = parseInt(cellTime.match(/\d+/)[0]) - 1; //this -1 and the !=11 below it are to deal 
+        const am = cellTime.match(/AM/) != null && cellHours != 11; //with GMT+1 scheduling. Very bad.
         return {
           type: sheet.getCell(
             dayNameCells[idx][0] + 1 + 2 * row,
@@ -208,6 +233,8 @@ async function recordGuess(user,guess,game) {
 module.exports = {
   getLeaderboard,
   getGuessLeaderboard,
+  getFantasyLeaderboard,
+  getBestGuess,
   getSchedule,
   getGames,
   getPlayers,

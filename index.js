@@ -7,6 +7,7 @@ const { formatDistanceToNow } = require("date-fns");
 const { getStartDay, getSheetURL, sheet_data } = require("./constants");
 const { getPlayers } = require("./sheet");
 const { recordGuess } = require ("./sheet");
+const { getBestGuess } = require ("./sheet");
 const {
   PREFIX,
   ENABLE_DB,
@@ -76,7 +77,7 @@ async function scheduleEmbed(dayNumber, timeZone, footer) {
                 timeZone,
               })
         }`;
-        if (game.type === "Silent") {
+        if (game.type === "SILENT" || game.type === "BULLET") {
           const gameInfos = games.filter((g) => g.number === game.number);
           const played =
             gameInfos[0].played && gameInfos[1].played && gameInfos[2].played;
@@ -120,7 +121,8 @@ client.on("message", async (message) => {
 
   const args = message.content.slice(PREFIX.length).trim().split(/ +/);
   const command = args.shift().toLowerCase();
-  const regex = new RegExp('[1234567hH]{3,4}');
+  const regex = new RegExp('^[1234567hH]{3,4}$');
+  const gamenums = new RegExp('^[0-9]{1,2}[ABCabc]?$')
 
   let userTimeZone = await timezones.get(message.author.id);
 
@@ -202,6 +204,80 @@ client.on("message", async (message) => {
           "😔 There was an error making your request. Please try again in a bit."
         )
       );
+    }
+  } else if (["fantasyleaderboard", "fantasylb", "flb"].includes(command)) {
+    try {
+      const leaderboard = await sheet.getFantasyLeaderboard();
+      const accuracy = (args.length === 1 && ["acc", "accuracy"].includes(args[0]))
+      leaderboard.sort((a, b) => b.score - a.score)
+      const ranks = rank(leaderboard, "score")
+      const embed = new Discord.MessageEmbed()
+        .setTitle("Fantasy League Leaderboard")
+        .setDescription(
+          leaderboard
+            .filter((entry) => entry.mod !== "mod")
+            .slice(0, 10)
+            .map((entry, i) => `${ranks[i]}. <@${entry.name}>'s ${entry.team}: ${entry.score}`)
+            .join("\n")
+        )
+        .setFooter(`Updated ${updateTime}`)
+      message.channel.send(embed);
+    } catch (err) {
+      Sentry.captureException(err);
+      console.error(err);
+      message.channel.send(
+        errorMessage(
+          "😔 There was an error making your request. Please try again in a bit."
+        )
+      );
+    }
+  } else if (["bestguess", "bg"].includes(command)) {
+    if (args.length !== 1) {
+      message.channel.send(errorMessage("Must include valid game number."))
+    } else {
+      try {
+        if (gamenums.test(args[0])) {
+          if (['A','B','C','a','b','c'].includes(args[0].slice(-1))) {
+            const subIndicatorList = ['a','b','c'];
+            const game = parseInt(args[0].slice(0,-1)) + (1 + subIndicatorList.indexOf(args[0].slice(-1).toLowerCase()))/10;
+            const guessInfo = await getBestGuess(game);
+            if (guessInfo[1] === '#N/A') {
+              message.channel.send(
+                errorMessage(
+                  "This game is not complete or has no guesses."
+                  )
+                );
+            } else {
+              const embed = new Discord.MessageEmbed()
+                .setTitle(`Best Guess For Game ${args[0].toUpperCase()}`)
+                .setDescription(`<@${guessInfo[1]}>\nGuess: ${guessInfo[2]}\nPoints: ${guessInfo[3]}`)
+              message.channel.send(embed);
+            }
+          } else {
+            const game = parseInt(args[0]);
+            const guessInfo = await getBestGuess(game);
+            if (guessInfo[1] === '#N/A') {
+              message.channel.send(
+                errorMessage(
+                  "This game is not complete or has no guesses."
+                  )
+                );
+            } else {
+              const embed = new Discord.MessageEmbed()
+                .setTitle(`Best Guess For Game ${args[0].toUpperCase()}`)
+                .setDescription(`<@${guessInfo[1]}>\nGuess: ${guessInfo[2]}\nPoints: ${guessInfo[3]}`)
+              message.channel.send(embed);
+            }
+          }
+        }
+      } catch (err) {
+        console.error(err);
+        message.channel.send(
+          errorMessage(
+            "😔 There was an error making your request. You may have entered an incorrect game number."
+          )
+        );
+      }
     }
   } else if (["schedule", "sc"].includes(command)) {
     const currentDate = new Date();
@@ -401,6 +477,10 @@ client.on("message", async (message) => {
         value: "View the line guessers leaderboard",
       },
       {
+        name: `${PREFIX}bestguess|bg {game}`,
+        value: "View the best guess made for a specific game",
+      },
+      {
         name: `${PREFIX}mvp`,
         value: "View the MVP running",
       },
@@ -518,16 +598,21 @@ client.on("message", async (message) => {
         const subIndicatorList = ['a','b','c'];
         recordGuess(message.author.id,args[0],currentGame.number + (1 + subIndicatorList.indexOf(args[1].toLowerCase()))/10);
         if (!isdm) { message.delete() }
+        message.channel.send("Guess recieved!")
       } else {
-      recordGuess(message.author.id,args[0],parseInt(args[1]));
-      if (!isdm) { message.delete() }
-    }
+        recordGuess(message.author.id,args[0],parseInt(args[1]));
+        if (!isdm) { message.delete() }
+        message.channel.send("Guess recieved!")
+      }
     } else if ( args.length === 1 && regex.test(args[0]) ) {
     const games2 = await sheet.getGames();
     const currentGame = games2.find((g) => !g.played );
     recordGuess(message.author.id,args[0].toLowerCase(),currentGame.number);
     if (!isdm) { message.delete() }
-  }
+    message.channel.send("Guess recieved!")
+    } else {
+      message.channel.send(errorMessage("Must include valid guess."))
+    }
   } else if (command === 'open') {
     if (!(await authorized_data_setters.get("auth"))) {
       await authorized_data_setters.set("auth", []);
