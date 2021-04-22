@@ -30,7 +30,7 @@ const rank = (competitorList, column, secondary = false, limit = 10) => {
     }
     ranks.push(lastRank);
     lastScore = p[column];
-    lastSecondary = p[secondary];
+    lastSecondary = p[secondary]
   });
   return ranks;
 };
