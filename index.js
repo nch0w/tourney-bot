@@ -4,7 +4,7 @@ const sheet = require("./sheet");
 const client = new Discord.Client();
 const { format, utcToZonedTime } = require("date-fns-tz");
 const { formatDistanceToNow } = require("date-fns");
-const { getStartDay, getSheetURL, sheet_data } = require("./constants");
+const { getStartDay, getSheetURL, sheet_data, GLOBAL_SHEET_URL } = require("./constants");
 const { getPlayers } = require("./sheet");
 const { recordGuess } = require("./sheet");
 const { getBestGuess } = require("./sheet");
@@ -174,12 +174,17 @@ client.on("message", async (message) => {
   } else if (["guessleaderboard", "guesslb", "glb"].includes(command)) {
     try {
       const leaderboard = await sheet.getGuessLeaderboard();
-      const accuracy =
-        args.length === 1 && ["acc", "accuracy"].includes(args[0]);
+      const accuracy = (args.length === 1 && ["acc", "accuracy"].includes(args[0]));
       accuracy
-        ? leaderboard.sort((a, b) => b.acc - a.acc)
-        : leaderboard.sort((a, b) => b.score - a.score);
-      const ranks = rank(leaderboard, "score");
+        ? leaderboard.sort((a, b) => b.acc - a.acc || b.score - a.score)
+        : leaderboard.sort((a, b) => b.score - a.score || b.acc - a.acc)
+      const ranks = rank(leaderboard, 
+        accuracy 
+          ? "acc"
+          : "score",
+          accuracy
+            ? "score"
+            : "acc");
       const embed = new Discord.MessageEmbed()
         .setTitle(
           accuracy
@@ -190,12 +195,7 @@ client.on("message", async (message) => {
           leaderboard
             .slice(0, 10)
             .filter((entry) => entry.name !== null)
-            .map(
-              (entry, i) =>
-                `${ranks[i]}. <@${entry.name}> Points: ${
-                  entry.score
-                } Accuracy: ${entry.acc * 100}%`
-            )
+            .map((entry, i) => `${ranks[i]}. <@${entry.name}> Points: ${entry.score} Accuracy: ${(entry.acc*100).toFixed(1)}%`)
             .join("\n")
         )
         .setFooter(
@@ -216,14 +216,13 @@ client.on("message", async (message) => {
   } else if (["fantasyleaderboard", "fantasylb", "flb"].includes(command)) {
     try {
       const leaderboard = await sheet.getFantasyLeaderboard();
-      const accuracy =
-        args.length === 1 && ["acc", "accuracy"].includes(args[0]);
-      leaderboard.sort((a, b) => b.score - a.score);
-      const ranks = rank(leaderboard, "score");
+      noModLeaderboard = leaderboard.filter((entry) => entry.mod !== "mod")
+      noModLeaderboard.sort((a, b) => b.score - a.score || b.gamesWon - a.gamesWon)
+      const ranks = rank(noModLeaderboard, "score","gamesWon")
       const embed = new Discord.MessageEmbed()
         .setTitle("Fantasy League Leaderboard")
         .setDescription(
-          leaderboard
+          noModLeaderboard
             .filter((entry) => entry.mod !== "mod")
             .slice(0, 10)
             .map(
@@ -545,6 +544,8 @@ client.on("message", async (message) => {
     message.channel.send(embed);
   } else if (command === "sheet") {
     message.channel.send(`Official Tourney Sheet: <${await getSheetURL()}>`);
+  } else if (command === "global") {
+    message.channel.send(`Official Global Tourney Sheet: <${GLOBAL_SHEET_URL}>`);
   } else if (args.length > 0 && command === "authorize") {
     if (!(await authorized_data_setters.get("auth"))) {
       await authorized_data_setters.set("auth", []);
@@ -637,19 +638,16 @@ client.on("message", async (message) => {
     } catch (err) {
       message.channel.send(errorMessage("No parameters entered."));
     }
-  } else if (command === "guess") {
-    const isdm = message.channel.type === "dm";
+  } else if (['guess','g'].includes(command)) {
+    const isdm = message.channel.type === 'dm';
     if (!open) {
       message.channel.send(
         errorMessage(
-          "Line guesses can only be made during in-progress games before the Special Election and/or the fourth liberal policy."
-        )
-      );
-    } else if (
-      args.length === 2 &&
-      regex.test(args[0] && !/([1-7hH]).*?\1/.test(args[0]))
-    ) {
-      const subIndicator = new RegExp("[abcABC]{1}");
+          'Line guesses can only be made during in-progress games before the Special Election and/or the fourth liberal policy.'
+          )
+        );
+    } else if ( args.length === 2 && regex.test(args[0]) && !(/([1-7hH]).*?\1/).test(args[0]) ) {
+      const subIndicator = new RegExp('[abcABC]{1}')
       if (subIndicator.test(args[1])) {
         const games2 = await sheet.getGames();
         const currentGame = games2.find((g) => !g.played);

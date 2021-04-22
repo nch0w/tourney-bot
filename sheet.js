@@ -22,9 +22,9 @@ async function loadSheet() {
   await doc.sheetsByIndex[1].loadCells("A1:S28");
   await doc.sheetsByIndex[2].loadCells("A1:CA100");
   await doc.sheetsByIndex[4].loadCells("A1:S113");
-  await doc.sheetsByIndex[5].loadCells("B5:V87");
+  await doc.sheetsByIndex[5].loadCells("B5:G92");
   await moddoc.loadInfo();
-  await moddoc.sheetsByIndex[0].loadCells("A1:K500");
+  await moddoc.sheetsByIndex[0].loadCells("A1:K1000");
   await moddoc.sheetsByIndex[1].loadCells("A1:C200");
   await moddoc.sheetsByIndex[2].loadCells("A1:D75");
 }
@@ -58,13 +58,14 @@ async function getGuessLeaderboard() {
 
 async function getFantasyLeaderboard() {
   const sheet = doc.sheetsByIndex[5];
-  const leaderboard = _.range(5, 87, 1).map((row) => ({
+  const leaderboard = _.range(5, 93, 1).map((row) => ({
     mod: sheet.getCellByA1(`B${row}`).value,
     team: sheet.getCellByA1(`D${row}`).value,
     name: sheet.getCellByA1(`E${row}`).value,
     score: sheet.getCellByA1(`F${row}`).value,
     gamesWon: sheet.getCellByA1(`G${row}`).value,
   }));
+  console.log(leaderboard)
   return leaderboard;
 }
 
@@ -225,17 +226,14 @@ async function getPlayers() {
 async function recordGuess(user, guess, game) {
   const sheet = moddoc.sheetsByIndex[0];
   const rows = await sheet.getRows();
-  for (let i = 0; i < rows.length; i++) {
-    if (
-      rows[i]._rawData[1] === user &&
-      parseInt(rows[i]._rawData[3]) === game
-    ) {
+  for (let i = rows.length - 1; i>=0; i--) {
+    if (rows[i]._rawData[1] === user && parseFloat(rows[i]._rawData[3]) === game) {
       await rows[i].delete();
       break;
     }
   }
   timestamp = new Date(new Date().getTime());
-  sheet.addRow([timestamp, user, guess, game]);
+  sheet.addRow([timestamp,user,guess,game]);
 }
 
 module.exports = {
