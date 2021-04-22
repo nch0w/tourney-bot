@@ -17,7 +17,6 @@ async function getYear() {
   return value ? value : 2021;
 }
 
-
 async function getMonth() {
   const value = await sheet_data.get("MONTH");
 
@@ -41,7 +40,9 @@ async function getTeamEmojis() {
 async function getSheetURL() {
   const value = await sheet_data.get("SHEET_URL");
 
-  return value ? value : "https://docs.google.com/spreadsheets/d/1o-gIsqo-tp4sbrVd4biyUshMUve0SXmEnmTwD9jNP0E/edit#gid=1095222730";
+  return value
+    ? value
+    : "https://docs.google.com/spreadsheets/d/1o-gIsqo-tp4sbrVd4biyUshMUve0SXmEnmTwD9jNP0E/edit#gid=1095222730";
 }
 
 async function getStartDay() {
@@ -57,5 +58,6 @@ module.exports = {
   getTeamEmojis: getTeamEmojis,
   getStartDay: getStartDay,
   sheet_data: sheet_data,
-  GLOBAL_SHEET_URL: "https://docs.google.com/spreadsheets/d/1au5YS0hmneOv8kEA75VOxgcPIUya2EB19hWXl7oII-A/edit?usp=sharing",
+  GLOBAL_SHEET_URL:
+    "https://docs.google.com/spreadsheets/d/1au5YS0hmneOv8kEA75VOxgcPIUya2EB19hWXl7oII-A/edit?usp=sharing",
 };

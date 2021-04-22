@@ -17,13 +17,13 @@ const rank = (competitorList, column, secondary = false, limit = 10) => {
     }
     if (p[column] !== lastScore) {
       lastRank = i + 1;
-      if (lastRank > 10) {
+      if (lastRank > limit) {
         reachedLimit = true;
         return;
       }
     } else if (p[secondary] !== lastSecondary) {
       lastRank = i + 1;
-      if (lastRank > 10) {
+      if (lastRank > limit) {
         reachedLimit = true;
         return;
       }
