@@ -1,6 +1,10 @@
 const _ = require("lodash");
 const { GoogleSpreadsheet } = require("google-spreadsheet");
-const { SHEET_PRIVATE_ID, MOD_SHEET_PRIVATE_ID, GOOGLE_API_CREDENTIALS } = require("./env");
+const {
+  SHEET_PRIVATE_ID,
+  MOD_SHEET_PRIVATE_ID,
+  GOOGLE_API_CREDENTIALS,
+} = require("./env");
 const { getYear, getMonth, getTeamEmojis } = require("./constants");
 
 // this is the 4th SH Tourney spreadsheet
@@ -65,9 +69,9 @@ async function getFantasyLeaderboard() {
 }
 
 async function getBestGuess(game) {
-  const sheet = moddoc.sheetsByIndex[2]
+  const sheet = moddoc.sheetsByIndex[2];
   const rows = await sheet.getRows();
-  for (let i = 0; i<75; i++) {
+  for (let i = 0; i < 75; i++) {
     if (parseFloat(rows[i]._rawData[0]) === game) {
       return rows[i]._rawData;
       break;
@@ -91,9 +95,10 @@ async function getSchedule() {
 
   const schedule = dayNames.map((name, idx) => {
     const day = parseInt(name.match(/\d+/)[0]);
-    const date = (day<20)
-      ? new Date(Date.UTC(YEAR, MONTH+1, day))
-      : new Date(Date.UTC(YEAR, MONTH, day));
+    const date =
+      day < 20
+        ? new Date(Date.UTC(YEAR, MONTH + 1, day))
+        : new Date(Date.UTC(YEAR, MONTH, day));
     let cellTime;
     return {
       number: idx + 1,
@@ -105,7 +110,7 @@ async function getSchedule() {
             dayNameCells[idx][1] + 1
           ).value || cellTime; // fallback to last read cellTime
 
-        const cellHours = parseInt(cellTime.match(/\d+/)[0]) - 1; //this -1 and the !=11 below it are to deal 
+        const cellHours = parseInt(cellTime.match(/\d+/)[0]) - 1; //this -1 and the !=11 below it are to deal
         const am = cellTime.match(/AM/) != null && cellHours != 11; //with GMT+1 scheduling. Very bad.
         return {
           type: sheet.getCell(
@@ -118,12 +123,12 @@ async function getSchedule() {
               .value.match(/\d+/)[0]
           ),
           time: am
-            ? (day<20)
-              ? new Date(Date.UTC(YEAR, MONTH+1, day + 1, cellHours % 12))
+            ? day < 20
+              ? new Date(Date.UTC(YEAR, MONTH + 1, day + 1, cellHours % 12))
               : new Date(Date.UTC(YEAR, MONTH, day + 1, cellHours % 12))
-            : (day<20)
-              ? new Date(Date.UTC(YEAR, MONTH+1, day, (cellHours % 12) + 12))
-              : new Date(Date.UTC(YEAR, MONTH, day, (cellHours % 12) + 12)),
+            : day < 20
+            ? new Date(Date.UTC(YEAR, MONTH + 1, day, (cellHours % 12) + 12))
+            : new Date(Date.UTC(YEAR, MONTH, day, (cellHours % 12) + 12)),
         };
       }),
     };
@@ -145,7 +150,7 @@ async function getGames() {
 
       let number = sheet.getCell(row, 0).value;
       let subGame;
-      if (mode === "Silent" || mode === 'Bullet') {
+      if (mode === "Silent" || mode === "Bullet") {
         const subGameCell = sheet.getCell(row, 2).value;
         number = parseInt(subGameCell.replace(/[^\d]/g, ""));
         subGame = subGameCell.replace(/\s/g, "").slice(-1);
@@ -217,17 +222,20 @@ async function getPlayers() {
   return players;
 }
 
-async function recordGuess(user,guess,game) {
+async function recordGuess(user, guess, game) {
   const sheet = moddoc.sheetsByIndex[0];
   const rows = await sheet.getRows();
-  for (let i = 0; i<rows.length; i++) {
-    if (rows[i]._rawData[1] === user && parseInt(rows[i]._rawData[3]) === game) {
+  for (let i = 0; i < rows.length; i++) {
+    if (
+      rows[i]._rawData[1] === user &&
+      parseInt(rows[i]._rawData[3]) === game
+    ) {
       await rows[i].delete();
       break;
     }
   }
-  timestamp = new Date(new Date().getTime())
-  sheet.addRow([timestamp,user,guess,game])
+  timestamp = new Date(new Date().getTime());
+  sheet.addRow([timestamp, user, guess, game]);
 }
 
 module.exports = {
