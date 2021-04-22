@@ -65,7 +65,6 @@ async function getFantasyLeaderboard() {
     score: sheet.getCellByA1(`F${row}`).value,
     gamesWon: sheet.getCellByA1(`G${row}`).value,
   }));
-  console.log(leaderboard)
   return leaderboard;
 }
 
@@ -226,14 +225,17 @@ async function getPlayers() {
 async function recordGuess(user, guess, game) {
   const sheet = moddoc.sheetsByIndex[0];
   const rows = await sheet.getRows();
-  for (let i = rows.length - 1; i>=0; i--) {
-    if (rows[i]._rawData[1] === user && parseFloat(rows[i]._rawData[3]) === game) {
+  for (let i = rows.length - 1; i >= 0; i--) {
+    if (
+      rows[i]._rawData[1] === user &&
+      parseFloat(rows[i]._rawData[3]) === game
+    ) {
       await rows[i].delete();
       break;
     }
   }
   timestamp = new Date(new Date().getTime());
-  sheet.addRow([timestamp,user,guess,game]);
+  sheet.addRow([timestamp, user, guess, game]);
 }
 
 module.exports = {
