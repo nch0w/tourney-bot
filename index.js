@@ -246,7 +246,7 @@ client.on("message", async (message) => {
         .setDescription(
           noModLeaderboard
             .filter((entry) => entry.mod !== "mod")
-            .slice(0, 10)
+            .slice(0, playerNumber)
             .map(
               (entry, i) =>
                 `${ranks[i]}. <@${entry.name}>'s ${entry.team}: ${entry.score}`
