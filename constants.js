@@ -56,5 +56,6 @@ module.exports = {
   getYear: getYear,
   getTeamEmojis: getTeamEmojis,
   getStartDay: getStartDay,
-  sheet_data: sheet_data
+  sheet_data: sheet_data,
+  GLOBAL_SHEET_URL: "https://docs.google.com/spreadsheets/d/1au5YS0hmneOv8kEA75VOxgcPIUya2EB19hWXl7oII-A/edit?usp=sharing",
 };
