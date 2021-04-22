@@ -6,15 +6,15 @@ const { format, utcToZonedTime } = require("date-fns-tz");
 const { formatDistanceToNow } = require("date-fns");
 const { getStartDay, getSheetURL, sheet_data, GLOBAL_SHEET_URL } = require("./constants");
 const { getPlayers } = require("./sheet");
-const { recordGuess } = require ("./sheet");
-const { getBestGuess } = require ("./sheet");
+const { recordGuess } = require("./sheet");
+const { getBestGuess } = require("./sheet");
 const {
   PREFIX,
   ENABLE_DB,
   DISCORD_TOKEN,
   SENTRY_DSN,
   ENABLE_SENTRY,
-  OWNER
+  OWNER,
 } = require("./env");
 const { errorMessage, rank } = require("./message-helpers");
 const Sentry = require("@sentry/node");
@@ -121,8 +121,8 @@ client.on("message", async (message) => {
 
   const args = message.content.slice(PREFIX.length).trim().split(/ +/);
   const command = args.shift().toLowerCase();
-  const regex = new RegExp('^[1-7hH]{3,4}$');
-  const gamenums = new RegExp('^[0-9]{1,2}[ABCabc]?$')
+  const regex = new RegExp("^[1-7hH]{3,4}$");
+  const gamenums = new RegExp("^[0-9]{1,2}[ABCabc]?$");
 
   let userTimeZone = await timezones.get(message.author.id);
 
@@ -188,8 +188,9 @@ client.on("message", async (message) => {
       const embed = new Discord.MessageEmbed()
         .setTitle(
           accuracy
-          ? "Line Guesser Accuracy Leaderboard"
-          : "Line Guesser Leaderboard")
+            ? "Line Guesser Accuracy Leaderboard"
+            : "Line Guesser Leaderboard"
+        )
         .setDescription(
           leaderboard
             .slice(0, 10)
@@ -200,7 +201,8 @@ client.on("message", async (message) => {
         .setFooter(
           accuracy
             ? `Use ${PREFIX}glb to view the best line guessers by points.\nUpdated ${updateTime}`
-            : `Use ${PREFIX}glb acc to view the best line guessers by accuracy.\nUpdated ${updateTime}`)
+            : `Use ${PREFIX}glb acc to view the best line guessers by accuracy.\nUpdated ${updateTime}`
+        );
       message.channel.send(embed);
     } catch (err) {
       Sentry.captureException(err);
@@ -223,10 +225,13 @@ client.on("message", async (message) => {
           noModLeaderboard
             .filter((entry) => entry.mod !== "mod")
             .slice(0, 10)
-            .map((entry, i) => `${ranks[i]}. <@${entry.name}>'s ${entry.team}: ${entry.score}`)
+            .map(
+              (entry, i) =>
+                `${ranks[i]}. <@${entry.name}>'s ${entry.team}: ${entry.score}`
+            )
             .join("\n")
         )
-        .setFooter(`Updated ${updateTime}`)
+        .setFooter(`Updated ${updateTime}`);
       message.channel.send(embed);
     } catch (err) {
       Sentry.captureException(err);
@@ -239,39 +244,44 @@ client.on("message", async (message) => {
     }
   } else if (["bestguess", "bg"].includes(command)) {
     if (args.length !== 1) {
-      message.channel.send(errorMessage("Must include a valid game number, such as 1B or 27."))
+      message.channel.send(
+        errorMessage("Must include a valid game number, such as 1B or 27.")
+      );
     } else {
       try {
         if (gamenums.test(args[0])) {
-          if (['A','B','C','a','b','c'].includes(args[0].slice(-1))) {
-            const subIndicatorList = ['a','b','c'];
-            const game = parseInt(args[0].slice(0,-1)) + (1 + subIndicatorList.indexOf(args[0].slice(-1).toLowerCase()))/10;
+          if (["A", "B", "C", "a", "b", "c"].includes(args[0].slice(-1))) {
+            const subIndicatorList = ["a", "b", "c"];
+            const game =
+              parseInt(args[0].slice(0, -1)) +
+              (1 + subIndicatorList.indexOf(args[0].slice(-1).toLowerCase())) /
+                10;
             const guessInfo = await getBestGuess(game);
-            if (guessInfo[1] === '#N/A') {
+            if (guessInfo[1] === "#N/A") {
               message.channel.send(
-                errorMessage(
-                  "This game is not complete or has no guesses."
-                  )
-                );
+                errorMessage("This game is not complete or has no guesses.")
+              );
             } else {
               const embed = new Discord.MessageEmbed()
                 .setTitle(`Best Guess For Game ${args[0].toUpperCase()}`)
-                .setDescription(`<@${guessInfo[1]}>\nGuess: ${guessInfo[2]}\nPoints: ${guessInfo[3]}`)
+                .setDescription(
+                  `<@${guessInfo[1]}>\nGuess: ${guessInfo[2]}\nPoints: ${guessInfo[3]}`
+                );
               message.channel.send(embed);
             }
           } else {
             const game = parseInt(args[0]);
             const guessInfo = await getBestGuess(game);
-            if (guessInfo[1] === '#N/A') {
+            if (guessInfo[1] === "#N/A") {
               message.channel.send(
-                errorMessage(
-                  "This game is not complete or has no guesses."
-                  )
-                );
+                errorMessage("This game is not complete or has no guesses.")
+              );
             } else {
               const embed = new Discord.MessageEmbed()
                 .setTitle(`Best Guess For Game ${args[0].toUpperCase()}`)
-                .setDescription(`<@${guessInfo[1]}>\nGuess: ${guessInfo[2]}\nPoints: ${guessInfo[3]}`)
+                .setDescription(
+                  `<@${guessInfo[1]}>\nGuess: ${guessInfo[2]}\nPoints: ${guessInfo[3]}`
+                );
               message.channel.send(embed);
             }
           }
@@ -292,8 +302,8 @@ client.on("message", async (message) => {
       Math.max(
         1,
         currentDate.getUTCHours() < 9 // day changes at 9AM UTC
-          ? currentDate.getUTCDate() - await getStartDay()
-          : currentDate.getUTCDate() - await getStartDay() + 1
+          ? currentDate.getUTCDate() - (await getStartDay())
+          : currentDate.getUTCDate() - (await getStartDay()) + 1
       )
     );
     if (args.length > 0) {
@@ -372,29 +382,33 @@ client.on("message", async (message) => {
     }
 
     // "invalid" timezone names
-    if (["EST","EDT"].includes(newTimeZone.toUpperCase())) {
+    if (["EST", "EDT"].includes(newTimeZone.toUpperCase())) {
       newTimeZone = "America/New_York";
-    } else if (["PST","PDT"].includes(newTimeZone.toUpperCase())) {
+    } else if (["PST", "PDT"].includes(newTimeZone.toUpperCase())) {
       newTimeZone = "America/Los_Angeles";
-    } else if (["CST","CDT"].includes(newTimeZone.toUpperCase())) {
+    } else if (["CST", "CDT"].includes(newTimeZone.toUpperCase())) {
       newTimeZone = "America/Chicago";
-    } else if (["MST","MDT"].includes(newTimeZone.toUpperCase())) {
+    } else if (["MST", "MDT"].includes(newTimeZone.toUpperCase())) {
       newTimeZone = "America/Denver";
     } else if (["HST"].includes(newTimeZone.toUpperCase())) {
       newTimeZone = "Pacific/Honolulu";
-    } else if (["WET","WEST","BST"].includes(newTimeZone.toUpperCase())) {
+    } else if (["WET", "WEST", "BST"].includes(newTimeZone.toUpperCase())) {
       newTimeZone = "Europe/London";
-    } else if (["CET","CEST","MET","MEST"].includes(newTimeZone.toUpperCase())) {
+    } else if (
+      ["CET", "CEST", "MET", "MEST"].includes(newTimeZone.toUpperCase())
+    ) {
       newTimeZone = "Europe/Paris";
-    } else if (["EET","EEST"].includes(newTimeZone.toUpperCase())) {
+    } else if (["EET", "EEST"].includes(newTimeZone.toUpperCase())) {
       newTimeZone = "Europe/Sofia";
-    } else if (["MSK","TRT"].includes(newTimeZone.toUpperCase())) {
+    } else if (["MSK", "TRT"].includes(newTimeZone.toUpperCase())) {
       newTimeZone = "Europe/Moscow";
     } else if (["IST"].includes(newTimeZone.toUpperCase())) {
       newTimeZone = "Asia/Kolkata";
-    } else if (["BJT","SST","SGT","HKT"].includes(newTimeZone.toUpperCase())) {
+    } else if (
+      ["BJT", "SST", "SGT", "HKT"].includes(newTimeZone.toUpperCase())
+    ) {
       newTimeZone = "Asia/Shanghai";
-    } 
+    }
 
     if (
       newTimeZone.length <= 4 &&
@@ -525,7 +539,7 @@ client.on("message", async (message) => {
       {
         name: `${PREFIX}info|help`,
         value: "Show this help message",
-      },
+      }
     );
     message.channel.send(embed);
   } else if (command === "sheet") {
@@ -539,7 +553,11 @@ client.on("message", async (message) => {
 
     let author = message.author.id;
 
-    if ((await authorized_data_setters.get("auth")).indexOf(author) >= 0 || author === OWNER) { // jules :iconic:
+    if (
+      (await authorized_data_setters.get("auth")).indexOf(author) >= 0 ||
+      author === OWNER
+    ) {
+      // jules :iconic:
       let id = args[0];
 
       if (isNaN(id) || isNaN(parseFloat(id))) {
@@ -547,7 +565,10 @@ client.on("message", async (message) => {
         id = id.substr(3, id.length - 4);
       }
 
-      await authorized_data_setters.set("auth", (await authorized_data_setters.get("auth")).concat([id]));
+      await authorized_data_setters.set(
+        "auth",
+        (await authorized_data_setters.get("auth")).concat([id])
+      );
       message.channel.send(`<@${id}> is now authorized.`);
     }
   } else if (command === "deauthorize") {
@@ -557,7 +578,11 @@ client.on("message", async (message) => {
 
     let author = message.author.id;
 
-    if ((await authorized_data_setters.get("auth")).indexOf(author) >= 0 || author === OWNER) { // jules :iconic:
+    if (
+      (await authorized_data_setters.get("auth")).indexOf(author) >= 0 ||
+      author === OWNER
+    ) {
+      // jules :iconic:
       let id = args[0];
 
       if (isNaN(id) || isNaN(parseFloat(id))) {
@@ -565,7 +590,10 @@ client.on("message", async (message) => {
         id = id.substr(3, id.length - 4);
       }
 
-      await authorized_data_setters.set("auth", (await authorized_data_setters.get("auth")).filter(x => x !== id));
+      await authorized_data_setters.set(
+        "auth",
+        (await authorized_data_setters.get("auth")).filter((x) => x !== id)
+      );
       message.channel.send(`<@${id}> is now deauthorized.`);
     }
   } else if (command === "authorized") {
@@ -575,8 +603,13 @@ client.on("message", async (message) => {
 
     let author = message.author.id;
 
-    if ((await authorized_data_setters.get("auth")).indexOf(author) >= 0 || author === OWNER) {
-      message.channel.send([...new Set(await authorized_data_setters.get("auth"))].join(', '));
+    if (
+      (await authorized_data_setters.get("auth")).indexOf(author) >= 0 ||
+      author === OWNER
+    ) {
+      message.channel.send(
+        [...new Set(await authorized_data_setters.get("auth"))].join(", ")
+      );
     }
   } else if (command === "update") {
     if (!(await authorized_data_setters.get("auth"))) {
@@ -585,18 +618,25 @@ client.on("message", async (message) => {
 
     let author = message.author.id;
 
-    try { 
-      if ((await authorized_data_setters.get("auth")).indexOf(author) >= 0 || author === OWNER) {
-
-        if ((["YEAR","MONTH","START_DAY"].includes(args[0]) && Number.isInteger(parseInt(args[1]))) || (args[0].startsWith("teamEmoji") && /\p{Emoji}/u.test(args[1]) ) || (args[0] === "SHEET_URL")) {
+    try {
+      if (
+        (await authorized_data_setters.get("auth")).indexOf(author) >= 0 ||
+        author === OWNER
+      ) {
+        if (
+          (["YEAR", "MONTH", "START_DAY"].includes(args[0]) &&
+            Number.isInteger(parseInt(args[1]))) ||
+          (args[0].startsWith("teamEmoji") && /\p{Emoji}/u.test(args[1])) ||
+          args[0] === "SHEET_URL"
+        ) {
           await sheet_data.set(args[0], args[1]);
           message.channel.send(`Updated ${args[0]} to ${args[1]}!`);
-        } else { 
-          message.channel.send(errorMessage("Invalid update parameters.")); 
+        } else {
+          message.channel.send(errorMessage("Invalid update parameters."));
         }
       }
-    } catch (err) { 
-      message.channel.send(errorMessage("No parameters entered.")); 
+    } catch (err) {
+      message.channel.send(errorMessage("No parameters entered."));
     }
   } else if (['guess','g'].includes(command)) {
     const isdm = message.channel.type === 'dm';
@@ -610,45 +650,72 @@ client.on("message", async (message) => {
       const subIndicator = new RegExp('[abcABC]{1}')
       if (subIndicator.test(args[1])) {
         const games2 = await sheet.getGames();
-        const currentGame = games2.find((g) => !g.played );
-        const subIndicatorList = ['a','b','c'];
-        recordGuess(message.author.id,args[0],currentGame.number + (1 + subIndicatorList.indexOf(args[1].toLowerCase()))/10);
-        if (!isdm) { message.delete() }
-        message.channel.send(`<@${message.author.id}>'s guess recieved!`)
+        const currentGame = games2.find((g) => !g.played);
+        const subIndicatorList = ["a", "b", "c"];
+        recordGuess(
+          message.author.id,
+          args[0],
+          currentGame.number +
+            (1 + subIndicatorList.indexOf(args[1].toLowerCase())) / 10
+        );
+        if (!isdm) {
+          message.delete();
+        }
+        message.channel.send(`<@${message.author.id}>'s guess recieved!`);
       } else {
-        recordGuess(message.author.id,args[0],parseInt(args[1]));
-        if (!isdm) { message.delete() }
-        message.channel.send(`<@${message.author.id}>'s guess recieved!`)
+        recordGuess(message.author.id, args[0], parseInt(args[1]));
+        if (!isdm) {
+          message.delete();
+        }
+        message.channel.send(`<@${message.author.id}>'s guess recieved!`);
       }
-    } else if ( args.length === 1 && regex.test(args[0]) && !(/([1-7hH]).*?\1/).test(args[0]) ) {
-    const games2 = await sheet.getGames();
-    const currentGame = games2.find((g) => !g.played );
-    recordGuess(message.author.id,args[0].toLowerCase(),currentGame.number);
-    if (!isdm) { message.delete() }
-    message.channel.send(`<@${message.author.id}>'s guess recieved!`)
+    } else if (
+      args.length === 1 &&
+      regex.test(args[0]) &&
+      !/([1-7hH]).*?\1/.test(args[0])
+    ) {
+      const games2 = await sheet.getGames();
+      const currentGame = games2.find((g) => !g.played);
+      recordGuess(message.author.id, args[0].toLowerCase(), currentGame.number);
+      if (!isdm) {
+        message.delete();
+      }
+      message.channel.send(`<@${message.author.id}>'s guess recieved!`);
     } else {
-      message.channel.send(errorMessage("Must include a valid guess in the form 567 or 123h, where h goes after Hitler's seat."))
+      message.channel.send(
+        errorMessage(
+          "Must include a valid guess in the form 567 or 123h, where h goes after Hitler's seat."
+        )
+      );
     }
-  } else if (command === 'open') {
+  } else if (command === "open") {
     if (!(await authorized_data_setters.get("auth"))) {
       await authorized_data_setters.set("auth", []);
     }
 
     let author = message.author.id;
 
-    if (!open && ((await authorized_data_setters.get("auth")).indexOf(author) >= 0 || author === OWNER)) {
-      message.channel.send('Guessing Opened!');
+    if (
+      !open &&
+      ((await authorized_data_setters.get("auth")).indexOf(author) >= 0 ||
+        author === OWNER)
+    ) {
+      message.channel.send("Guessing Opened!");
       open = !open;
     }
-  } else if (command === 'close') {
+  } else if (command === "close") {
     if (!(await authorized_data_setters.get("auth"))) {
       await authorized_data_setters.set("auth", []);
     }
 
     let author = message.author.id;
 
-    if (open && ((await authorized_data_setters.get("auth")).indexOf(author) >= 0 || author === OWNER)) {
-      message.channel.send('Guessing Closed.');
+    if (
+      open &&
+      ((await authorized_data_setters.get("auth")).indexOf(author) >= 0 ||
+        author === OWNER)
+    ) {
+      message.channel.send("Guessing Closed.");
       open = !open;
     }
   } else {
