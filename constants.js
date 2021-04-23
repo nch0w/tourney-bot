@@ -45,6 +45,14 @@ async function getSheetURL() {
     : "https://docs.google.com/spreadsheets/d/1o-gIsqo-tp4sbrVd4biyUshMUve0SXmEnmTwD9jNP0E/edit#gid=1095222730";
 }
 
+async function getFormURL() {
+  const value = await sheet_data.get("FORM_URL");
+
+  return value
+    ? value
+    : "https://forms.gle/2EuaR9GgFMTgasau9";
+}
+
 async function getStartDay() {
   const value = await sheet_data.get("START_DAY");
 
@@ -53,6 +61,7 @@ async function getStartDay() {
 
 module.exports = {
   getSheetURL: getSheetURL,
+  getFormURL: getFormURL,
   getMonth: getMonth,
   getYear: getYear,
   getTeamEmojis: getTeamEmojis,

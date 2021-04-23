@@ -7,6 +7,7 @@ const { formatDistanceToNow } = require("date-fns");
 const {
   getStartDay,
   getSheetURL,
+  getFormURL,
   sheet_data,
   GLOBAL_SHEET_URL,
 } = require("./constants");
@@ -35,6 +36,7 @@ if (ENABLE_SENTRY) {
 let timezones;
 let authorized_data_setters;
 let open = false;
+let subGameIndicator = false;
 
 if (ENABLE_DB) {
   timezones = new Keyv("mongodb://localhost:27017/tourney-bot", {
@@ -127,6 +129,7 @@ client.on("message", async (message) => {
   const args = message.content.slice(PREFIX.length).trim().split(/ +/);
   const command = args.shift().toLowerCase();
   const regex = new RegExp("^[1-7hH]{3,4}$");
+  const subRegex = new RegExp("[abcABC]{1}");
   const gamenums = new RegExp("^[0-9]{1,2}[ABCabc]?$");
 
   let userTimeZone = await timezones.get(message.author.id);
@@ -531,11 +534,11 @@ client.on("message", async (message) => {
         value: "View the team leaderboard",
       },
       {
-        name: `${PREFIX}guessleaderboard|glb`,
+        name: `${PREFIX}guessleaderboard|glb {length}`,
         value: "View the line guessers leaderboard",
       },
       {
-        name: `${PREFIX}fantasyleaderboard|flb`,
+        name: `${PREFIX}fantasyleaderboard|flb {length}`,
         value: "View the Fantasy League leaderboard",
       },
       {
@@ -559,6 +562,10 @@ client.on("message", async (message) => {
         value: "Send a link to the official global tourney Google sheet",
       },
       {
+        name: `${PREFIX}submit`,
+        value: "Send a link to the Quotes/Gag Awards/Reports form",
+      },
+      {
         name: `${PREFIX}guess {line}`,
         value: "Submit a guess for a line in a game",
       },
@@ -570,6 +577,10 @@ client.on("message", async (message) => {
     message.channel.send(embed);
   } else if (command === "sheet") {
     message.channel.send(`Official Tourney Sheet: <${await getSheetURL()}>`);
+  } else if (command === "submit") {
+    message.channel.send(
+      `Quotes/Gag Awards/Reports Form: <${await getFormURL()}>`
+    );
   } else if (command === "global") {
     message.channel.send(
       `Official Global Tourney Sheet: <${GLOBAL_SHEET_URL}>`
@@ -655,7 +666,7 @@ client.on("message", async (message) => {
           (["YEAR", "MONTH", "START_DAY"].includes(args[0]) &&
             Number.isInteger(parseInt(args[1]))) ||
           (args[0].startsWith("teamEmoji") && /\p{Emoji}/u.test(args[1])) ||
-          args[0] === "SHEET_URL"
+          ["SHEET_URL", "FORM_URL"].includes(args[0])
         ) {
           await sheet_data.set(args[0], args[1]);
           message.channel.send(`Updated ${args[0]} to ${args[1]}!`);
@@ -668,7 +679,12 @@ client.on("message", async (message) => {
     }
   } else if (["guess", "g"].includes(command)) {
     const isdm = message.channel.type === "dm";
-    if (!open) {
+    if (message.channel.id !== "697225108376387724" && !isdm) { //The ID of tournament-vc-text
+      message.delete();
+      message.channel.send(
+        errorMessage("Line guesses can only be made in #tournament-vc-text.")
+      );
+    } else if (!open) {
       message.channel.send(
         errorMessage(
           "Line guesses can only be made during in-progress games before the Special Election and/or the fourth liberal policy."
@@ -677,29 +693,15 @@ client.on("message", async (message) => {
     } else if (
       args.length === 2 &&
       regex.test(args[0]) &&
-      !/([1-7hH]).*?\1/.test(args[0])
+      !/([1-7hH]).*?\1/.test(args[0]) &&
+      [59, 60].includes(parseInt(args[1]))
     ) {
-      const subIndicator = new RegExp("[abcABC]{1}");
-      if (subIndicator.test(args[1])) {
-        const games2 = await sheet.getGames();
-        const currentGame = games2.find((g) => !g.played);
-        const subIndicatorList = ["a", "b", "c"];
-        recordGuess(
-          message.author.id,
-          args[0],
-          currentGame.number +
-            (1 + subIndicatorList.indexOf(args[1].toLowerCase())) / 10
-        );
-        if (!isdm) {
-          message.delete();
-        }
-        message.channel.send(`<@${message.author.id}>'s guess recieved!`);
+      recordGuess(message.author.id, args[0], parseInt(args[1]));
+      if (!isdm) {
+        message.delete();
+        message.channel.send(`<@${message.author.id}>'s guess received!`);
       } else {
-        recordGuess(message.author.id, args[0], parseInt(args[1]));
-        if (!isdm) {
-          message.delete();
-        }
-        message.channel.send(`<@${message.author.id}>'s guess recieved!`);
+        message.channel.send("Guess received!");
       }
     } else if (
       args.length === 1 &&
@@ -708,11 +710,24 @@ client.on("message", async (message) => {
     ) {
       const games2 = await sheet.getGames();
       const currentGame = games2.find((g) => !g.played);
-      recordGuess(message.author.id, args[0].toLowerCase(), currentGame.number);
+      if (subGameIndicator) {
+        const subIndicatorList = ["a", "b", "c"];
+        console.log(subGameIndicator)
+        recordGuess(
+          message.author.id,
+          args[0],
+          currentGame.number +
+            (1 + subIndicatorList.indexOf(subGameIndicator)) / 10
+        );
+      } else {
+        recordGuess(message.author.id, args[0].toLowerCase(), currentGame.number);
+      }
       if (!isdm) {
         message.delete();
+        message.channel.send(`<@${message.author.id}>'s guess received!`);
+      } else {
+        message.channel.send("Guess received!");
       }
-      message.channel.send(`<@${message.author.id}>'s guess recieved!`);
     } else {
       message.channel.send(
         errorMessage(
@@ -734,6 +749,9 @@ client.on("message", async (message) => {
     ) {
       message.channel.send("Guessing Opened!");
       open = !open;
+      if (args.length === 1 && subRegex.test(args[0])) {
+        subGameIndicator = args[0].toLowerCase();
+      }
     }
   } else if (command === "close") {
     if (!(await authorized_data_setters.get("auth"))) {
@@ -749,6 +767,9 @@ client.on("message", async (message) => {
     ) {
       message.channel.send("Guessing Closed.");
       open = !open;
+      if (subGameIndicator) {
+        subGameIndicator = false;
+      }
     }
   } else {
     message.channel.send(
