@@ -232,7 +232,7 @@ async function recordGuess(user, guess, game) {
     ) {
       await rows[i].delete();
       break;
-    } else if (rows[i]._rawData[3] !== game ) {
+    } else if (parseFloat(rows[i]._rawData[3]) !== game) {
       break;
     }
   }
