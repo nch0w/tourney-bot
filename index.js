@@ -287,10 +287,12 @@ client.on("message", async (message) => {
                 errorMessage("This game is not complete or has no guesses.")
               );
             } else {
+              const lineList = [guessInfo[4].slice(0,1), guessInfo[4].slice(1,2), guessInfo[4].slice(2)];
+              lineList.sort((a,b) => a.slice(0,1) - b.slice(0,1));
               const embed = new Discord.MessageEmbed()
                 .setTitle(`Best Guess For Game ${args[0].toUpperCase()}`)
                 .setDescription(
-                  `<@${guessInfo[1]}>\nGuess: ${guessInfo[2]}\nPoints: ${guessInfo[3]}`
+                  `<@${guessInfo[1]}>\nGuess: ${guessInfo[2]}\nReal Line: ${lineList.join("")}\nPoints: ${guessInfo[3]}\nAverage Points: ${parseFloat(guessInfo[5]).toFixed(1)}`
                 );
               message.channel.send(embed);
             }
@@ -302,10 +304,12 @@ client.on("message", async (message) => {
                 errorMessage("This game is not complete or has no guesses.")
               );
             } else {
+              const lineList = [guessInfo[4].slice(0,1), guessInfo[4].slice(1,2), guessInfo[4].slice(2)];
+              lineList.sort((a,b) => a.slice(0,1) - b.slice(0,1));
               const embed = new Discord.MessageEmbed()
                 .setTitle(`Best Guess For Game ${args[0].toUpperCase()}`)
                 .setDescription(
-                  `<@${guessInfo[1]}>\nGuess: ${guessInfo[2]}\nPoints: ${guessInfo[3]}`
+                  `<@${guessInfo[1]}>\nGuess: ${guessInfo[2]}\nReal Line: ${lineList.join("")}\nPoints: ${guessInfo[3]}\nAverage Points: ${parseFloat(guessInfo[5]).toFixed(1)}`
                 );
               message.channel.send(embed);
             }
@@ -682,7 +686,7 @@ client.on("message", async (message) => {
     if (message.channel.id !== "697225108376387724" && !isdm) { //The ID of tournament-vc-text
       message.delete();
       message.channel.send(
-        errorMessage("Line guesses can only be made in #tournament-vc-text.")
+        errorMessage("Line guesses can only be made in #tournament-vc-text or DMs.")
       );
     } else if (!open) {
       message.channel.send(

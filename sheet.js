@@ -26,7 +26,7 @@ async function loadSheet() {
   await moddoc.loadInfo();
   await moddoc.sheetsByIndex[0].loadCells("A1:K1000");
   await moddoc.sheetsByIndex[1].loadCells("A1:C200");
-  await moddoc.sheetsByIndex[2].loadCells("A1:D75");
+  await moddoc.sheetsByIndex[2].loadCells("A1:F75");
 }
 
 setTimeout(loadSheet, 0);
@@ -231,6 +231,8 @@ async function recordGuess(user, guess, game) {
       parseFloat(rows[i]._rawData[3]) === game
     ) {
       await rows[i].delete();
+      break;
+    } else if (rows[i]._rawData[3] !== game ) {
       break;
     }
   }
