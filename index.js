@@ -159,8 +159,8 @@ client.on("message", async (message) => {
   if (["leaderboard", "lb", "le"].includes(command)) {
     try {
       const leaderboard = await sheet.getLeaderboard();
-      leaderboard.sort((a, b) => b.score - a.score);
-      const ranks = rank(leaderboard, "score");
+      leaderboard.sort((a, b) => b.tiebreakScore - a.tiebreakScore);
+      const ranks = rank(leaderboard, "tiebreakScore");
       const embed = new Discord.MessageEmbed()
         .setTitle("Leaderboard")
         .setDescription(
