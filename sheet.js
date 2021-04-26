@@ -18,7 +18,7 @@ let updateTime = new Date(new Date().getTime());
 async function loadSheet() {
   updateTime = new Date(new Date().getTime());
   await doc.loadInfo();
-  await doc.sheetsByIndex[0].loadCells("AA2:AG15");
+  await doc.sheetsByIndex[0].loadCells("AA2:AL15");
   await doc.sheetsByIndex[1].loadCells("A1:S28");
   await doc.sheetsByIndex[2].loadCells("A1:CA100");
   await doc.sheetsByIndex[4].loadCells("A1:S113");
