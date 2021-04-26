@@ -38,10 +38,11 @@ function getUpdateTime() {
 
 async function getLeaderboard() {
   const sheet = doc.sheetsByIndex[0];
-  // await sheet.loadCells("AA2:AG15");
+  // await sheet.loadCells("AA2:AL15");
   const leaderboard = _.range(2, 16, 2).map((row) => ({
     name: sheet.getCellByA1(`AA${row}`).value,
     score: sheet.getCellByA1(`AG${row}`).value,
+    tiebreakScore: sheet.getCellByA1(`AL${row}`).value,
   }));
   return leaderboard;
 }
