@@ -14,6 +14,10 @@ async function execute(message, args, user) {
       value: "View the team leaderboard",
     },
     {
+      name: `${PREFIX}mvp`,
+      value: "View the MVP running",
+    },
+    {
       name: `${PREFIX}guessleaderboard|glb {length}`,
       value: "View the line guessers leaderboard",
     },
@@ -26,8 +30,8 @@ async function execute(message, args, user) {
       value: "View the best guess made for a specific game",
     },
     {
-      name: `${PREFIX}mvp`,
-      value: "View the MVP running",
+      name: `${PREFIX}personalrecord|pr {guesser: optional}`,
+      value: "View a guesser's personal guess record",
     },
     {
       name: `${PREFIX}timezone {timezone}`,
