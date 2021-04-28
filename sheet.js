@@ -1,5 +1,6 @@
 const _ = require("lodash");
 const { GoogleSpreadsheet } = require("google-spreadsheet");
+var Mutex = require("async-mutex").Mutex;
 const {
   SHEET_PRIVATE_ID,
   MOD_SHEET_PRIVATE_ID,
@@ -14,6 +15,7 @@ doc.useServiceAccountAuth(GOOGLE_API_CREDENTIALS);
 moddoc.useServiceAccountAuth(GOOGLE_API_CREDENTIALS);
 
 let updateTime = new Date(new Date().getTime());
+const lineGuessMutex = new Mutex();
 
 async function loadSheet() {
   updateTime = new Date(new Date().getTime());
@@ -255,6 +257,8 @@ async function getPlayers() {
 
 async function recordGuess(user, guess, game) {
   const sheet = moddoc.sheetsByIndex[0];
+  const timestamp = new Date(new Date().getTime());
+  const release = await lineGuessMutex.acquire();
   const rows = await sheet.getRows();
   for (let i = rows.length - 1; i >= 0; i--) {
     if (
@@ -267,8 +271,8 @@ async function recordGuess(user, guess, game) {
       break;
     }
   }
-  timestamp = new Date(new Date().getTime());
-  sheet.addRow([timestamp, user, guess, game]);
+  await sheet.addRow([timestamp, user, guess, game]);
+  release();
 }
 
 module.exports = {
