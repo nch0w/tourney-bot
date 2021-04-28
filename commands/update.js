@@ -1,15 +1,13 @@
 const Discord = require("discord.js");
 const sheet = require("../sheet");
 const { errorMessage, rank } = require("../message-helpers");
+const { sheet_data } = require("../constants");
 
 async function execute(message, args, user) {
   let author = message.author.id;
 
   try {
-    if (
-      (await authorized_data_setters.get("auth")).indexOf(author) >= 0 ||
-      author === OWNER
-    ) {
+    if (user.isAuthorized) {
       if (
         (["YEAR", "MONTH", "START_DAY"].includes(args[0]) &&
           Number.isInteger(parseInt(args[1]))) ||
