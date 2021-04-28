@@ -119,7 +119,7 @@ async function execute(message, args, user) {
     };
 
     const collector = emb.createReactionCollector(filter, { time: 60000 });
-    collector.on("collect", async (reaction, user) => {
+    collector.on("collect", async (reaction, author) => {
       if (reaction.emoji.name === "◀") {
         dayNumber = Math.max(dayNumber - 1, 1);
       } else {
@@ -128,11 +128,11 @@ async function execute(message, args, user) {
       const newEmbed = await scheduleEmbed(dayNumber, user.timeZone, footer);
       emb.edit(newEmbed);
       const userReactions = emb.reactions.cache.filter((reaction) =>
-        reaction.users.cache.has(user.id)
+        reaction.users.cache.has(author.id)
       );
       try {
         for (const reaction of userReactions.values()) {
-          await reaction.users.remove(user.id);
+          await reaction.users.remove(author.id);
         }
       } catch (err) {
         // Sentry.captureException(err);
