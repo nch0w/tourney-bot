@@ -92,7 +92,6 @@ client.on("message", async (message) => {
     await authorized_data_setters.set("auth", []);
   }
 
-  console.log(message.author.id === OWNER);
   const user = {
     timeZone,
     updateTime,
