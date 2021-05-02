@@ -269,6 +269,8 @@ async function recordGuess(user, guess, game) {
       break;
     } else if (parseFloat(rows[i]._rawData[3]) !== game && game < 59) {
       break;
+    } else if (game > 58 && parseFloat(rows[i]._rawData[3]) === 58) {
+      break;
     }
   }
   await sheet.addRow([timestamp, user, guess, game]);
