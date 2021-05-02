@@ -6,6 +6,8 @@ const regex = new RegExp("^[1-7hH]{3,4}$");
 
 async function execute(message, args, user) {
   const isdm = message.channel.type === "dm";
+  const games2 = await sheet.getGames();
+  const currentGame = games2.find((g) => !g.played);
   if (message.channel.id !== "697225108376387724" && !isdm) {
     //The ID of tournament-vc-text
     message.delete();
@@ -20,11 +22,17 @@ async function execute(message, args, user) {
         "Line guesses can only be made during in-progress games before the Special Election and/or the fourth liberal policy."
       )
     );
+  } else if (currentGame === 59 && args.length === 1) {
+    message.channel.send(
+      errorMessage(
+        "Must include a valid game number, for example, s!guess 123h 59."
+      )
+    );
   } else if (
     args.length === 2 &&
     regex.test(args[0]) &&
     !/([1-7hH]).*?\1/.test(args[0]) &&
-    [59, 60].includes(parseInt(args[1]))
+    finalGame.includes(parseInt(args[1]))
   ) {
     sheet.recordGuess(message.author.id, args[0], parseInt(args[1]));
     if (!isdm) {
@@ -38,8 +46,6 @@ async function execute(message, args, user) {
     regex.test(args[0]) &&
     !/([1-7hH]).*?\1/.test(args[0])
   ) {
-    const games2 = await sheet.getGames();
-    const currentGame = games2.find((g) => !g.played);
     if (subGameIndicator) {
       const subIndicatorList = ["a", "b", "c"];
       sheet.recordGuess(
