@@ -8,7 +8,7 @@ async function execute(message, args, user) {
   const isdm = message.channel.type === "dm";
   const games2 = await sheet.getGames();
   const currentGame = games2.find((g) => !g.played);
-  if (message.channel.id !== "697225108376387724" && !isdm) {
+  if (message.channel.id !== "697225108376387724" && message.channel.id !== "838543107653369896" && !isdm) {
     //The ID of tournament-vc-text
     message.delete();
     message.channel.send(
