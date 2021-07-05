@@ -1,5 +1,6 @@
 const _ = require("lodash");
 const { GoogleSpreadsheet } = require("google-spreadsheet");
+var Mutex = require("async-mutex").Mutex;
 const {
   SHEET_PRIVATE_ID,
   MOD_SHEET_PRIVATE_ID,
@@ -14,6 +15,7 @@ doc.useServiceAccountAuth(GOOGLE_API_CREDENTIALS);
 moddoc.useServiceAccountAuth(GOOGLE_API_CREDENTIALS);
 
 let updateTime = new Date(new Date().getTime());
+const lineGuessMutex = new Mutex();
 
 async function loadSheet() {
   updateTime = new Date(new Date().getTime());
@@ -24,7 +26,7 @@ async function loadSheet() {
   await doc.sheetsByIndex[4].loadCells("A1:S113");
   await doc.sheetsByIndex[5].loadCells("B5:G92");
   await moddoc.loadInfo();
-  await moddoc.sheetsByIndex[0].loadCells("A1:D2000");
+  await moddoc.sheetsByIndex[0].loadCells("A1:K2000");
   await moddoc.sheetsByIndex[1].loadCells("A1:C200");
   await moddoc.sheetsByIndex[2].loadCells("A1:F75");
 }
@@ -67,6 +69,36 @@ async function getFantasyLeaderboard() {
     gamesWon: sheet.getCellByA1(`G${row}`).value,
   }));
   return leaderboard;
+}
+
+async function getPersonalStats(player) {
+  const sheet = moddoc.sheetsByIndex[0];
+  return _.range(1, 2000)
+    .map((row) => {
+      if (
+        sheet.getCell(row, 0).value === null ||
+        sheet.getCell(row, 1).value !== player ||
+        sheet.getCell(row, 10).value == null
+      )
+        return null;
+      let game;
+      if (Number.isInteger(parseFloat(sheet.getCell(row, 3).value))) {
+        game = sheet.getCell(row, 3).value;
+      } else {
+        const subGameList = ["A", "B", "C"];
+        const subGame =
+          subGameList[
+            (parseFloat(sheet.getCell(row, 3).value) % 1).toFixed(1) * 10 - 1
+          ];
+        game = [parseInt(sheet.getCell(row, 3).value), subGame].join("");
+      }
+      return {
+        line: sheet.getCell(row, 2).value,
+        game,
+        points: sheet.getCell(row, 10).value,
+      };
+    })
+    .filter((guess) => guess);
 }
 
 async function getBestGuess(game) {
@@ -225,6 +257,8 @@ async function getPlayers() {
 
 async function recordGuess(user, guess, game) {
   const sheet = moddoc.sheetsByIndex[0];
+  const timestamp = new Date(new Date().getTime());
+  const release = await lineGuessMutex.acquire();
   const rows = await sheet.getRows();
   for (let i = rows.length - 1; i >= 0; i--) {
     if (
@@ -233,18 +267,21 @@ async function recordGuess(user, guess, game) {
     ) {
       await rows[i].delete();
       break;
-    } else if (parseFloat(rows[i]._rawData[3]) !== game) {
+    } else if (parseFloat(rows[i]._rawData[3]) !== game && game < 59) {
+      break;
+    } else if (game > 58 && parseFloat(rows[i]._rawData[3]) === 58) {
       break;
     }
   }
-  timestamp = new Date(new Date().getTime());
-  sheet.addRow([timestamp, user, guess, game]);
+  await sheet.addRow([timestamp, user, guess, game]);
+  release();
 }
 
 module.exports = {
   getLeaderboard,
   getGuessLeaderboard,
   getFantasyLeaderboard,
+  getPersonalStats,
   getBestGuess,
   getSchedule,
   getGames,
