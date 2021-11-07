@@ -1,6 +1,10 @@
 const { format } = require("date-fns-tz");
 
 async function execute(message, args, user) {
+  message.reply(
+    "There's no need to give your timezone anymore! As long as your Discord settings are correct, the schedule automatically gives local times."
+  );
+  return;
   let newTimeZone = args[0];
 
   if (!newTimeZone) {
@@ -62,6 +66,6 @@ async function execute(message, args, user) {
 module.exports = {
   name: "timezone",
   aliases: ["tz"],
-  description: "Guess Leaderboard",
+  description: "Timezone",
   execute,
 };

@@ -20,6 +20,7 @@ async function scheduleEmbed(dayNumber, timeZone, footer) {
         "eee, LLL do"
       )}`
     )
+    .setDescription("All times are shown in your local timezone:")
     .addFields(
       ...daySchedule.games.map((game) => {
         const timeMessage = `${
@@ -30,15 +31,16 @@ async function scheduleEmbed(dayNumber, timeZone, footer) {
           addSuffix: true,
         })}`;
 
-        const gameHeader = `Game ${game.number} (${game.type}), ${
-          utcToZonedTime(game.time, timeZone).getMinutes()
-            ? format(utcToZonedTime(game.time, timeZone), "h:mma z", {
-                timeZone,
-              })
-            : format(utcToZonedTime(game.time, timeZone), "ha z", {
-                timeZone,
-              })
-        }`;
+        const gameHeader = `Game ${game.number} (${game.type}), <t:${
+          game.time / 1000
+          //utcToZonedTime(game.time, timeZone).getMinutes()
+          //  ? format(utcToZonedTime(game.time, timeZone), "h:mma z", {
+          //      timeZone,
+          //    })
+          //  : format(utcToZonedTime(game.time, timeZone), "ha z", {
+          //      timeZone,
+          //    })
+        }:t>`;
         if (game.type === "SILENT" || game.type === "BULLET") {
           const gameInfos = games.filter((g) => g.number === game.number);
           const played =
