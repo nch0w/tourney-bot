@@ -24,13 +24,13 @@ async function execute(message, args, user) {
   } else if (!open) {
     message.channel.send(
       errorMessage(
-        "Line guesses can only be made during in-progress games before the Special Election and/or the fourth liberal policy."
+        "Line guesses can only be made during in-progress games before the Special Election."
       )
     );
-  } else if (currentGame === 49 && args.length === 1) {
+  } else if (currentGame === 47 && args.length === 1) {
     message.channel.send(
       errorMessage(
-        "Must include a valid game number, for example, s!guess 123h 59."
+        "Must include a valid game number, for example, s!guess 123h 47."
       )
     );
   } else if (

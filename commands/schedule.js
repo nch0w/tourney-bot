@@ -13,6 +13,7 @@ async function scheduleEmbed(dayNumber, timeZone, footer) {
     (day) => day.number === parseInt(dayNumber)
   );
   const games = await sheet.getGames();
+  console.log(games);
   return new Discord.MessageEmbed()
     .setTitle(
       `Day ${dayNumber}: ${format(
@@ -22,55 +23,60 @@ async function scheduleEmbed(dayNumber, timeZone, footer) {
     )
     .setDescription("All times are shown in your local timezone:")
     .addFields(
-      ...daySchedule.games.map((game) => {
-        const timeMessage = `${
-          game.time > currentDate
-            ? "Not played yet - starts"
-            : "In progress - started"
-        } ${formatDistanceToNow(game.time, {
-          addSuffix: true,
-        })}`;
+      ...daySchedule.games
+        .filter((entry) => entry !== null)
+        .map((game) => {
+          //added this filter to account for possible missing 5th games
+          const timeMessage = `${
+            game.time > currentDate
+              ? "Not played yet - starts"
+              : "In progress - started"
+          } ${formatDistanceToNow(game.time, {
+            addSuffix: true,
+          })}`;
+          console.log(game);
+          const gameHeader = `Game ${game.number} (${game.type}), <t:${
+            game.time / 1000
+            //utcToZonedTime(game.time, timeZone).getMinutes()
+            //  ? format(utcToZonedTime(game.time, timeZone), "h:mma z", {
+            //      timeZone,
+            //    })
+            //  : format(utcToZonedTime(game.time, timeZone), "ha z", {
+            //      timeZone,
+            //    })
+          }:t>`;
+          if (game.type === "SILENT" || game.type === "BULLET") {
+            const gameInfos = games.filter((g) => g.number === game.number);
+            const played =
+              gameInfos[0].played && gameInfos[1].played && gameInfos[2].played;
 
-        const gameHeader = `Game ${game.number} (${game.type}), <t:${
-          game.time / 1000
-          //utcToZonedTime(game.time, timeZone).getMinutes()
-          //  ? format(utcToZonedTime(game.time, timeZone), "h:mma z", {
-          //      timeZone,
-          //    })
-          //  : format(utcToZonedTime(game.time, timeZone), "ha z", {
-          //      timeZone,
-          //    })
-        }:t>`;
-        if (game.type === "SILENT" || game.type === "BULLET") {
-          const gameInfos = games.filter((g) => g.number === game.number);
-          const played =
-            gameInfos[0].played && gameInfos[1].played && gameInfos[2].played;
-
-          return {
-            name: gameHeader,
-            value: played
-              ? gameInfos.map(
-                  (gameInfo) =>
-                    `${gameInfo.subGame}: ${
-                      gameInfo.fasWin ? "Fascist win" : "Liberal win"
-                    }: ${gameInfo.winners.join(", ")} - [Replay](${
-                      gameInfo.link
-                    })`
-                )
-              : timeMessage,
-          };
-        } else {
-          const gameInfo = games.find((g) => g.number === game.number);
-          return {
-            name: gameHeader,
-            value: gameInfo.played
-              ? `${
-                  gameInfo.fasWin ? "Fascist win" : "Liberal win"
-                }: ${gameInfo.winners.join(", ")} - [Replay](${gameInfo.link})`
-              : timeMessage,
-          };
-        }
-      })
+            return {
+              name: gameHeader,
+              value: played
+                ? gameInfos.map(
+                    (gameInfo) =>
+                      `${gameInfo.subGame}: ${
+                        gameInfo.fasWin ? "Fascist win" : "Liberal win"
+                      }: ${gameInfo.winners.join(", ")} - [Replay](${
+                        gameInfo.link
+                      })`
+                  )
+                : timeMessage,
+            };
+          } else {
+            const gameInfo = games.find((g) => g.number === game.number);
+            return {
+              name: gameHeader,
+              value: gameInfo.played
+                ? `${
+                    gameInfo.fasWin ? "Fascist win" : "Liberal win"
+                  }: ${gameInfo.winners.join(", ")} - [Replay](${
+                    gameInfo.link
+                  })`
+                : timeMessage,
+            };
+          }
+        })
     )
     .setFooter(footer);
 }

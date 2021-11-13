@@ -6,7 +6,7 @@ async function execute(message, args, user) {
     open = !open;
     guessDict = {};
     if (args.length === 1 && args[0] === "final") {
-      finalGame = [59,60];
+      finalGame = [47, 48];
     } else if (args.length === 1 && subRegex.test(args[0])) {
       subGameIndicator = args[0].toLowerCase();
     }

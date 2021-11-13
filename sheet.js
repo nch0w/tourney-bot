@@ -22,7 +22,7 @@ async function loadSheet() {
   updateTime = new Date(new Date().getTime());
   await doc.loadInfo();
   await doc.sheetsByIndex[1].loadCells("R3:W16");
-  await doc.sheetsByIndex[2].loadCells("B1:K20");
+  await doc.sheetsByIndex[2].loadCells("B1:O20");
   await doc.sheetsByIndex[3].loadCells("A1:BE100");
   //await doc.sheetsByIndex[4].loadCells("A1:S113");
   //await doc.sheetsByIndex[5].loadCells("B5:G92");
@@ -117,12 +117,14 @@ async function getSchedule() {
   const sheet = doc.sheetsByIndex[2];
   // await sheet.loadCells("A1:S23");
   const dayNameCells = [
-    ..._.range(1, 11, 2).map((num) => [3, num]),
-    ..._.range(1, 11, 2).map((num) => [13, num]),
+    ..._.range(1, 14, 3).map((num) => [3, num]),
+    ..._.range(1, 14, 3).map((num) => [13, num]),
   ];
   const dayNames = dayNameCells.map(
     (name) => sheet.getCell(name[0], name[1]).value
   );
+
+  console.log(dayNames);
 
   const YEAR = await getYear();
   const MONTH = await getMonth();
@@ -135,6 +137,10 @@ async function getSchedule() {
       number: idx + 1,
       date,
       games: _.range(0, 5).map((row) => {
+        if (idx > 7 && row > 3) {
+          //this null return is to account for missing 5th games on some days
+          return null;
+        }
         cellTime =
           sheet.getCell(
             dayNameCells[idx][0] + 2 + row,
@@ -147,7 +153,7 @@ async function getSchedule() {
             dayNameCells[idx][0] + 2 + row,
             dayNameCells[idx][1]
           ).value,
-          number: idx * 5 + row + 1,
+          number: idx < 9 ? idx * 5 + row + 1 : idx * 5 + row, //this switch is to account for missing 5th games on some days
           //parseInt(
           //  sheet
           //    .getCell(dayNameCells[idx][0] + 2 + 2 * row, dayNameCells[idx][1])
@@ -195,8 +201,8 @@ async function getGames() {
       const winner = sheet.getCell(row, 8).value.replace(/\s/g, "");
       const fasWin = winner === "F";
       const hitler = parseInt(sheet.getCell(row, 7).value) - 1;
-      const fascist1 = parseInt(sheet.getCell(row, 6).value) - 1;
-      const fascist2 = parseInt(sheet.getCell(row, 6).value) - 1;
+      const fascist1 = parseInt(sheet.getCell(row, 38).value) - 1;
+      const fascist2 = parseInt(sheet.getCell(row, 39).value) - 1;
       const players = _.range(0, 7).map(
         (i) => `${emojis[i]} ${sheet.getCell(row, 10 + i).value}`
       );
