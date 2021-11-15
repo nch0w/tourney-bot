@@ -25,6 +25,7 @@ if (ENABLE_SENTRY) {
 
 global.timezones;
 global.authorized_data_setters;
+global.team_roles_channels;
 global.open = false;
 global.subGameIndicator = false;
 global.finalGame = false;
@@ -37,9 +38,13 @@ if (ENABLE_DB) {
   authorized_data_setters = new Keyv("mongodb://localhost:27017/tourney-bot", {
     namespace: "authorized_data_setter",
   });
+  team_roles_channels = new Keyv("mongodb://localhost:27017/tourney-bot", {
+    namespace: "team_roles_channels",
+  });
 } else {
   timezones = new Keyv();
   authorized_data_setters = new Keyv();
+  team_roles_channels = new Keyv();
 }
 
 client.commands = new Discord.Collection();
@@ -61,6 +66,7 @@ client.once("ready", () => {
 
 client.on("message", async (message) => {
   if (!message.content.startsWith(PREFIX) || message.author.bot) return;
+  if (message.channel.id === "599756425241296897") return; //event-general-chat id
 
   const args = message.content.slice(PREFIX.length).trim().split(/ +/);
   const commandName = args.shift().toLowerCase();
@@ -92,6 +98,10 @@ client.on("message", async (message) => {
   // initialize auth if not done already
   if (!(await authorized_data_setters.get("auth"))) {
     await authorized_data_setters.set("auth", []);
+  }
+
+  if (!(await team_roles_channels.get("teams"))) {
+    await team_roles_channels.set("teams", []);
   }
 
   const user = {

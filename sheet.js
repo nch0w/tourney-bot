@@ -23,7 +23,7 @@ async function loadSheet() {
   await doc.loadInfo();
   await doc.sheetsByIndex[1].loadCells("R3:W16");
   await doc.sheetsByIndex[2].loadCells("B1:O20");
-  await doc.sheetsByIndex[3].loadCells("A1:BE100");
+  await doc.sheetsByIndex[5].loadCells("A1:BE100");
   //await doc.sheetsByIndex[4].loadCells("A1:S113");
   //await doc.sheetsByIndex[5].loadCells("B5:G92");
   await moddoc.loadInfo();
@@ -124,8 +124,6 @@ async function getSchedule() {
     (name) => sheet.getCell(name[0], name[1]).value
   );
 
-  console.log(dayNames);
-
   const YEAR = await getYear();
   const MONTH = await getMonth();
 
@@ -170,12 +168,12 @@ async function getSchedule() {
 }
 
 async function getGames() {
-  const sheet = doc.sheetsByIndex[3];
+  const sheet = doc.sheetsByIndex[5];
   const emojis = await getTeamEmojis();
   return _.range(1, 100)
     .map((row) => {
       if (sheet.getCell(row, 2).value === null) return null;
-
+      console.log(sheet.getCell(row, 10).value);
       const played =
         sheet.getCell(row, 10).value && sheet.getCell(row, 8).value.length > 0;
 
