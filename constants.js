@@ -11,16 +11,6 @@ if (ENABLE_DB) {
   sheet_data = new Keyv();
 }
 
-let guess_data;
-
-if (ENABLE_DB) {
-  guess_data = new Keyv("mongodb://localhost:27017/tourney-bot", {
-    namespace: "guess_data",
-  });
-} else {
-  guess_data = new Keyv();
-}
-
 async function getYear() {
   const value = await sheet_data.get("YEAR");
 
@@ -58,9 +48,7 @@ async function getSheetURL() {
 async function getFormURL() {
   const value = await sheet_data.get("FORM_URL");
 
-  return value
-    ? value
-    : "https://forms.gle/2EuaR9GgFMTgasau9";
+  return value ? value : "https://forms.gle/2EuaR9GgFMTgasau9";
 }
 
 async function getStartDay() {
@@ -77,7 +65,6 @@ module.exports = {
   getTeamEmojis: getTeamEmojis,
   getStartDay: getStartDay,
   sheet_data: sheet_data,
-  guess_data: guess_data,
   GLOBAL_SHEET_URL:
     "https://docs.google.com/spreadsheets/d/1au5YS0hmneOv8kEA75VOxgcPIUya2EB19hWXl7oII-A/edit?usp=sharing",
 };

@@ -13,7 +13,6 @@ async function scheduleEmbed(dayNumber, timeZone, footer) {
     (day) => day.number === parseInt(dayNumber)
   );
   const games = await sheet.getGames();
-  console.log(games);
   return new Discord.MessageEmbed()
     .setTitle(
       `Day ${dayNumber}: ${format(
@@ -34,7 +33,6 @@ async function scheduleEmbed(dayNumber, timeZone, footer) {
           } ${formatDistanceToNow(game.time, {
             addSuffix: true,
           })}`;
-          console.log(game);
           const gameHeader = `Game ${game.number} (${game.type}), <t:${
             game.time / 1000
             //utcToZonedTime(game.time, timeZone).getMinutes()
