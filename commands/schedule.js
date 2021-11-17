@@ -43,7 +43,7 @@ async function scheduleEmbed(dayNumber, timeZone, footer) {
             //      timeZone,
             //    })
           }:t>`;
-          if (game.type === "SILENT" || game.type === "BULLET") {
+          if (game.type === "Silent" || game.type === "Bullet") {
             const gameInfos = games.filter((g) => g.number === game.number);
             const played =
               gameInfos[0].played && gameInfos[1].played && gameInfos[2].played;

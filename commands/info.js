@@ -33,10 +33,10 @@ async function execute(message, args, user) {
       name: `${PREFIX}personalrecord|pr {guesser: optional}`,
       value: "View a guesser's personal guess record",
     },
-    {
-      name: `${PREFIX}timezone {timezone}`,
-      value: "Set your account's timezone",
-    },
+    //{
+    //  name: `${PREFIX}timezone {timezone}`,
+    //  value: "Set your account's timezone",
+    //},
     {
       name: `${PREFIX}sheet`,
       value: "Send a link to the official tourney Google sheet",

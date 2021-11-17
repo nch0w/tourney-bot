@@ -42,7 +42,7 @@ async function getSheetURL() {
 
   return value
     ? value
-    : "https://docs.google.com/spreadsheets/d/1o-gIsqo-tp4sbrVd4biyUshMUve0SXmEnmTwD9jNP0E/edit#gid=1095222730";
+    : "https://docs.google.com/spreadsheets/d/1AyHok6VlIgaUkcAQd5SUKX0_bqwFNmqZmgxj-mjXawU/";
 }
 
 async function getFormURL() {
@@ -66,5 +66,5 @@ module.exports = {
   getStartDay: getStartDay,
   sheet_data: sheet_data,
   GLOBAL_SHEET_URL:
-    "https://docs.google.com/spreadsheets/d/1au5YS0hmneOv8kEA75VOxgcPIUya2EB19hWXl7oII-A/edit?usp=sharing",
+    "https://docs.google.com/spreadsheets/d/1au5YS0hmneOv8kEA75VOxgcPIUya2EB19hWXl7oII-A/",
 };

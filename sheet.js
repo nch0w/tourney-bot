@@ -24,8 +24,8 @@ async function loadSheet() {
   await doc.sheetsByIndex[1].loadCells("R3:W16");
   await doc.sheetsByIndex[2].loadCells("B1:O20");
   await doc.sheetsByIndex[5].loadCells("A1:BE100");
-  //await doc.sheetsByIndex[4].loadCells("A1:S113");
-  //await doc.sheetsByIndex[5].loadCells("B5:G92");
+  await doc.sheetsByIndex[4].loadCells("A1:U99");
+  await doc.sheetsByIndex[6].loadCells("B5:G92");
   await moddoc.loadInfo();
   await moddoc.sheetsByIndex[0].loadCells("A1:K2000");
   await moddoc.sheetsByIndex[1].loadCells("A1:C200");
@@ -40,12 +40,13 @@ function getUpdateTime() {
 }
 
 async function getLeaderboard() {
-  const sheet = doc.sheetsByIndex[0];
+  const sheet = doc.sheetsByIndex[1];
+  const sheet2 = doc.sheetsByIndex[5];
   // await sheet.loadCells("AA2:AL15");
-  const leaderboard = _.range(2, 16, 2).map((row) => ({
-    name: sheet.getCellByA1(`AA${row}`).value,
-    score: sheet.getCellByA1(`AG${row}`).value,
-    tiebreakScore: sheet.getCellByA1(`AL${row}`).value,
+  const leaderboard = _.range(0, 7).map((row) => ({
+    name: sheet.getCellByA1(`R${3+row*2}`).value,
+    score: sheet2.getCellByA1(`A${80+row}`).value,
+    tiebreakScore: sheet2.getCellByA1(`B${80+row}`).value,
   }));
   return leaderboard;
 }
@@ -61,7 +62,7 @@ async function getGuessLeaderboard() {
 }
 
 async function getFantasyLeaderboard() {
-  const sheet = doc.sheetsByIndex[5];
+  const sheet = doc.sheetsByIndex[6];
   const leaderboard = _.range(5, 93, 1).map((row) => ({
     mod: sheet.getCellByA1(`B${row}`).value,
     team: sheet.getCellByA1(`D${row}`).value,
@@ -170,13 +171,13 @@ async function getSchedule() {
 async function getGames() {
   const sheet = doc.sheetsByIndex[5];
   const emojis = await getTeamEmojis();
-  return _.range(1, 100)
+  return _.range(1, 60)
     .map((row) => {
       if (sheet.getCell(row, 2).value === null) return null;
-      console.log(sheet.getCell(row, 10).value);
-      const played =
-        sheet.getCell(row, 10).value && sheet.getCell(row, 8).value.length > 0;
 
+      const played =
+        sheet.getCell(row, 8).value && sheet.getCell(row, 8).value.length > 0;
+      
       const mode = sheet.getCell(row, 2).value.replace(/\s/g, "");
 
       let number = sheet.getCell(row, 0).value;
@@ -236,7 +237,7 @@ async function getPlayers() {
   const sheet = doc.sheetsByIndex[4];
   const players = [];
   let teamName = "";
-  for (let i = 0; i < 15 * 7; i++) {
+  for (let i = 0; i < 13 * 7; i++) {
     teamName = sheet.getCell(i + 8, 2).value || teamName;
     players.push({
       name: sheet.getCell(i + 8, 3).value,
