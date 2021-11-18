@@ -46,7 +46,7 @@ async function getLeaderboard() {
   const leaderboard = _.range(0, 7).map((row) => ({
     name: sheet.getCellByA1(`R${3+row*2}`).value,
     score: sheet2.getCellByA1(`A${80+row}`).value,
-    tiebreakScore: sheet2.getCellByA1(`B${80+row}`).value,
+    tiebreakScore: sheet2.getCellByA1(`C${80+row}`).value,
   }));
   return leaderboard;
 }
