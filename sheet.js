@@ -25,7 +25,7 @@ async function loadSheet() {
   await doc.sheetsByIndex[2].loadCells("B1:O20");
   await doc.sheetsByIndex[5].loadCells("A1:BE100");
   await doc.sheetsByIndex[4].loadCells("A1:U99");
-  await doc.sheetsByIndex[6].loadCells("B5:G92");
+  await doc.sheetsByIndex[6].loadCells("B5:G67");
   await moddoc.loadInfo();
   await moddoc.sheetsByIndex[0].loadCells("A1:K2000");
   await moddoc.sheetsByIndex[1].loadCells("A1:C200");
@@ -63,7 +63,7 @@ async function getGuessLeaderboard() {
 
 async function getFantasyLeaderboard() {
   const sheet = doc.sheetsByIndex[6];
-  const leaderboard = _.range(5, 93, 1).map((row) => ({
+  const leaderboard = _.range(5, 68, 1).map((row) => ({
     mod: sheet.getCellByA1(`B${row}`).value,
     team: sheet.getCellByA1(`D${row}`).value,
     name: sheet.getCellByA1(`E${row}`).value,
