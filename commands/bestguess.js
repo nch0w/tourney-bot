@@ -7,7 +7,7 @@ const gamenums = new RegExp("^[0-9]{1,2}[ABCabc]?$");
 async function execute(message, args, user) {
   if (args.length !== 1) {
     message.channel.send(
-      errorMessage("Must include a valid game number, such as 1B or 27.")
+      errorMessage("Must include a valid game number, such as 6B or 27.")
     );
   } else {
     try {
