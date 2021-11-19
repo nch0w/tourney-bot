@@ -30,6 +30,7 @@ global.open = false;
 global.subGameIndicator = false;
 global.finalGame = false;
 global.guessDict = false;
+global.coolDown = false;
 
 if (ENABLE_DB) {
   timezones = new Keyv("mongodb://localhost:27017/tourney-bot", {
