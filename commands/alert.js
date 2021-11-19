@@ -5,6 +5,9 @@ const _ = require("lodash");
 
 async function execute(message, args, user) {
   if (user.isAuthorized) {
+    if (coolDown) {
+        return message.reply("you can only do that command every 5 minutes.");
+    }
     var teams = await team_roles_channels.get("teams");
     const games2 = await sheet.getGames();
     const currentGame = games2.find((g) => !g.played);
@@ -15,7 +18,7 @@ async function execute(message, args, user) {
     const currentTime = gametimes
       .filter((entry) => entry !== null)
       .find((g) => g.number === currentGame.number).time;
-    console.log(gametimes);
+
     for (var team of teams) {
       if (currentGame.number > 46) {
         message.guild.channels.cache
@@ -38,6 +41,10 @@ async function execute(message, args, user) {
           );
       }
     }
+    coolDown = true;
+    setTimeout(() => {
+        coolDown = false;
+    }, 300000);
   }
 }
 
