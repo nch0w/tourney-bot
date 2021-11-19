@@ -68,16 +68,9 @@ client.once("ready", () => {
 client.on("message", async (message) => {
   if (!message.content.startsWith(PREFIX) || message.author.bot) return;
   
-  const user = {
-    timeZone,
-    updateTime,
-    isAuthorized:
-      (await authorized_data_setters.get("auth")).indexOf(message.author.id) >=
-        0 || message.author.id === OWNER,
-    isOwner: message.author.id === OWNER,
-  };
-  
-  if (message.channel.id === "599756425241296897" && !user.isAuthorized) return; //event-general-chat id
+  const isAuthorized = (await authorized_data_setters.get("auth")).indexOf(message.author.id) >=0 || message.author.id === OWNER;
+
+  if (message.channel.id === "599756425241296897" && !isAuthorized) return; //event-general-chat id
 
   const args = message.content.slice(PREFIX.length).trim().split(/ +/);
   const commandName = args.shift().toLowerCase();
@@ -105,6 +98,13 @@ client.on("message", async (message) => {
     "h:mm:ss a zzz",
     { timeZone }
   );
+
+  const user = {
+    timeZone,
+    updateTime,
+    isAuthorized,
+    isOwner: message.author.id === OWNER,
+  };
 
   // initialize auth if not done already
   if (!(await authorized_data_setters.get("auth"))) {
