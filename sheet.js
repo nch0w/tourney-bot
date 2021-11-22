@@ -25,7 +25,7 @@ async function loadSheet() {
   await doc.sheetsByIndex[2].loadCells("B1:O20");
   await doc.sheetsByIndex[5].loadCells("A1:BE100");
   await doc.sheetsByIndex[4].loadCells("A1:U99");
-  await doc.sheetsByIndex[6].loadCells("B5:G67");
+  await doc.sheetsByIndex[6].loadCells("B5:H67");
   await moddoc.loadInfo();
   await moddoc.sheetsByIndex[0].loadCells("A1:K2000");
   await moddoc.sheetsByIndex[1].loadCells("A1:C200");
@@ -44,9 +44,9 @@ async function getLeaderboard() {
   const sheet2 = doc.sheetsByIndex[5];
   // await sheet.loadCells("AA2:AL15");
   const leaderboard = _.range(0, 7).map((row) => ({
-    name: sheet.getCellByA1(`R${3+row*2}`).value,
-    score: sheet2.getCellByA1(`A${80+row}`).value,
-    tiebreakScore: sheet2.getCellByA1(`C${80+row}`).value,
+    name: sheet.getCellByA1(`R${3 + row * 2}`).value,
+    score: sheet2.getCellByA1(`A${80 + row}`).value,
+    tiebreakScore: sheet2.getCellByA1(`C${80 + row}`).value,
   }));
   return leaderboard;
 }
@@ -69,6 +69,12 @@ async function getFantasyLeaderboard() {
     name: sheet.getCellByA1(`E${row}`).value,
     score: sheet.getCellByA1(`F${row}`).value,
     gamesWon: sheet.getCellByA1(`G${row}`).value,
+    pointsPerGame:
+      Math.round(
+        (sheet.getCellByA1(`F${row}`).value /
+          sheet.getCellByA1(`H${row}`).value) *
+          100
+      ) / 100,
   }));
   return leaderboard;
 }
@@ -177,7 +183,7 @@ async function getGames() {
 
       const played =
         sheet.getCell(row, 8).value && sheet.getCell(row, 8).value.length > 0;
-      
+
       const mode = sheet.getCell(row, 2).value.replace(/\s/g, "");
 
       let number = sheet.getCell(row, 0).value;

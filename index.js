@@ -67,7 +67,14 @@ client.once("ready", () => {
 
 client.on("message", async (message) => {
   if (!message.content.startsWith(PREFIX) || message.author.bot) return;
-  
+  // initialize auth if not done already
+  if (!(await authorized_data_setters.get("auth"))) {
+    await authorized_data_setters.set("auth", []);
+  }
+
+  if (!(await team_roles_channels.get("teams"))) {
+    await team_roles_channels.set("teams", []);
+  }
   const isAuthorized = (await authorized_data_setters.get("auth")).indexOf(message.author.id) >=0 || message.author.id === OWNER;
 
   if (message.channel.id === "599756425241296897" && !isAuthorized) return; //event-general-chat id
@@ -105,15 +112,6 @@ client.on("message", async (message) => {
     isAuthorized,
     isOwner: message.author.id === OWNER,
   };
-
-  // initialize auth if not done already
-  if (!(await authorized_data_setters.get("auth"))) {
-    await authorized_data_setters.set("auth", []);
-  }
-
-  if (!(await team_roles_channels.get("teams"))) {
-    await team_roles_channels.set("teams", []);
-  }
 
   const command =
     client.commands.get(commandName) ||
