@@ -1,32 +1,50 @@
 const Discord = require("discord.js");
 const sheet = require("../sheet");
 const { errorMessage, rank } = require("../message-helpers");
+const { PREFIX } = require("../env");
 
 async function execute(message, args, user) {
   try {
+    const ppg = args.length > 0 && ["pointspergame", "ppg"].includes(args[0]);
     let playerNumber = 10;
-    if (args.length > 0) {
+    if (args.length > 0 && !ppg) {
       playerNumber = Math.min(parseInt(args[0]), 30);
+    } else if (args.length > 1) {
+      playerNumber = Math.min(parseInt(args[1]), 30);
     }
     const leaderboard = await sheet.getFantasyLeaderboard();
     noModLeaderboard = leaderboard.filter((entry) => entry.mod !== "mod");
-    noModLeaderboard.sort(
-      (a, b) => b.score - a.score || b.gamesWon - a.gamesWon
+    ppg
+      ? noModLeaderboard.sort((a, b) => b.pointsPerGame - a.pointsPerGame || b.score - a.score)
+      : noModLeaderboard.sort((a, b) => b.score - a.score || b.gamesWon - a.gamesWon);
+    const ranks = rank(
+      noModLeaderboard,
+      ppg ? "pointsPerGame" : "score",
+      ppg ? "score" : "gamesWon",
+      playerNumber
     );
-    const ranks = rank(noModLeaderboard, "score", "gamesWon", playerNumber);
+    console.log(ranks);
     const embed = new Discord.MessageEmbed()
-      .setTitle("Fantasy League Leaderboard")
+      .setTitle(
+        ppg
+          ? "Fantasy League Points Per Game Leaderboard"
+          : "Fantasy League Leaderboard"
+      )
       .setDescription(
         noModLeaderboard
-          .filter((entry) => entry.mod !== "mod")
           .slice(0, playerNumber)
           .map(
-            (entry, i) =>
-              `${ranks[i]}. <@${entry.name}>'s ${entry.team}: ${entry.score}`
+            ppg
+              ? (entry, i) => `${ranks[i]}. <@${entry.name}>'s ${entry.team}: ${entry.pointsPerGame}`
+              : (entry, i) => `${ranks[i]}. <@${entry.name}>'s ${entry.team}: ${entry.score}`
           )
           .join("\n")
       )
-      .setFooter(`Updated ${user.updateTime}`);
+      .setFooter(
+        ppg
+          ? `Use ${PREFIX}flb to view the best Fantasy Teams by points.\nUpdated ${user.updateTime}`
+          : `Use ${PREFIX}flb ppg to view the best Fantasy Teams by points per game.\nUpdated ${user.updateTime}`
+      );
     message.channel.send(embed);
   } catch (err) {
     // Sentry.captureException(err);
@@ -42,6 +60,6 @@ async function execute(message, args, user) {
 module.exports = {
   name: "fantasyleaderboard",
   aliases: ["fantasylb", "flb"],
-  description: "Guess Leaderboard",
+  description: "Fantasy Leaderboard",
   execute,
 };
