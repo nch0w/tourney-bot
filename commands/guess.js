@@ -11,7 +11,7 @@ async function execute(message, args, user) {
   const timestamp = new Date(new Date().getTime());
   if (
     message.channel.id !== "697225108376387724" &&
-    message.channel.id !== "838543107653369896" &&
+    message.channel.id !== "914274308359090238" &&
     !isdm
   ) {
     //The ID of tournament-vc-text
