@@ -14,13 +14,13 @@ if (ENABLE_DB) {
 async function getYear() {
   const value = await sheet_data.get("YEAR");
 
-  return value ? value : 2021;
+  return value ? value : 2022;
 }
 
 async function getMonth() {
   const value = await sheet_data.get("MONTH");
 
-  return value ? value : 10;
+  return value ? value : 6;
 }
 
 async function getTeamEmojis() {
@@ -42,7 +42,7 @@ async function getSheetURL() {
 
   return value
     ? value
-    : "https://docs.google.com/spreadsheets/d/1AyHok6VlIgaUkcAQd5SUKX0_bqwFNmqZmgxj-mjXawU/";
+    : "https://docs.google.com/spreadsheets/d/19CVhGa_CmtWTJQMGDzHDjElX9rkJkHKj5Esm3KGCFrg/";
 }
 
 async function getFormURL() {
@@ -54,7 +54,7 @@ async function getFormURL() {
 async function getStartDay() {
   const value = await sheet_data.get("START_DAY");
 
-  return value ? value : 18;
+  return value ? value : 13;
 }
 
 module.exports = {

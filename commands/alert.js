@@ -12,7 +12,7 @@ async function execute(message, args, user) {
     const games2 = await sheet.getGames();
     const currentGame = games2.find((g) => !g.played);
     const schedule = await sheet.getSchedule();
-    const gametimes = _.range(0, 10)
+    const gametimes = _.range(0, 12)
       .map((day) => schedule[day].games)
       .flat();
     const currentTime = gametimes
@@ -20,7 +20,7 @@ async function execute(message, args, user) {
       .find((g) => g.number === currentGame.number).time;
 
     for (var team of teams) {
-      if (currentGame.number > 46) {
+      if (currentGame.number > 58) {
         message.guild.channels.cache
           .get(team[1])
           .send(

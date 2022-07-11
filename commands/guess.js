@@ -27,10 +27,10 @@ async function execute(message, args, user) {
         "Line guesses can only be made during in-progress games before the Special Election."
       )
     );
-  } else if (currentGame === 47 && args.length === 1) {
+  } else if (currentGame === 59 && args.length === 1) {
     message.channel.send(
       errorMessage(
-        "Must include a valid game number, for example, s!guess 123h 47."
+        "Must include a valid game number, for example, s!guess 123h 59."
       )
     );
   } else if (
