@@ -22,7 +22,7 @@ async function loadSheet() {
   updateTime = new Date(new Date().getTime());
   await doc.loadInfo();
   await doc.sheetsByIndex[1].loadCells("R3:W16");
-  await doc.sheetsByIndex[2].loadCells("B1:O20");
+  await doc.sheetsByIndex[2].loadCells("B1:R18");
   await doc.sheetsByIndex[5].loadCells("A1:BE100");
   await doc.sheetsByIndex[4].loadCells("A1:U99");
   await doc.sheetsByIndex[6].loadCells("B5:H67");
@@ -124,8 +124,8 @@ async function getSchedule() {
   const sheet = doc.sheetsByIndex[2];
   // await sheet.loadCells("A1:S23");
   const dayNameCells = [
-    ..._.range(1, 14, 3).map((num) => [3, num]),
-    ..._.range(1, 14, 3).map((num) => [13, num]),
+    ..._.range(1, 17, 3).map((num) => [3, num]),
+    ..._.range(1, 17, 3).map((num) => [12, num]),
   ];
   const dayNames = dayNameCells.map(
     (name) => sheet.getCell(name[0], name[1]).value
@@ -142,23 +142,24 @@ async function getSchedule() {
       number: idx + 1,
       date,
       games: _.range(0, 5).map((row) => {
-        if (idx > 7 && row > 3) {
-          //this null return is to account for missing 5th games on some days
-          return null;
-        }
+        //if (idx > 7 && row > 3) {
+        //  //this null return is to account for missing 5th games on some days
+        //  return null;
+        //}
         cellTime =
           sheet.getCell(
-            dayNameCells[idx][0] + 2 + row,
+            dayNameCells[idx][0] + 1 + row,
             dayNameCells[idx][1] + 1
           ).value || cellTime; // fallback to last read cellTime
         const cellHours = parseInt(cellTime.match(/\d+/)[0]); //yay for no daylight savings
         const am = cellTime.match(/AM/) != null; //got rid of some BS on these lines
         return {
           type: sheet.getCell(
-            dayNameCells[idx][0] + 2 + row,
+            dayNameCells[idx][0] + 1 + row,
             dayNameCells[idx][1]
           ).value,
-          number: idx < 9 ? idx * 5 + row + 1 : idx * 5 + row, //this switch is to account for missing 5th games on some days
+          number: idx * 5 + row + 1,
+          //number: idx < 9 ? idx * 5 + row + 1 : idx * 5 + row, //this switch is to account for missing 5th games on some days
           //parseInt(
           //  sheet
           //    .getCell(dayNameCells[idx][0] + 2 + 2 * row, dayNameCells[idx][1])
@@ -177,7 +178,7 @@ async function getSchedule() {
 async function getGames() {
   const sheet = doc.sheetsByIndex[5];
   const emojis = await getTeamEmojis();
-  return _.range(1, 60)
+  return _.range(1, 72)
     .map((row) => {
       if (sheet.getCell(row, 2).value === null) return null;
 
