@@ -24,8 +24,8 @@ async function loadSheet() {
   await doc.sheetsByIndex[1].loadCells("R3:W16");
   await doc.sheetsByIndex[2].loadCells("B1:R18");
   await doc.sheetsByIndex[5].loadCells("A1:BE100");
-  await doc.sheetsByIndex[4].loadCells("A1:U99");
-  await doc.sheetsByIndex[6].loadCells("B5:H67");
+  await doc.sheetsByIndex[4].loadCells("A1:W113");
+  await doc.sheetsByIndex[6].loadCells("B5:H74");
   await moddoc.loadInfo();
   await moddoc.sheetsByIndex[0].loadCells("A1:K2000");
   await moddoc.sheetsByIndex[1].loadCells("A1:C200");
@@ -244,7 +244,7 @@ async function getPlayers() {
   const sheet = doc.sheetsByIndex[4];
   const players = [];
   let teamName = "";
-  for (let i = 0; i < 13 * 7; i++) {
+  for (let i = 0; i < 15 * 7; i++) {
     teamName = sheet.getCell(i + 8, 2).value || teamName;
     players.push({
       name: sheet.getCell(i + 8, 3).value,
