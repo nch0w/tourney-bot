@@ -4,9 +4,9 @@ async function execute(message, args, user) {
 
     if (isNaN(id) || isNaN(parseFloat(id))) {
       // Assume it's a mention
-      id = id.substr(3, id.length - 4);
+      id = id.substr(2, id.length - 3);
     }
-
+    
     await authorized_data_setters.set(
       "auth",
       (await authorized_data_setters.get("auth")).concat([id])

@@ -10,7 +10,7 @@ async function execute(message, args, user) {
     }
     if (args.length > 0 && (isNaN(args[0]) || isNaN(parseFloat(args[0])))) {
       // Assume it's a mention
-      id = id.substr(3, id.length - 4);
+      id = id.substr(2, id.length - 3);
     }
     const guessRecord = await sheet.getPersonalStats(id);
     const embed = new Discord.MessageEmbed()
