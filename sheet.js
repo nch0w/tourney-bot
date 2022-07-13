@@ -205,7 +205,7 @@ async function getGames() {
       }
 
       const winner = sheet.getCell(row, 8).value.replace(/\s/g, "");
-      const fasWin = winner === "F";
+      const fasWin = winner === "Fascist";
       const hitler = parseInt(sheet.getCell(row, 7).value) - 1;
       const fascist1 = parseInt(sheet.getCell(row, 38).value) - 1;
       const fascist2 = parseInt(sheet.getCell(row, 39).value) - 1;
