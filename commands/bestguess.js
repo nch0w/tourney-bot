@@ -25,19 +25,39 @@ async function execute(message, args, user) {
             );
           } else {
             const lineList = [
-              guessInfo[4].slice(0, 1),
-              guessInfo[4].slice(1, 2),
-              guessInfo[4].slice(2),
+              [guessInfo[4].slice(0, 1), parseFloat(guessInfo[6])],
+              [guessInfo[4].slice(1, 2), parseFloat(guessInfo[7])],
+              [guessInfo[4].slice(2), parseFloat(guessInfo[8])],
             ];
-            lineList.sort((a, b) => a.slice(0, 1) - b.slice(0, 1));
+            lineList.sort((a, b) => a[0].slice(0, 1) - b[0].slice(0, 1));
             const embed = new Discord.MessageEmbed()
               .setTitle(`Best Guess For Game ${args[0].toUpperCase()}`)
               .setDescription(
-                `<@${guessInfo[1]}>\nGuess: ${
-                  guessInfo[2]
-                }\nReal Line: ${lineList.join("")}\nPoints: ${
+                `<@${guessInfo[1]}>\nGuess: ${guessInfo[2]}\nReal Line: ${[
+                  lineList[0][0],
+                  lineList[1][0],
+                  lineList[2][0],
+                ].join("")}\nPoints: ${
                   guessInfo[3]
-                }\nAverage Points: ${parseFloat(guessInfo[5]).toFixed(1)}`
+                }\n\nAverage Points: ${parseFloat(guessInfo[5]).toFixed(
+                  1
+                )}\nGuess Rate by Seat:\n**${lineList[0][0].slice(
+                  0,
+                  1
+                )}:** ${lineList[0][1]}/${guessInfo[9]} (${(
+                  (lineList[0][1] / parseFloat(guessInfo[9])) *
+                  100
+                ).toFixed(1)}%)\n**${lineList[1][0].slice(0, 1)}:** ${
+                  lineList[1][1]
+                }/${guessInfo[9]} (${(
+                  (lineList[1][1] / parseFloat(guessInfo[9])) *
+                  100
+                ).toFixed(1)}%)\n**${lineList[2][0].slice(0, 1)}:** ${
+                  lineList[2][1]
+                }/${guessInfo[9]} (${(
+                  (lineList[2][1] / parseFloat(guessInfo[9])) *
+                  100
+                ).toFixed(1)}%)`
               );
             message.channel.send(embed);
           }
@@ -50,19 +70,39 @@ async function execute(message, args, user) {
             );
           } else {
             const lineList = [
-              guessInfo[4].slice(0, 1),
-              guessInfo[4].slice(1, 2),
-              guessInfo[4].slice(2),
+              [guessInfo[4].slice(0, 1), parseFloat(guessInfo[6])],
+              [guessInfo[4].slice(1, 2), parseFloat(guessInfo[7])],
+              [guessInfo[4].slice(2), parseFloat(guessInfo[8])],
             ];
-            lineList.sort((a, b) => a.slice(0, 1) - b.slice(0, 1));
+            lineList.sort((a, b) => a[0].slice(0, 1) - b[0].slice(0, 1));
             const embed = new Discord.MessageEmbed()
               .setTitle(`Best Guess For Game ${args[0].toUpperCase()}`)
               .setDescription(
-                `<@${guessInfo[1]}>\nGuess: ${
-                  guessInfo[2]
-                }\nReal Line: ${lineList.join("")}\nPoints: ${
+                `<@${guessInfo[1]}>\nGuess: ${guessInfo[2]}\nReal Line: ${[
+                  lineList[0][0],
+                  lineList[1][0],
+                  lineList[2][0],
+                ].join("")}\nPoints: ${
                   guessInfo[3]
-                }\nAverage Points: ${parseFloat(guessInfo[5]).toFixed(1)}`
+                }\n\nAverage Points: ${parseFloat(guessInfo[5]).toFixed(
+                  1
+                )}\nGuess Rate by Seat:\n**${lineList[0][0].slice(
+                  0,
+                  1
+                )}:** ${lineList[0][1]}/${guessInfo[9]} (${(
+                  (lineList[0][1] / parseFloat(guessInfo[9])) *
+                  100
+                ).toFixed(1)}%)\n**${lineList[1][0].slice(0, 1)}:** ${
+                  lineList[1][1]
+                }/${guessInfo[9]} (${(
+                  (lineList[1][1] / parseFloat(guessInfo[9])) *
+                  100
+                ).toFixed(1)}%)\n**${lineList[2][0].slice(0, 1)}:** ${
+                  lineList[2][1]
+                }/${guessInfo[9]} (${(
+                  (lineList[2][1] / parseFloat(guessInfo[9])) *
+                  100
+                ).toFixed(1)}%)`
               );
             message.channel.send(embed);
           }

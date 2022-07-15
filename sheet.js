@@ -27,7 +27,7 @@ async function loadSheet() {
   await doc.sheetsByIndex[4].loadCells("A1:W113");
   await doc.sheetsByIndex[6].loadCells("B5:H77");
   await moddoc.loadInfo();
-  await moddoc.sheetsByIndex[0].loadCells("A1:K2000");
+  await moddoc.sheetsByIndex[0].loadCells("A1:N2000");
   await moddoc.sheetsByIndex[1].loadCells("A1:C200");
   await moddoc.sheetsByIndex[2].loadCells("A1:F75");
 }
@@ -86,7 +86,7 @@ async function getPersonalStats(player) {
       if (
         sheet.getCell(row, 0).value === null ||
         sheet.getCell(row, 1).value !== player ||
-        sheet.getCell(row, 10).value == null
+        sheet.getCell(row, 12).value == null
       )
         return null;
       let game;
@@ -103,7 +103,7 @@ async function getPersonalStats(player) {
       return {
         line: sheet.getCell(row, 2).value,
         game,
-        points: sheet.getCell(row, 10).value,
+        points: sheet.getCell(row, 12).value,
       };
     })
     .filter((guess) => guess);
