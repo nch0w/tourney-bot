@@ -4,6 +4,8 @@ var Mutex = require("async-mutex").Mutex;
 const {
   SHEET_PRIVATE_ID,
   MOD_SHEET_PRIVATE_ID,
+  GLOBAL_SHEET_PRIVATE_ID,
+  NAMES_SHEET_PRIVATE_ID,
   GOOGLE_API_CREDENTIALS,
 } = require("./env");
 const { getYear, getMonth, getTeamEmojis } = require("./constants");
@@ -12,8 +14,12 @@ const { guess_data } = require("./constants");
 // this is the 4th SH Tourney spreadsheet
 const doc = new GoogleSpreadsheet(SHEET_PRIVATE_ID);
 const moddoc = new GoogleSpreadsheet(MOD_SHEET_PRIVATE_ID);
+const globaldoc = new GoogleSpreadsheet(GLOBAL_SHEET_PRIVATE_ID);
+const namesdoc = new GoogleSpreadsheet(NAMES_SHEET_PRIVATE_ID);
 doc.useServiceAccountAuth(GOOGLE_API_CREDENTIALS);
 moddoc.useServiceAccountAuth(GOOGLE_API_CREDENTIALS);
+globaldoc.useServiceAccountAuth(GOOGLE_API_CREDENTIALS);
+namesdoc.useServiceAccountAuth(GOOGLE_API_CREDENTIALS);
 
 let updateTime = new Date(new Date().getTime());
 const lineGuessMutex = new Mutex();
@@ -24,12 +30,16 @@ async function loadSheet() {
   await doc.sheetsByIndex[1].loadCells("R3:W16");
   await doc.sheetsByIndex[2].loadCells("B1:R18");
   await doc.sheetsByIndex[5].loadCells("A1:BE100");
-  await doc.sheetsByIndex[4].loadCells("A1:W113");
+  await doc.sheetsByIndex[4].loadCells("A1:O113");
   await doc.sheetsByIndex[6].loadCells("B5:H77");
   await moddoc.loadInfo();
   await moddoc.sheetsByIndex[0].loadCells("A1:N2000");
   await moddoc.sheetsByIndex[1].loadCells("A1:C200");
   await moddoc.sheetsByIndex[2].loadCells("A1:F75");
+  await namesdoc.loadInfo();
+  await namesdoc.sheetsByIndex[0].loadCells("I1:Q337");
+  await globaldoc.loadInfo();
+  await globaldoc.sheetsByIndex[2].loadCells("A1:AU324");
 }
 
 setTimeout(loadSheet, 0);
@@ -261,6 +271,57 @@ async function getPlayers() {
   return players;
 }
 
+async function getGlobalPlayer(player) {
+  const names = namesdoc.sheetsByIndex[0];
+  const namerows = await names.getRows();
+  const sheet = globaldoc.sheetsByIndex[2];
+  const rows = await sheet.getRows();
+  const currentsheet = doc.sheetsByIndex[4];
+  let canonName = "";
+  let gName = "";
+  let currentName = "";
+  let currentInfo = [];
+  let pastInfo = [];
+  for (let i = 1; i < namerows.length + 1; i++) {
+    for (let j = 8; j < 17; j++) {
+      if (
+        names.getCell(i, j).value !== null &&
+        names.getCell(i, j).value.toLowerCase() === player
+      ) {
+        canonName = names.getCell(i, 10).value;
+        gName = names.getCell(i, 9).value;
+        if (names.getCell(i, 8).value !== null) {
+          currentName = names.getCell(i, 8).value;
+          let teamName = "";
+          for (let k = 0; k < 15 * 7; k++) {
+            teamName = currentsheet.getCell(k + 8, 2).value || teamName;
+            if (currentsheet.getCell(k + 8, 3).value === currentName) {
+              currentInfo.push(
+                teamName,
+                ..._.range(3, 9).map(
+                  (entry) => currentsheet.getCell(k + 8, entry).value
+                )
+              );
+            }
+          }
+        }
+        break;
+      }
+    }
+    if (canonName !== "") {
+      break;
+    }
+  }
+  for (let i = 5; i < rows.length; i++) {
+    if (sheet.getCell(i + 1, 0).value === gName) {
+      pastInfo.push(
+        ..._.range(0, 47).map((entry) => sheet.getCell(i + 1, entry).value)
+      );
+    }
+  }
+  return [canonName, currentInfo, pastInfo];
+}
+
 async function recordGuess(user, guess, game) {
   const sheet = moddoc.sheetsByIndex[0];
   const timestamp = new Date(new Date().getTime());
@@ -307,6 +368,7 @@ module.exports = {
   getSchedule,
   getGames,
   getPlayers,
+  getGlobalPlayer,
   getUpdateTime,
   recordGuess,
   dumpGuesses,
