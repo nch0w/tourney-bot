@@ -18,6 +18,10 @@ async function execute(message, args, user) {
       value: "View the MVP running",
     },
     {
+      name: `${PREFIX}playerstats|ps {player}`,
+      value: "View all-time statistics for a player",
+    },
+    {
       name: `${PREFIX}guessleaderboard|glb {length}`,
       value: "View the line guessers leaderboard",
     },
