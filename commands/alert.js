@@ -18,6 +18,9 @@ async function execute(message, args, user) {
     const currentTime = gametimes
       .filter((entry) => entry !== null)
       .find((g) => g.number === currentGame.number).time;
+    const currentType = gametimes
+      .filter((entry) => entry !== null)
+      .find((g) => g.number === currentGame.number).type;
 
     for (var team of teams) {
       if (currentGame.number > 58) {
@@ -29,6 +32,15 @@ async function execute(message, args, user) {
             }! The final games will happen ${formatDistanceToNow(currentTime, {
               addSuffix: true,
             })}. Are your players ready?`
+          );
+      } else if (currentType === "Duo") {
+        message.guild.channels.cache
+          .get(team[1])
+          .send(
+            `Hello, ${team[0]}! The game will happen ${formatDistanceToNow(
+              currentTime,
+              { addSuffix: true }
+            )}. Are your player and coach ready?`
           );
       } else {
         message.guild.channels.cache
