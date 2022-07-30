@@ -2,7 +2,8 @@ const { getFormURL } = require("../constants");
 
 async function execute(message, args, user) {
   message.channel.send(
-    `Quotes/Gag Awards/Reports Form: <${await getFormURL()}>`
+    `Quotes/Gag Awards/Reports Form not active yet!`
+    //`Quotes/Gag Awards/Reports Form: <${await getFormURL()}>`
   );
 }
 

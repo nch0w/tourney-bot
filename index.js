@@ -23,22 +23,24 @@ if (ENABLE_SENTRY) {
   });
 }
 
-global.timezones;
 global.authorized_data_setters;
+global.team_roles_channels;
 global.open = false;
 global.subGameIndicator = false;
 global.finalGame = false;
+global.guessDict = false;
+global.coolDown = false;
 
 if (ENABLE_DB) {
-  timezones = new Keyv("mongodb://localhost:27017/tourney-bot", {
-    namespace: "timezone",
-  });
   authorized_data_setters = new Keyv("mongodb://localhost:27017/tourney-bot", {
     namespace: "authorized_data_setter",
   });
+  team_roles_channels = new Keyv("mongodb://localhost:27017/tourney-bot", {
+    namespace: "team_roles_channels",
+  });
 } else {
-  timezones = new Keyv();
   authorized_data_setters = new Keyv();
+  team_roles_channels = new Keyv();
 }
 
 client.commands = new Discord.Collection();
@@ -60,45 +62,30 @@ client.once("ready", () => {
 
 client.on("message", async (message) => {
   if (!message.content.startsWith(PREFIX) || message.author.bot) return;
-
-  const args = message.content.slice(PREFIX.length).trim().split(/ +/);
-  const commandName = args.shift().toLowerCase();
-
-  let userTimeZone = await timezones.get(message.author.id);
-
-  // short time zones are not supported
-  if (userTimeZone) {
-    if (
-      userTimeZone.length <= 4 &&
-      !["UTC", "GMT"].includes(userTimeZone.toUpperCase())
-    ) {
-      // fallback to UTC
-      await timezones.set(message.author.id, "UTC");
-      userTimeZone = "UTC";
-      message.reply(
-        `You were using an invalid timezone which has been reset to UTC. Please set it up again using \`${PREFIX}timezone\`.`
-      );
-    }
-  }
-
-  const timeZone = userTimeZone || "UTC";
-  const updateTime = format(
-    utcToZonedTime(sheet.getUpdateTime(), timeZone),
-    "h:mm:ss a zzz",
-    { timeZone }
-  );
-
   // initialize auth if not done already
   if (!(await authorized_data_setters.get("auth"))) {
     await authorized_data_setters.set("auth", []);
   }
 
+  if (!(await team_roles_channels.get("teams"))) {
+    await team_roles_channels.set("teams", []);
+  }
+  const isAuthorized = (await authorized_data_setters.get("auth")).indexOf(message.author.id) >=0 || message.author.id === OWNER;
+
+  if (message.channel.id === "599756425241296897" && !isAuthorized) return; //event-general-chat id
+
+  const args = message.content.slice(PREFIX.length).trim().split(/ +/);
+  const commandName = args.shift().toLowerCase();
+
+  const updateTime = format(
+    utcToZonedTime(sheet.getUpdateTime(), "America/Los_Angeles"),
+    "h:mm:ss a zzz",
+    {timeZone: "America/Los_Angeles"}
+  );
+
   const user = {
-    timeZone,
     updateTime,
-    isAuthorized:
-      (await authorized_data_setters.get("auth")).indexOf(message.author.id) >=
-        0 || message.author.id === OWNER,
+    isAuthorized,
     isOwner: message.author.id === OWNER,
   };
 
@@ -125,7 +112,5 @@ client.on("message", async (message) => {
     );
   }
 });
-
-timezones.on("error", (err) => console.error("Keyv connection error:", err));
 
 client.login(DISCORD_TOKEN);

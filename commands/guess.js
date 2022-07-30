@@ -8,7 +8,12 @@ async function execute(message, args, user) {
   const isdm = message.channel.type === "dm";
   const games2 = await sheet.getGames();
   const currentGame = games2.find((g) => !g.played);
-  if (message.channel.id !== "697225108376387724" && message.channel.id !== "838543107653369896" && !isdm) {
+  const timestamp = new Date(new Date().getTime());
+  if (
+    message.channel.id !== "697225108376387724" &&
+    message.channel.id !== "914274308359090238" &&
+    !isdm
+  ) {
     //The ID of tournament-vc-text
     message.delete();
     message.channel.send(
@@ -19,7 +24,7 @@ async function execute(message, args, user) {
   } else if (!open) {
     message.channel.send(
       errorMessage(
-        "Line guesses can only be made during in-progress games before the Special Election and/or the fourth liberal policy."
+        "Line guesses can only be made during in-progress games before the Special Election."
       )
     );
   } else if (currentGame === 59 && args.length === 1) {
@@ -34,7 +39,13 @@ async function execute(message, args, user) {
     !/([1-7hH]).*?\1/.test(args[0]) &&
     finalGame.includes(parseInt(args[1]))
   ) {
-    sheet.recordGuess(message.author.id, args[0], parseInt(args[1]));
+    guessDict[message.author.id + "_" + args[1]] = [
+      timestamp,
+      message.author.id,
+      args[0],
+      parseInt(args[1]),
+    ];
+    //sheet.recordGuess(message.author.id, args[0], parseInt(args[1]));
     if (!isdm) {
       message.delete();
       message.channel.send(`<@${message.author.id}>'s guess received!`);
@@ -48,18 +59,31 @@ async function execute(message, args, user) {
   ) {
     if (subGameIndicator) {
       const subIndicatorList = ["a", "b", "c"];
-      sheet.recordGuess(
+      guessDict[message.author.id] = [
+        timestamp,
         message.author.id,
         args[0],
         currentGame.number +
-          (1 + subIndicatorList.indexOf(subGameIndicator)) / 10
-      );
+          (1 + subIndicatorList.indexOf(subGameIndicator)) / 10,
+      ];
+      //sheet.recordGuess(
+      //  message.author.id,
+      //  args[0],
+      //  currentGame.number +
+      //    (1 + subIndicatorList.indexOf(subGameIndicator)) / 10
+      //);
     } else {
-      sheet.recordGuess(
+      guessDict[message.author.id] = [
+        timestamp,
         message.author.id,
-        args[0].toLowerCase(),
-        currentGame.number
-      );
+        args[0],
+        currentGame.number,
+      ];
+      //sheet.recordGuess(
+      //  message.author.id,
+      //  args[0].toLowerCase(),
+      //  currentGame.number
+      //);
     }
     if (!isdm) {
       message.delete();

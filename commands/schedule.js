@@ -5,7 +5,7 @@ const { getStartDay } = require("../constants");
 const { format, utcToZonedTime } = require("date-fns-tz");
 const { formatDistanceToNow } = require("date-fns");
 
-async function scheduleEmbed(dayNumber, timeZone, footer) {
+async function scheduleEmbed(dayNumber, footer) {
   const currentDate = new Date();
   const schedule = await sheet.getSchedule();
 
@@ -20,55 +20,54 @@ async function scheduleEmbed(dayNumber, timeZone, footer) {
         "eee, LLL do"
       )}`
     )
+    .setDescription("All times are shown in your local timezone:")
     .addFields(
-      ...daySchedule.games.map((game) => {
-        const timeMessage = `${
-          game.time > currentDate
-            ? "Not played yet - starts"
-            : "In progress - started"
-        } ${formatDistanceToNow(game.time, {
-          addSuffix: true,
-        })}`;
+      ...daySchedule.games
+        .filter((entry) => entry !== null)
+        .map((game) => {
+          //added this filter to account for possible missing 5th games
+          const timeMessage = `${
+            game.time > currentDate
+              ? "Not played yet - starts"
+              : "In progress - started"
+          } ${formatDistanceToNow(game.time, {
+            addSuffix: true,
+          })}`;
+          const gameHeader = `Game ${game.number} (${game.type}), <t:${
+            game.time / 1000
+          }:t>`;
+          if (game.type === "Silent" || game.type === "Bullet") {
+            const gameInfos = games.filter((g) => g.number === game.number);
+            const played =
+              gameInfos[0].played && gameInfos[1].played && gameInfos[2].played;
 
-        const gameHeader = `Game ${game.number} (${game.type}), ${
-          utcToZonedTime(game.time, timeZone).getMinutes()
-            ? format(utcToZonedTime(game.time, timeZone), "h:mma z", {
-                timeZone,
-              })
-            : format(utcToZonedTime(game.time, timeZone), "ha z", {
-                timeZone,
-              })
-        }`;
-        if (game.type === "SILENT" || game.type === "BULLET") {
-          const gameInfos = games.filter((g) => g.number === game.number);
-          const played =
-            gameInfos[0].played && gameInfos[1].played && gameInfos[2].played;
-
-          return {
-            name: gameHeader,
-            value: played
-              ? gameInfos.map(
-                  (gameInfo) =>
-                    `${gameInfo.subGame}: ${
-                      gameInfo.fasWin ? "Fascist win" : "Liberal win"
-                    }: ${gameInfo.winners.join(", ")} - [Replay](${
-                      gameInfo.link
-                    })`
-                )
-              : timeMessage,
-          };
-        } else {
-          const gameInfo = games.find((g) => g.number === game.number);
-          return {
-            name: gameHeader,
-            value: gameInfo.played
-              ? `${
-                  gameInfo.fasWin ? "Fascist win" : "Liberal win"
-                }: ${gameInfo.winners.join(", ")} - [Replay](${gameInfo.link})`
-              : timeMessage,
-          };
-        }
-      })
+            return {
+              name: gameHeader,
+              value: played
+                ? gameInfos.map(
+                    (gameInfo) =>
+                      `${gameInfo.subGame}: ${
+                        gameInfo.fasWin ? "Fascist win" : "Liberal win"
+                      }: ${gameInfo.winners.join(", ")} - [Replay](${
+                        gameInfo.link
+                      })`
+                  )
+                : timeMessage,
+            };
+          } else {
+            const gameInfo = games.find((g) => g.number === game.number);
+            return {
+              name: gameHeader,
+              value: gameInfo.played
+                ? `${
+                    gameInfo.fasWin ? "Fascist win" : "Liberal win"
+                  }: ${gameInfo.winners.join(", ")} - [Replay](${
+                    gameInfo.link
+                  })`
+                : timeMessage,
+            };
+          }
+        })
     )
     .setFooter(footer);
 }
@@ -96,9 +95,6 @@ async function execute(message, args, user) {
     );
     return;
   }
-  // if (args.length > 1) {
-  //   timeZone = args[1].toLowerCase();
-  // }
 
   if (dayNumber < 1 || dayNumber > 12) {
     message.channel.send(
@@ -110,7 +106,7 @@ async function execute(message, args, user) {
   let footer = `Updated ${user.updateTime}`;
 
   try {
-    const embed = await scheduleEmbed(dayNumber, user.timeZone, footer);
+    const embed = await scheduleEmbed(dayNumber, footer);
     const emb = await message.channel.send(embed);
     await emb.react("◀");
     await emb.react("▶");
@@ -125,7 +121,7 @@ async function execute(message, args, user) {
       } else {
         dayNumber = Math.min(dayNumber + 1, 12);
       }
-      const newEmbed = await scheduleEmbed(dayNumber, user.timeZone, footer);
+      const newEmbed = await scheduleEmbed(dayNumber, footer);
       emb.edit(newEmbed);
       const userReactions = emb.reactions.cache.filter((reaction) =>
         reaction.users.cache.has(author.id)

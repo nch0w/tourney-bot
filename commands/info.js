@@ -18,6 +18,10 @@ async function execute(message, args, user) {
       value: "View the MVP running",
     },
     {
+      name: `${PREFIX}playerstats|ps {player}`,
+      value: "View all-time statistics for a player",
+    },
+    {
       name: `${PREFIX}guessleaderboard|glb {length}`,
       value: "View the line guessers leaderboard",
     },
@@ -32,10 +36,6 @@ async function execute(message, args, user) {
     {
       name: `${PREFIX}personalrecord|pr {guesser: optional}`,
       value: "View a guesser's personal guess record",
-    },
-    {
-      name: `${PREFIX}timezone {timezone}`,
-      value: "Set your account's timezone",
     },
     {
       name: `${PREFIX}sheet`,
