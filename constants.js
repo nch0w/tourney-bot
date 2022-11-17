@@ -20,7 +20,7 @@ async function getYear() {
 async function getMonth() {
   const value = await sheet_data.get("MONTH");
 
-  return value ? value : 6;
+  return value ? value : 10;
 }
 
 async function getTeamEmojis() {
@@ -42,7 +42,7 @@ async function getSheetURL() {
 
   return value
     ? value
-    : "https://docs.google.com/spreadsheets/d/19CVhGa_CmtWTJQMGDzHDjElX9rkJkHKj5Esm3KGCFrg/";
+    : "https://docs.google.com/spreadsheets/d/1Yn2JK3QITQA3Av0SpTbNHO7eGjU2YRHjBH6dvh9JxNE/";
 }
 
 async function getFormURL() {
@@ -54,7 +54,7 @@ async function getFormURL() {
 async function getStartDay() {
   const value = await sheet_data.get("START_DAY");
 
-  return value ? value : 13;
+  return value ? value : 17;
 }
 
 module.exports = {

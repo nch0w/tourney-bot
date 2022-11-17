@@ -20,11 +20,11 @@ async function execute(message, args, user) {
           )
         );
       }
-      const tourneyNames = ["T1", "T2", "T3", "T4", "T5", "T6", "T7"];
+      const tourneyNames = ["T1", "T2", "T3", "T4", "T5", "T6", "T7","T8"];
       const wins = playerInfo[2][5] || 0;
       let tourneyIndices = [];
       if (playerInfo[2].length > 0) {
-        for (let i = 0; i < 7; i++) {
+        for (let i = 0; i < 8; i++) { // Has to be number of past tournies
           if (playerInfo[2][12 + i * 5]) {
             tourneyIndices.push(i);
           }
@@ -55,10 +55,10 @@ async function execute(message, args, user) {
                       )}/${playerInfo[2][13 + entry * 5]})`
                   )
                   .join("\n") +
-                `\nT8: ${playerInfo[1][0]} - ${
+                `\nT9: ${playerInfo[1][0]} - ${
                   playerInfo[1][5]
                 } pts (${roundToThirds(playerInfo[1][3])}/${playerInfo[1][2]})`
-              : `**Rookie Tourney**\n\nT8: ${playerInfo[1][0]} - ${
+              : `**Rookie Tourney**\n\nT9: ${playerInfo[1][0]} - ${
                   playerInfo[1][5]
                 } pts (${roundToThirds(playerInfo[1][3])}/${playerInfo[1][2]})`
             : `**Overall Points:** ${
