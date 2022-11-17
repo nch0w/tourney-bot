@@ -8,8 +8,12 @@ const {
   NAMES_SHEET_PRIVATE_ID,
   GOOGLE_API_CREDENTIALS,
 } = require("./env");
-const { getYear, getMonth, getTeamEmojis } = require("./constants");
-const { guess_data } = require("./constants");
+const {
+  getYear,
+  getMonth,
+  getTeamEmojis,
+  getGameNumber,
+} = require("./constants");
 
 // this is the 4th SH Tourney spreadsheet
 const doc = new GoogleSpreadsheet(SHEET_PRIVATE_ID);
@@ -27,19 +31,19 @@ const lineGuessMutex = new Mutex();
 async function loadSheet() {
   updateTime = new Date(new Date().getTime());
   await doc.loadInfo();
-  await doc.sheetsByIndex[1].loadCells("R3:W16");
-  await doc.sheetsByIndex[2].loadCells("B1:R18");
-  await doc.sheetsByIndex[5].loadCells("A1:BE100");
-  await doc.sheetsByIndex[4].loadCells("A1:O113");
-  await doc.sheetsByIndex[6].loadCells("B5:H77");
+  await doc.sheetsByIndex[1].loadCells("Y3:AD16"); //The borders of the Leaderboard on main sheet
+  await doc.sheetsByIndex[2].loadCells("B1:R18"); //The borders of the Schedule on main sheet
+  await doc.sheetsByIndex[5].loadCells("A1:BE100"); //The relevant portion of the Importer, including the leaderboard
+  await doc.sheetsByIndex[4].loadCells("A1:O100"); //The borders of the Personal Scores Block
+  await doc.sheetsByIndex[6].loadCells("B5:H77"); //The lefthand portion of the Fantasy League
   await moddoc.loadInfo();
   await moddoc.sheetsByIndex[0].loadCells("A1:N2000");
   await moddoc.sheetsByIndex[1].loadCells("A1:C200");
   await moddoc.sheetsByIndex[2].loadCells("A1:F75");
   await namesdoc.loadInfo();
-  await namesdoc.sheetsByIndex[0].loadCells("I1:Q337");
+  await namesdoc.sheetsByIndex[0].loadCells("J1:R348");
   await globaldoc.loadInfo();
-  await globaldoc.sheetsByIndex[2].loadCells("A1:AU324");
+  await globaldoc.sheetsByIndex[2].loadCells("A1:AZ341");
 }
 
 setTimeout(loadSheet, 0);
@@ -54,9 +58,9 @@ async function getLeaderboard() {
   const sheet2 = doc.sheetsByIndex[5];
   // await sheet.loadCells("AA2:AL15");
   const leaderboard = _.range(0, 7).map((row) => ({
-    name: sheet.getCellByA1(`R${3 + row * 2}`).value,
-    score: sheet2.getCellByA1(`A${80 + row}`).value,
-    tiebreakScore: sheet2.getCellByA1(`C${80 + row}`).value,
+    name: sheet.getCellByA1(`Y${3 + row * 2}`).value, //Column has to be leftmost column of leaderboard
+    score: sheet2.getCellByA1(`A${66 + row}`).value, //Number has to be the position of the top score in the Reformat block
+    tiebreakScore: sheet2.getCellByA1(`C${66 + row}`).value, //Same here
   }));
   return leaderboard;
 }
@@ -134,7 +138,7 @@ async function getSchedule() {
   const sheet = doc.sheetsByIndex[2];
   // await sheet.loadCells("A1:S23");
   const dayNameCells = [
-    ..._.range(1, 17, 3).map((num) => [3, num]),
+    ..._.range(4, 17, 3).map((num) => [3, num]),
     ..._.range(1, 17, 3).map((num) => [12, num]),
   ];
   const dayNames = dayNameCells.map(
@@ -143,6 +147,7 @@ async function getSchedule() {
 
   const YEAR = await getYear();
   const MONTH = await getMonth();
+  const offset = [0, -2, -3, -3, -3, -4, -5, -6, -7, -7, -7];
 
   const schedule = dayNames.map((name, idx) => {
     const day = parseInt(name.match(/\d+/)[0]);
@@ -152,10 +157,13 @@ async function getSchedule() {
       number: idx + 1,
       date,
       games: _.range(0, 5).map((row) => {
-        //if (idx > 7 && row > 3) {
-        //  //this null return is to account for missing 5th games on some days
-        //  return null;
-        //}
+        if (
+          (idx === 0 && row > 2) ||
+          ([1, 4, 5, 6, 7].includes(idx) && row > 3)
+        ) {
+          //this null return is to account for missing 5th games on some days
+          return null;
+        }
         cellTime =
           sheet.getCell(
             dayNameCells[idx][0] + 1 + row,
@@ -168,7 +176,7 @@ async function getSchedule() {
             dayNameCells[idx][0] + 1 + row,
             dayNameCells[idx][1]
           ).value,
-          number: idx * 5 + row + 1,
+          number: idx * 5 + row + 1 + offset[idx],
           //number: idx < 9 ? idx * 5 + row + 1 : idx * 5 + row, //this switch is to account for missing 5th games on some days
           //parseInt(
           //  sheet
@@ -188,7 +196,7 @@ async function getSchedule() {
 async function getGames() {
   const sheet = doc.sheetsByIndex[5];
   const emojis = await getTeamEmojis();
-  return _.range(1, 72)
+  return _.range(1, 58) //Has to be one more than the number of rows in Inporter
     .map((row) => {
       if (sheet.getCell(row, 2).value === null) return null;
 
@@ -254,7 +262,7 @@ async function getPlayers() {
   const sheet = doc.sheetsByIndex[4];
   const players = [];
   let teamName = "";
-  for (let i = 0; i < 15 * 7; i++) {
+  for (let i = 0; i < 13 * 7; i++) {
     teamName = sheet.getCell(i + 8, 2).value || teamName;
     players.push({
       name: sheet.getCell(i + 8, 3).value,
@@ -283,17 +291,19 @@ async function getGlobalPlayer(player) {
   let currentInfo = [];
   let pastInfo = [];
   for (let i = 1; i < namerows.length + 1; i++) {
-    for (let j = 8; j < 17; j++) {
+    for (let j = 9; j < 18; j++) {
+      // The first number is the index of the current tourney column, the second is the one plus the index of Tourney Name 5
       if (
         names.getCell(i, j).value !== null &&
         names.getCell(i, j).value.toLowerCase() === player
       ) {
-        canonName = names.getCell(i, 10).value;
-        gName = names.getCell(i, 9).value;
-        if (names.getCell(i, 8).value !== null) {
-          currentName = names.getCell(i, 8).value;
+        canonName = names.getCell(i, 11).value;
+        gName = names.getCell(i, 10).value;
+        if (names.getCell(i, 9).value !== null) {
+          currentName = names.getCell(i, 9).value;
           let teamName = "";
-          for (let k = 0; k < 15 * 7; k++) {
+          for (let k = 0; k < 13 * 7; k++) {
+            // It has to be the number of players in each team times seven
             teamName = currentsheet.getCell(k + 8, 2).value || teamName;
             if (currentsheet.getCell(k + 8, 3).value === currentName) {
               currentInfo.push(
@@ -315,7 +325,7 @@ async function getGlobalPlayer(player) {
   for (let i = 5; i < rows.length; i++) {
     if (sheet.getCell(i + 1, 0).value === gName) {
       pastInfo.push(
-        ..._.range(0, 47).map((entry) => sheet.getCell(i + 1, entry).value)
+        ..._.range(0, 52).map((entry) => sheet.getCell(i + 1, entry).value) // Has to be the number of columns in the Global Sheet
       );
     }
   }
@@ -327,6 +337,7 @@ async function recordGuess(user, guess, game) {
   const timestamp = new Date(new Date().getTime());
   const release = await lineGuessMutex.acquire();
   const rows = await sheet.getRows();
+  const gameNumber = await getGameNumber();
   for (let i = rows.length - 1; i >= 0; i--) {
     if (
       rows[i]._rawData[1] === user &&
@@ -334,9 +345,15 @@ async function recordGuess(user, guess, game) {
     ) {
       await rows[i].delete();
       break;
-    } else if (parseFloat(rows[i]._rawData[3]) !== game && game < 59) {
+    } else if (
+      parseFloat(rows[i]._rawData[3]) !== game &&
+      game < gameNumber - 1
+    ) {
       break;
-    } else if (game > 58 && parseFloat(rows[i]._rawData[3]) === 58) {
+    } else if (
+      game > gameNumber - 2 &&
+      parseFloat(rows[i]._rawData[3]) === gameNumber - 2
+    ) {
       break;
     }
   }
