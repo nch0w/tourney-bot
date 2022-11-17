@@ -1,5 +1,5 @@
 const subRegex = new RegExp("[abcABC]{1}");
-const getGameNumber = require("../constants");
+const { getGameNumber } = require("../constants");
 
 async function execute(message, args, user) {
   const gameNumber = await getGameNumber();

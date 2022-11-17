@@ -1,5 +1,5 @@
 const sheet = require("../sheet");
-const getGameNumber = require("../constants");
+const { getGameNumber } = require("../constants");
 
 async function execute(message, args, user) {
   const gameNumber = await getGameNumber();

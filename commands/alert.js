@@ -2,7 +2,7 @@ const Discord = require("discord.js");
 const sheet = require("../sheet");
 const { formatDistanceToNow } = require("date-fns");
 const _ = require("lodash");
-const getGameNumber = require("../constants");
+const { getGameNumber } = require("../constants");
 
 async function execute(message, args, user) {
   if (user.isAuthorized) {
