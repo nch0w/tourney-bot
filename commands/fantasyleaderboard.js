@@ -16,14 +16,13 @@ async function execute(message, args, user) {
     noModLeaderboard = leaderboard.filter((entry) => entry.mod !== "mod");
     ppg
       ? noModLeaderboard.sort((a, b) => b.pointsPerGame - a.pointsPerGame || b.score - a.score)
-      : noModLeaderboard.sort((a, b) => b.score - a.score || b.gamesWon - a.gamesWon);
+      : noModLeaderboard.sort((a, b) => b.score - a.score || b.pointsPerGame - a.pointsPerGame);
     const ranks = rank(
       noModLeaderboard,
       ppg ? "pointsPerGame" : "score",
-      ppg ? "score" : "gamesWon",
+      ppg ? "score" : "pointsPerGame",
       playerNumber
     );
-    console.log(ranks);
     const embed = new Discord.MessageEmbed()
       .setTitle(
         ppg
