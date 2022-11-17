@@ -8,8 +8,12 @@ const {
   NAMES_SHEET_PRIVATE_ID,
   GOOGLE_API_CREDENTIALS,
 } = require("./env");
-const { getYear, getMonth, getTeamEmojis } = require("./constants");
-const { guess_data } = require("./constants");
+const {
+  getYear,
+  getMonth,
+  getTeamEmojis,
+  getGameNumber,
+} = require("./constants");
 
 // this is the 4th SH Tourney spreadsheet
 const doc = new GoogleSpreadsheet(SHEET_PRIVATE_ID);
@@ -143,7 +147,7 @@ async function getSchedule() {
 
   const YEAR = await getYear();
   const MONTH = await getMonth();
-  const offset = [0,-2,-3,-3,-3,-4,-5,-6,-7,-7,-7]
+  const offset = [0, -2, -3, -3, -3, -4, -5, -6, -7, -7, -7];
 
   const schedule = dayNames.map((name, idx) => {
     const day = parseInt(name.match(/\d+/)[0]);
@@ -153,8 +157,11 @@ async function getSchedule() {
       number: idx + 1,
       date,
       games: _.range(0, 5).map((row) => {
-        if (idx === 0 && row > 2 || [1,4,5,6,7].includes(idx) && row > 3 ) {
-        //this null return is to account for missing 5th games on some days
+        if (
+          (idx === 0 && row > 2) ||
+          ([1, 4, 5, 6, 7].includes(idx) && row > 3)
+        ) {
+          //this null return is to account for missing 5th games on some days
           return null;
         }
         cellTime =
@@ -284,7 +291,8 @@ async function getGlobalPlayer(player) {
   let currentInfo = [];
   let pastInfo = [];
   for (let i = 1; i < namerows.length + 1; i++) {
-    for (let j = 9; j < 18; j++) { // The first number is the index of the current tourney column, the second is the one plus the index of Tourney Name 5 
+    for (let j = 9; j < 18; j++) {
+      // The first number is the index of the current tourney column, the second is the one plus the index of Tourney Name 5
       if (
         names.getCell(i, j).value !== null &&
         names.getCell(i, j).value.toLowerCase() === player
@@ -294,7 +302,8 @@ async function getGlobalPlayer(player) {
         if (names.getCell(i, 9).value !== null) {
           currentName = names.getCell(i, 9).value;
           let teamName = "";
-          for (let k = 0; k < 13 * 7; k++) { // It has to be the number of players in each team times seven
+          for (let k = 0; k < 13 * 7; k++) {
+            // It has to be the number of players in each team times seven
             teamName = currentsheet.getCell(k + 8, 2).value || teamName;
             if (currentsheet.getCell(k + 8, 3).value === currentName) {
               currentInfo.push(
@@ -328,6 +337,7 @@ async function recordGuess(user, guess, game) {
   const timestamp = new Date(new Date().getTime());
   const release = await lineGuessMutex.acquire();
   const rows = await sheet.getRows();
+  const gameNumber = await getGameNumber();
   for (let i = rows.length - 1; i >= 0; i--) {
     if (
       rows[i]._rawData[1] === user &&
@@ -335,9 +345,15 @@ async function recordGuess(user, guess, game) {
     ) {
       await rows[i].delete();
       break;
-    } else if (parseFloat(rows[i]._rawData[3]) !== game && game < 59) {
+    } else if (
+      parseFloat(rows[i]._rawData[3]) !== game &&
+      game < gameNumber - 1
+    ) {
       break;
-    } else if (game > 58 && parseFloat(rows[i]._rawData[3]) === 58) {
+    } else if (
+      game > gameNumber - 2 &&
+      parseFloat(rows[i]._rawData[3]) === gameNumber - 2
+    ) {
       break;
     }
   }

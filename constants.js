@@ -57,6 +57,18 @@ async function getStartDay() {
   return value ? value : 17;
 }
 
+async function getGameNumber() {
+  const value = await sheet_data.get("GAME_NUMBER");
+
+  return value ? value : 48;
+}
+
+async function getTournamentVCTextTwo() {
+  const value = await sheet_data.get("VC_TEXT_2_ID");
+
+  return value ? value : "914274308359090238";
+}
+
 module.exports = {
   getSheetURL: getSheetURL,
   getFormURL: getFormURL,
@@ -64,6 +76,8 @@ module.exports = {
   getYear: getYear,
   getTeamEmojis: getTeamEmojis,
   getStartDay: getStartDay,
+  getGameNumber: getGameNumber,
+  getTournamentVCTextTwo: getTournamentVCTextTwo,
   sheet_data: sheet_data,
   GLOBAL_SHEET_URL:
     "https://docs.google.com/spreadsheets/d/1au5YS0hmneOv8kEA75VOxgcPIUya2EB19hWXl7oII-A/",

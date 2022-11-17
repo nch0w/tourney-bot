@@ -2,13 +2,15 @@ const Discord = require("discord.js");
 const sheet = require("../sheet");
 const { formatDistanceToNow } = require("date-fns");
 const _ = require("lodash");
+const getGameNumber = require("../constants");
 
 async function execute(message, args, user) {
   if (user.isAuthorized) {
     if (coolDown) {
-        return message.reply("you can only do that command every 5 minutes.");
+      return message.reply("you can only do that command every 5 minutes.");
     }
     var teams = await team_roles_channels.get("teams");
+    const gameNumber = await getGameNumber();
     const games2 = await sheet.getGames();
     const currentGame = games2.find((g) => !g.played);
     const schedule = await sheet.getSchedule();
@@ -23,16 +25,15 @@ async function execute(message, args, user) {
       .find((g) => g.number === currentGame.number).type;
 
     for (var team of teams) {
-      if (currentGame.number > 58) {
-        message.guild.channels.cache
-          .get(team[1])
-          .send(
-            `Hello, ${
-              team[0]
-            }! The final games will happen ${formatDistanceToNow(currentTime, {
+      if (currentGame.number > gameNumber - 2) {
+        message.guild.channels.cache.get(team[1]).send(
+          `Hello, ${team[0]}! The final games will happen ${formatDistanceToNow(
+            currentTime,
+            {
               addSuffix: true,
-            })}. Are your players ready?`
-          );
+            }
+          )}. Are your players ready?`
+        );
       } else if (currentType === "Duo") {
         message.guild.channels.cache
           .get(team[1])
@@ -55,7 +56,7 @@ async function execute(message, args, user) {
     }
     coolDown = true;
     setTimeout(() => {
-        coolDown = false;
+      coolDown = false;
     }, 300000);
   }
 }

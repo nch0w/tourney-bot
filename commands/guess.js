@@ -1,6 +1,7 @@
 const Discord = require("discord.js");
 const sheet = require("../sheet");
 const { errorMessage, rank } = require("../message-helpers");
+const { getTournamentVCTextTwo, getGameNumber } = require("../constants");
 
 const regex = new RegExp("^[1-7hH]{3,4}$");
 
@@ -9,9 +10,11 @@ async function execute(message, args, user) {
   const games2 = await sheet.getGames();
   const currentGame = games2.find((g) => !g.played);
   const timestamp = new Date(new Date().getTime());
+  const vcTextTwo = await getTournamentVCTextTwo();
+  const gameNumber = await getGameNumber();
   if (
     message.channel.id !== "697225108376387724" &&
-    message.channel.id !== "914274308359090238" &&
+    message.channel.id !== vcTextTwo.toString() &&
     !isdm
   ) {
     //The ID of tournament-vc-text
@@ -27,7 +30,7 @@ async function execute(message, args, user) {
         "Line guesses can only be made during in-progress games before the Special Election."
       )
     );
-  } else if (currentGame === 59 && args.length === 1) {
+  } else if (currentGame === gameNumber - 1 && args.length === 1) {
     message.channel.send(
       errorMessage(
         "Must include a valid game number, for example, s!guess 123h 59."

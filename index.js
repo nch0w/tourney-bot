@@ -70,7 +70,9 @@ client.on("message", async (message) => {
   if (!(await team_roles_channels.get("teams"))) {
     await team_roles_channels.set("teams", []);
   }
-  const isAuthorized = (await authorized_data_setters.get("auth")).indexOf(message.author.id) >=0 || message.author.id === OWNER;
+  const isAuthorized =
+    (await authorized_data_setters.get("auth")).indexOf(message.author.id) >=
+      0 || message.author.id === OWNER;
 
   if (message.channel.id === "599756425241296897" && !isAuthorized) return; //event-general-chat id
 
@@ -80,7 +82,7 @@ client.on("message", async (message) => {
   const updateTime = format(
     utcToZonedTime(sheet.getUpdateTime(), "America/Los_Angeles"),
     "h:mm:ss a zzz",
-    {timeZone: "America/Los_Angeles"}
+    { timeZone: "America/Los_Angeles" }
   );
 
   const user = {
