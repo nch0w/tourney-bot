@@ -29,6 +29,13 @@ async function execute(message, args, user) {
               [guessInfo[4].slice(1, 2), parseFloat(guessInfo[7])],
               [guessInfo[4].slice(2), parseFloat(guessInfo[8])],
             ];
+            let libList = [
+              guessInfo[11],
+              guessInfo[12],
+              guessInfo[13],
+              guessInfo[14],
+            ];
+            libList = libList.filter((seat) => seat.length > 0);
             lineList.sort((a, b) => a[0].slice(0, 1) - b[0].slice(0, 1));
             const embed = new Discord.MessageEmbed()
               .setTitle(`Best Guess For Game ${args[0].toUpperCase()}`)
@@ -41,10 +48,9 @@ async function execute(message, args, user) {
                   guessInfo[3]
                 }\n\nAverage Points: ${parseFloat(guessInfo[5]).toFixed(
                   1
-                )}\nGuess Rate by Seat:\n**${lineList[0][0].slice(
-                  0,
-                  1
-                )}:** ${lineList[0][1]}/${guessInfo[9]} (${(
+                )}\nGuess Rate by Seat:\n**${lineList[0][0].slice(0, 1)}:** ${
+                  lineList[0][1]
+                }/${guessInfo[9]} (${(
                   (lineList[0][1] / parseFloat(guessInfo[9])) *
                   100
                 ).toFixed(1)}%)\n**${lineList[1][0].slice(0, 1)}:** ${
@@ -56,6 +62,11 @@ async function execute(message, args, user) {
                   lineList[2][1]
                 }/${guessInfo[9]} (${(
                   (lineList[2][1] / parseFloat(guessInfo[9])) *
+                  100
+                ).toFixed(1)}%)\n\nMost Guessed Liberal(s):\n**${libList.join(
+                  ", "
+                )}:** ${guessInfo[10]}/${guessInfo[9]} (${(
+                  (parseFloat(guessInfo[10]) / parseFloat(guessInfo[9])) *
                   100
                 ).toFixed(1)}%)`
               );
@@ -74,6 +85,13 @@ async function execute(message, args, user) {
               [guessInfo[4].slice(1, 2), parseFloat(guessInfo[7])],
               [guessInfo[4].slice(2), parseFloat(guessInfo[8])],
             ];
+            let libList = [
+              guessInfo[11],
+              guessInfo[12],
+              guessInfo[13],
+              guessInfo[14],
+            ];
+            libList = libList.filter((seat) => seat.length > 0);
             lineList.sort((a, b) => a[0].slice(0, 1) - b[0].slice(0, 1));
             const embed = new Discord.MessageEmbed()
               .setTitle(`Best Guess For Game ${args[0].toUpperCase()}`)
@@ -86,10 +104,9 @@ async function execute(message, args, user) {
                   guessInfo[3]
                 }\n\nAverage Points: ${parseFloat(guessInfo[5]).toFixed(
                   1
-                )}\nGuess Rate by Seat:\n**${lineList[0][0].slice(
-                  0,
-                  1
-                )}:** ${lineList[0][1]}/${guessInfo[9]} (${(
+                )}\nGuess Rate by Seat:\n**${lineList[0][0].slice(0, 1)}:** ${
+                  lineList[0][1]
+                }/${guessInfo[9]} (${(
                   (lineList[0][1] / parseFloat(guessInfo[9])) *
                   100
                 ).toFixed(1)}%)\n**${lineList[1][0].slice(0, 1)}:** ${
@@ -101,6 +118,11 @@ async function execute(message, args, user) {
                   lineList[2][1]
                 }/${guessInfo[9]} (${(
                   (lineList[2][1] / parseFloat(guessInfo[9])) *
+                  100
+                ).toFixed(1)}%)\n\nMost Guessed Liberal(s):\n**${libList.join(
+                  ", "
+                )}:** ${guessInfo[10]}/${guessInfo[9]} (${(
+                  (parseFloat(guessInfo[10]) / parseFloat(guessInfo[9])) *
                   100
                 ).toFixed(1)}%)`
               );
