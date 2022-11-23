@@ -39,7 +39,7 @@ async function loadSheet() {
   await moddoc.loadInfo();
   await moddoc.sheetsByIndex[0].loadCells("A1:N2000");
   await moddoc.sheetsByIndex[1].loadCells("A1:C200");
-  await moddoc.sheetsByIndex[2].loadCells("A1:F75");
+  await moddoc.sheetsByIndex[2].loadCells("A1:O75");
   await namesdoc.loadInfo();
   await namesdoc.sheetsByIndex[0].loadCells("J1:R348");
   await globaldoc.loadInfo();
