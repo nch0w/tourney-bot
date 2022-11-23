@@ -8,6 +8,19 @@ async function execute(message, args, user) {
       errorMessage("Must include a valid player name, like Dev or Gamethrower")
     );
   } else {
+    if (
+      ["secretaccount", "secret", "imverybad"].includes(
+        args.join("").toLowerCase()
+      )
+    ) {
+      const embed = new Discord.MessageEmbed()
+        .setTitle("Dating Statistics for Secret Account")
+        .setDescription(
+          "**Overall Dates:** 0\n**Overall Record:** 0/17548 (0%)\n**Total Hoes:** 0"
+        )
+        .setFooter(`Updated ${user.updateTime}`);
+      return message.channel.send(embed);
+    }
     try {
       const playerInfo = await sheet.getGlobalPlayer(
         args.join(" ").toLowerCase()
