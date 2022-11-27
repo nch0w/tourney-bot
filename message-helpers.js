@@ -10,6 +10,7 @@ const rank = (competitorList, column, secondary = false, limit = 10) => {
   const ranks = [];
   let lastRank = 1;
   let lastScore = -1;
+  let lastSecondary = -1;
   let reachedLimit = false;
   competitorList.forEach((p, i) => {
     if (reachedLimit) {
