@@ -13,10 +13,14 @@ async function execute(message, args, user) {
       playerNumber = Math.min(parseInt(args[1]), 30);
     }
     const leaderboard = await sheet.getFantasyLeaderboard();
-    noModLeaderboard = leaderboard.filter((entry) => entry.mod !== "mod");
+    let noModLeaderboard = leaderboard.filter((entry) => entry.mod !== "mod");
     ppg
-      ? noModLeaderboard.sort((a, b) => b.pointsPerGame - a.pointsPerGame || b.score - a.score)
-      : noModLeaderboard.sort((a, b) => b.score - a.score || b.pointsPerGame - a.pointsPerGame);
+      ? noModLeaderboard.sort(
+          (a, b) => b.pointsPerGame - a.pointsPerGame || b.score - a.score
+        )
+      : noModLeaderboard.sort(
+          (a, b) => b.score - a.score || b.pointsPerGame - a.pointsPerGame
+        );
     const ranks = rank(
       noModLeaderboard,
       ppg ? "pointsPerGame" : "score",
@@ -34,8 +38,10 @@ async function execute(message, args, user) {
           .slice(0, playerNumber)
           .map(
             ppg
-              ? (entry, i) => `${ranks[i]}. <@${entry.name}>'s ${entry.team}: ${entry.pointsPerGame}`
-              : (entry, i) => `${ranks[i]}. <@${entry.name}>'s ${entry.team}: ${entry.score}`
+              ? (entry, i) =>
+                  `${ranks[i]}. <@${entry.name}>'s ${entry.team}: ${entry.pointsPerGame}`
+              : (entry, i) =>
+                  `${ranks[i]}. <@${entry.name}>'s ${entry.team}: ${entry.score}`
           )
           .join("\n")
       )

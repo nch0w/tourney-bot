@@ -5,12 +5,11 @@ const { errorMessage, rank } = require("../message-helpers");
 
 async function execute(message, args, user) {
   if (user.isAuthorized) {
-    
     //if (args[0] == null) {
     //  return message.channel.send(errorMessage("No link given."));
     //}
     //const link = args[0];
-    
+
     var channels = await team_roles_channels.get("teams");
     channels = channels.map((team) => team[1]);
     channels = channels.concat(["599756425241296897", "697225108376387724"]); //channel ids for event-general-chat and tournament-vc-text

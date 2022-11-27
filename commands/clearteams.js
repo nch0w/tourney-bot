@@ -4,9 +4,7 @@ async function execute(message, args, user) {
   if (user.isAuthorized) {
     await team_roles_channels.set(
       "teams",
-      (
-        await team_roles_channels.clear("teams")
-      )
+      await team_roles_channels.clear("teams")
     );
     message.channel.send(
       "All team roles and channels have now been cleared from the list."

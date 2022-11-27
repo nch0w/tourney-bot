@@ -6,7 +6,7 @@ async function execute(message, args, user) {
       // Assume it's a mention
       id = id.substr(2, id.length - 3);
     }
-    
+
     await authorized_data_setters.set(
       "auth",
       (await authorized_data_setters.get("auth")).concat([id])
