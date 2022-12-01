@@ -36,37 +36,15 @@ async function scheduleEmbed(dayNumber, footer) {
           const gameHeader = `Game ${game.number} (${game.type}), <t:${
             game.time / 1000
           }:t>`;
-          if (game.type === "Silent" || game.type === "Bullet") {
-            const gameInfos = games.filter((g) => g.number === game.number);
-            const played =
-              gameInfos[0].played && gameInfos[1].played && gameInfos[2].played;
-
-            return {
-              name: gameHeader,
-              value: played
-                ? gameInfos.map(
-                    (gameInfo) =>
-                      `${gameInfo.subGame}: ${
-                        gameInfo.fasWin ? "Fascist win" : "Liberal win"
-                      }: ${gameInfo.winners.join(", ")} - [Replay](${
-                        gameInfo.link
-                      })`
-                  )
-                : timeMessage,
-            };
-          } else {
-            const gameInfo = games.find((g) => g.number === game.number);
-            return {
-              name: gameHeader,
-              value: gameInfo.played
-                ? `${
-                    gameInfo.fasWin ? "Fascist win" : "Liberal win"
-                  }: ${gameInfo.winners.join(", ")} - [Replay](${
-                    gameInfo.link
-                  })`
-                : timeMessage,
-            };
-          }
+          const gameInfo = games.find((g) => g.number === game.number);
+          return {
+            name: gameHeader,
+            value: gameInfo.played
+              ? `${
+                  gameInfo.spyWin ? "Spy win" : "Resistance win"
+                }: ${gameInfo.winners.join(", ")}`
+              : timeMessage,
+          };
         })
     )
     .setFooter(footer);
@@ -75,7 +53,7 @@ async function scheduleEmbed(dayNumber, footer) {
 async function execute(message, args, user) {
   const currentDate = new Date();
   let dayNumber = Math.min(
-    11,
+    10,
     Math.max(
       1,
       currentDate.getUTCHours() < 9 // day changes at 9AM UTC
@@ -96,7 +74,7 @@ async function execute(message, args, user) {
     return;
   }
 
-  if (dayNumber < 1 || dayNumber > 11) {
+  if (dayNumber < 1 || dayNumber > 10) {
     message.channel.send(
       errorMessage(`Could not find a schedule for day ${dayNumber}.`)
     );
@@ -119,7 +97,7 @@ async function execute(message, args, user) {
       if (reaction.emoji.name === "◀") {
         dayNumber = Math.max(dayNumber - 1, 1);
       } else {
-        dayNumber = Math.min(dayNumber + 1, 11);
+        dayNumber = Math.min(dayNumber + 1, 10);
       }
       const newEmbed = await scheduleEmbed(dayNumber, footer);
       emb.edit(newEmbed);
