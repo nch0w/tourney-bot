@@ -17,13 +17,13 @@ async function execute(message, args, user) {
       name: `${PREFIX}mvp`,
       value: "View the MVP running",
     },
-    {
-      name: `${PREFIX}playerstats|ps {player}`,
-      value: "View all-time statistics for a player",
-    },
+    //{
+     // name: `${PREFIX}playerstats|ps {player}`,
+    //  value: "View all-time statistics for a player",
+    //},
     {
       name: `${PREFIX}guessleaderboard|glb {length}`,
-      value: "View the line guessers leaderboard",
+      value: "View the Merlin guessers leaderboard",
     },
     {
       name: `${PREFIX}fantasyleaderboard|flb {length}`,
@@ -41,17 +41,17 @@ async function execute(message, args, user) {
       name: `${PREFIX}sheet`,
       value: "Send a link to the official tourney Google sheet",
     },
+    //{
+    //  name: `${PREFIX}global`,
+    //  value: "Send a link to the official global tourney Google sheet",
+    //},
+    //{
+    //  name: `${PREFIX}submit`,
+    //  value: "Send a link to the Quotes/Gag Awards/Reports form",
+    //},
     {
-      name: `${PREFIX}global`,
-      value: "Send a link to the official global tourney Google sheet",
-    },
-    {
-      name: `${PREFIX}submit`,
-      value: "Send a link to the Quotes/Gag Awards/Reports form",
-    },
-    {
-      name: `${PREFIX}guess {line}`,
-      value: "Submit a guess for a line in a game",
+      name: `${PREFIX}guessmerlin {merlin}`,
+      value: "Submit a guess for a Merlin in a game",
     },
     {
       name: `${PREFIX}info|help`,

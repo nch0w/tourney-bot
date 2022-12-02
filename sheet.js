@@ -22,8 +22,8 @@ const globaldoc = new GoogleSpreadsheet(GLOBAL_SHEET_PRIVATE_ID);
 const namesdoc = new GoogleSpreadsheet(NAMES_SHEET_PRIVATE_ID);
 doc.useServiceAccountAuth(GOOGLE_API_CREDENTIALS);
 moddoc.useServiceAccountAuth(GOOGLE_API_CREDENTIALS);
-globaldoc.useServiceAccountAuth(GOOGLE_API_CREDENTIALS);
-namesdoc.useServiceAccountAuth(GOOGLE_API_CREDENTIALS);
+//globaldoc.useServiceAccountAuth(GOOGLE_API_CREDENTIALS);
+//namesdoc.useServiceAccountAuth(GOOGLE_API_CREDENTIALS);
 
 let updateTime = new Date(new Date().getTime());
 const lineGuessMutex = new Mutex();
@@ -37,13 +37,13 @@ async function loadSheet() {
   await doc.sheetsByIndex[2].loadCells("A1:H81"); //The borders of the Personal Scores Block
   //await doc.sheetsByIndex[6].loadCells("B5:I69"); //The lefthand portion of the Fantasy League
   await moddoc.loadInfo();
-  await moddoc.sheetsByIndex[0].loadCells("A1:N2000");
+  await moddoc.sheetsByIndex[0].loadCells("A1:G2000");
   await moddoc.sheetsByIndex[1].loadCells("A1:C200");
-  await moddoc.sheetsByIndex[2].loadCells("A1:O75");
-  await namesdoc.loadInfo();
-  await namesdoc.sheetsByIndex[0].loadCells("J1:R348");
-  await globaldoc.loadInfo();
-  await globaldoc.sheetsByIndex[2].loadCells("A1:AZ341");
+  await moddoc.sheetsByIndex[2].loadCells("C1:H60");
+  //await namesdoc.loadInfo();
+  //await namesdoc.sheetsByIndex[0].loadCells("J1:R348");
+  //await globaldoc.loadInfo();
+  //await globaldoc.sheetsByIndex[2].loadCells("A1:AZ341");
 }
 
 setTimeout(loadSheet, 0);
@@ -97,38 +97,39 @@ async function getPersonalStats(player) {
       if (
         sheet.getCell(row, 0).value === null ||
         sheet.getCell(row, 1).value !== player ||
-        sheet.getCell(row, 12).value == null
+        sheet.getCell(row, 5).value == null
       )
         return null;
-      let game;
-      if (Number.isInteger(parseFloat(sheet.getCell(row, 3).value))) {
-        game = sheet.getCell(row, 3).value;
-      } else {
-        const subGameList = ["A", "B", "C"];
-        const subGame =
-          subGameList[
-            (parseFloat(sheet.getCell(row, 3).value) % 1).toFixed(1) * 10 - 1
-          ];
-        game = [parseInt(sheet.getCell(row, 3).value), subGame].join("");
-      }
       return {
-        line: sheet.getCell(row, 2).value,
-        game,
-        points: sheet.getCell(row, 12).value,
+        merlin: sheet.getCell(row, 2).value,
+        game: sheet.getCell(row, 3).value,
+        correct: sheet.getCell(row, 5).value === 1 ? "Correct" : "Incorrect",
       };
     })
     .filter((guess) => guess);
 }
 
 async function getBestGuess(game) {
-  const sheet = moddoc.sheetsByIndex[2];
-  const rows = await sheet.getRows();
-  for (let i = 0; i < 75; i++) {
-    if (parseFloat(rows[i]._rawData[0]) === game) {
-      return rows[i]._rawData;
-      break;
+  const sheet = moddoc.sheetsByIndex[0];
+  const sheet2 = moddoc.sheetsByIndex[2];
+  let guesserList = [];
+  for (let i = 2; i < 2000; i++) {
+    if (sheet.getCellByA1(`A${i}`).value === null) break;
+    if (
+      sheet.getCellByA1(`D${i}`).value === game &&
+      sheet.getCellByA1(`F${i}`).value === 1
+    ) {
+      guesserList.push(sheet.getCellByA1(`B${i}`).value);
     }
   }
+  return {
+    guesserList,
+    merlin: sheet2.getCellByA1(`C${game + 1}`).value,
+    average: sheet2.getCellByA1(`E${game + 1}`).value,
+    guessnum: sheet2.getCellByA1(`F${game + 1}`).value,
+    falsenum: sheet2.getCellByA1(`G${game + 1}`).value,
+    mostfalse: sheet2.getCellByA1(`H${game + 1}`).value,
+  };
 }
 
 async function getSchedule() {
@@ -210,7 +211,6 @@ async function getGames() {
   return _.range(0, 54) //Has to be one more than the number of rows in Inporter
     .map((row) => {
       if (sheet.getCellByA1(`C${row + 4}`).value === null) return null;
-      console.log(sheet.getCellByA1(`Y${row + 4}`).value);
       const played =
         sheet.getCellByA1(`Y${row + 4}`).value &&
         sheet.getCellByA1(`Y${row + 4}`).value.length > 0;

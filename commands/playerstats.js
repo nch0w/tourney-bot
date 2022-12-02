@@ -3,6 +3,11 @@ const sheet = require("../sheet");
 const { errorMessage, rank, roundToThirds } = require("../message-helpers");
 
 async function execute(message, args, user) {
+  return message.channel.send(
+    errorMessage(
+      "The Player Stats command is nonfunctional due to lack of a Global Sheet for Avalon."
+    )
+  );
   if (args.length < 1) {
     message.channel.send(
       errorMessage("Must include a valid player name, like Dev or Gamethrower")

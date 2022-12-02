@@ -1,5 +1,6 @@
 const sheet = require("../sheet");
 const { getGameNumber } = require("../constants");
+const { errorMessage } = require("../message-helpers");
 
 async function execute(message, args, user) {
   const gameNumber = await getGameNumber();
@@ -20,15 +21,12 @@ async function execute(message, args, user) {
       finalGame = false;
       open = !open;
       sheet.dumpGuesses(guessDict);
-    } else if (subGameIndicator) {
-      message.channel.send("Guessing Closed.");
-      subGameIndicator = false;
-      open = !open;
-      sheet.dumpGuesses(guessDict);
     } else if (args.length === 0) {
       message.channel.send("Guessing Closed.");
       open = !open;
       sheet.dumpGuesses(guessDict);
+    } else {
+      return message.channel.send(errorMessage("Incorrect or no parameters."));
     }
   }
 }

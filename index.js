@@ -26,7 +26,7 @@ if (ENABLE_SENTRY) {
 global.authorized_data_setters;
 global.team_roles_channels;
 global.open = false;
-global.subGameIndicator = false;
+global.guessOptions = false;
 global.finalGame = false;
 global.guessDict = false;
 global.coolDown = false;
@@ -74,7 +74,7 @@ client.on("message", async (message) => {
     (await authorized_data_setters.get("auth")).indexOf(message.author.id) >=
       0 || message.author.id === OWNER;
 
-  if (message.channel.id === "599756425241296897" && !isAuthorized) return; //event-general-chat id
+  //if (message.channel.id === "599756425241296897" && !isAuthorized) return; //event-general-chat id
 
   const args = message.content.slice(PREFIX.length).trim().split(/ +/);
   const commandName = args.shift().toLowerCase();

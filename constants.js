@@ -31,10 +31,9 @@ async function getTeamEmojis() {
     await sheet_data.get("teamEmoji4"),
     await sheet_data.get("teamEmoji5"),
     await sheet_data.get("teamEmoji6"),
-    await sheet_data.get("teamEmoji7"),
   ];
 
-  return values ? values : ["🦉", "🚫", "✌️", "🌮", "🦩", "😈", "🐬"];
+  return values ? values : ["🦉", "🚫", "✌️", "🌮", "🦩", "😈"];
 }
 
 async function getSheetURL() {

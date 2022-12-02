@@ -1,16 +1,21 @@
-const subRegex = new RegExp("[abcABC]{1}");
 const { getGameNumber } = require("../constants");
+const { errorMessage } = require("../message-helpers");
 
 async function execute(message, args, user) {
   const gameNumber = await getGameNumber();
   if (!open && user.isAuthorized) {
-    message.channel.send("Guessing Opened!");
-    open = !open;
-    guessDict = {};
-    if (args.length === 1 && args[0] === "final") {
-      finalGame = [gameNumber - 1, gameNumber];
-    } else if (args.length === 1 && subRegex.test(args[0])) {
-      subGameIndicator = args[0].toLowerCase();
+    if (args.length === 6 || (args.length === 13 && args[0] === "final")) {
+      message.channel.send("Guessing Opened!");
+      open = !open;
+      guessDict = {};
+      if (args[0] === "final") {
+        finalGame = [gameNumber - 1, gameNumber];
+        guessOptions = [args.slice(1,7),args.slice(7,13)];
+      } else {
+        guessOptions = args;
+      }
+    } else {
+      return message.channel.send(errorMessage("Incorrect or no parameters. Remember to list all player usernames separated by spaces."));
     }
   }
 }
