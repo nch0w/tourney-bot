@@ -59,7 +59,6 @@ async function execute(message, args, user) {
       timestamp,
       message.author.id,
       args[0],
-      1,
       currentGame.number,
     ];
     if (!isdm) {
