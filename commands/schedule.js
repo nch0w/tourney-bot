@@ -53,7 +53,7 @@ async function scheduleEmbed(dayNumber, footer) {
 async function execute(message, args, user) {
   const currentDate = new Date();
   let dayNumber = Math.min(
-    10,
+    9,
     Math.max(
       1,
       currentDate.getUTCHours() < 9 // day changes at 9AM UTC
@@ -74,7 +74,7 @@ async function execute(message, args, user) {
     return;
   }
 
-  if (dayNumber < 1 || dayNumber > 10) {
+  if (dayNumber < 1 || dayNumber > 9) {
     message.channel.send(
       errorMessage(`Could not find a schedule for day ${dayNumber}.`)
     );
@@ -97,7 +97,7 @@ async function execute(message, args, user) {
       if (reaction.emoji.name === "◀") {
         dayNumber = Math.max(dayNumber - 1, 1);
       } else {
-        dayNumber = Math.min(dayNumber + 1, 10);
+        dayNumber = Math.min(dayNumber + 1, 9);
       }
       const newEmbed = await scheduleEmbed(dayNumber, footer);
       emb.edit(newEmbed);

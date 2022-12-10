@@ -11,7 +11,7 @@ async function execute(message, args, user) {
   const vcTextTwo = await getTournamentVCTextTwo();
   const gameNumber = await getGameNumber();
   if (
-    message.channel.id !== "697225108376387724" &&
+    message.channel.id !== "855806852108255292" &&
     message.channel.id !== vcTextTwo.toString() &&
     !isdm
   ) {
