@@ -26,8 +26,7 @@ async function execute(message, args, user) {
     message.channel.send(
       errorMessage("Merlin guesses can only be made during in-progress games.")
     );
-  } else if (1 === gameNumber - 1 && args.length === 1) {
-    //currentGame.number ===
+  } else if (currentGame.number === gameNumber - 1 && args.length === 1) {
     message.channel.send(
       errorMessage(
         "Must include a valid game number, for example, s!gm wanglebangle 53."
@@ -61,7 +60,7 @@ async function execute(message, args, user) {
       message.author.id,
       args[0],
       1,
-      //currentGame.number,
+      currentGame.number,
     ];
     if (!isdm) {
       message.delete();
