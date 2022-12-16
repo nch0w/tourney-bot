@@ -73,7 +73,7 @@ async function getGuessLeaderboard() {
 }
 
 async function getFantasyLeaderboard() {
-  const sheet = doc.sheetsByIndex[3];
+  const sheet = doc.sheetsByIndex[6];
   const leaderboard = _.range(5, 46, 1).map((row) => ({
     mod: '',
     team: sheet.getCellByA1(`C${row}`).value,
@@ -276,7 +276,7 @@ async function getPlayers() {
       gamesPlayed: sheet.getCell(i + 3, 3).value,
       gamesWon: sheet.getCell(i + 3, 4).value,
       winrate: sheet.getCell(i + 3, 5).value,
-      personalScore: sheet.getCell(i + 3, 7).value,
+      personalScore: sheet.getCell(i + 3, 8).value,
     });
   }
   return players;
