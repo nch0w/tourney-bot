@@ -32,9 +32,9 @@ async function loadSheet() {
   updateTime = new Date(new Date().getTime());
   await doc.loadInfo();
   await doc.sheetsByIndex[0].loadCells("B3:C14"); //The borders of the Leaderboard on main sheet
-  await doc.sheetsByIndex[4].loadCells("B3:F50"); //The borders of the Schedule on main sheet
-  await doc.sheetsByIndex[1].loadCells("B2:Y51"); //The relevant portion of the Importer, including the leaderboard
-  await doc.sheetsByIndex[2].loadCells("A1:I69"); //The borders of the Personal Scores Block
+  await doc.sheetsByIndex[4].loadCells("B3:F44"); //The borders of the Schedule on main sheet
+  await doc.sheetsByIndex[1].loadCells("B2:Y45"); //The relevant portion of the Importer, including the leaderboard
+  await doc.sheetsByIndex[2].loadCells("A1:I64"); //The borders of the Personal Scores Block
   await doc.sheetsByIndex[6].loadCells("A5:H45"); //The lefthand portion of the Fantasy League
   await moddoc.loadInfo();
   await moddoc.sheetsByIndex[0].loadCells("A1:G2000");
@@ -135,7 +135,7 @@ async function getBestGuess(game) {
 async function getSchedule() {
   const sheet = doc.sheetsByIndex[4];
   //await sheet.loadCells("A1:S23");
-  const dayGames = [5, 6, 5, 5, 5, 5, 5, 6, 6];
+  const dayGames = [5, 5, 4, 4, 4, 4, 4, 6, 6];
   console.log(sheet.getCellByA1(`B${dayGames.slice(8, 0).reduce((a, b) => a + b, 0) + 3}`).value);
   const dayNames = _.range(0, 9).map(
     (num) =>
@@ -146,12 +146,13 @@ async function getSchedule() {
   const modeNames = {
     R: "Regular",
     D: "Duo",
+    "D+": "Duo +",
     S: "Special",
     "S+": "Special +",
     V: "VC",
+    "V+": "VC +",
     A: "Anonymous",
     B: "Bullet",
-    "D+": "Duo +",
   };
 
   const YEAR = await getYear();
@@ -204,14 +205,16 @@ async function getGames() {
   const modeNames = {
     R: "Regular",
     D: "Duo",
+    "D+": "Duo +",
     S: "Special",
     "S+": "Special +",
     V: "VC",
+    "V+": "VC +",
     A: "Anonymous",
     B: "Bullet",
-    "D+": "Duo +",
   };
-  return _.range(0, 48) //Has to be one more than the number of rows in Inporter
+  const gameNumber = await getGameNumber()
+  return _.range(0, gameNumber) //Has to be one more than the number of rows in Inporter
     .map((row) => {
       if (sheet.getCellByA1(`C${row + 4}`).value === null) return null;
       const played =
@@ -268,7 +271,7 @@ async function getPlayers() {
   const sheet = doc.sheetsByIndex[2];
   const players = [];
   let teamName = "";
-  for (let i = 0; i < 11 * 6; i++) {
+  for (let i = 0; i < 10 * 6 + 1; i++) { //special +1 case for goofy here
     teamName = sheet.getCell(i + 3, 1).value || teamName;
     players.push({
       name: sheet.getCell(i + 3, 2).value,

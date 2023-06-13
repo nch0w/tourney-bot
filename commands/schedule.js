@@ -3,7 +3,6 @@ const sheet = require("../sheet");
 const { errorMessage } = require("../message-helpers");
 const { getStartDay } = require("../constants");
 const { format, utcToZonedTime } = require("date-fns-tz");
-const { formatDistanceToNow } = require("date-fns");
 
 async function scheduleEmbed(dayNumber, footer) {
   const currentDate = new Date();
@@ -30,9 +29,7 @@ async function scheduleEmbed(dayNumber, footer) {
             game.time > currentDate
               ? "Not played yet - starts"
               : "In progress - started"
-          } ${formatDistanceToNow(game.time, {
-            addSuffix: true,
-          })}`;
+          } <t:${game.time / 1000}:R>`;
           const gameHeader = `Game ${game.number} (${game.type}), <t:${
             game.time / 1000
           }:t>`;

@@ -14,13 +14,13 @@ if (ENABLE_DB) {
 async function getYear() {
   const value = await sheet_data.get("YEAR");
 
-  return value ? value : 2022;
+  return value ? value : 2023;
 }
 
 async function getMonth() {
   const value = await sheet_data.get("MONTH");
 
-  return value ? value : 11;
+  return value ? value : 5;
 }
 
 async function getTeamEmojis() {
@@ -41,7 +41,7 @@ async function getSheetURL() {
 
   return value
     ? value
-    : "https://docs.google.com/spreadsheets/d/1Yn2JK3QITQA3Av0SpTbNHO7eGjU2YRHjBH6dvh9JxNE/";
+    : "https://docs.google.com/spreadsheets/d/1MIgL-vAvQK4gmqmYTBiIh3HYHaZpfupQABa5n0jpZTA/";
 }
 
 async function getFormURL() {
@@ -53,13 +53,13 @@ async function getFormURL() {
 async function getStartDay() {
   const value = await sheet_data.get("START_DAY");
 
-  return value ? value : 10;
+  return value ? value : 17;
 }
 
 async function getGameNumber() {
   const value = await sheet_data.get("GAME_NUMBER");
 
-  return value ? value : 48;
+  return value ? value : 42;
 }
 
 async function getTournamentVCTextTwo() {
@@ -79,5 +79,5 @@ module.exports = {
   getTournamentVCTextTwo: getTournamentVCTextTwo,
   sheet_data: sheet_data,
   GLOBAL_SHEET_URL:
-    "https://docs.google.com/spreadsheets/d/1au5YS0hmneOv8kEA75VOxgcPIUya2EB19hWXl7oII-A/",
+    "https://docs.google.com/spreadsheets/d/1-FqHJLGnPiuKNLkBIgNFMWUB_2VPOFGrEa2bWUhzsCE/",
 };
