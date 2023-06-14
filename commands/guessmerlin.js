@@ -10,6 +10,8 @@ async function execute(message, args, user) {
   const timestamp = new Date(new Date().getTime());
   const vcTextTwo = await getTournamentVCTextTwo();
   const gameNumber = await getGameNumber();
+  const guessOptions = await guess_information.get("guessOptions");
+  const finalGame = await guess_information.get("finalGame");
   if (
     message.channel.id !== "855806852108255292" &&
     message.channel.id !== vcTextTwo.toString() &&
@@ -22,7 +24,7 @@ async function execute(message, args, user) {
         "Merlin guesses can only be made in #tournament-vc-text or DMs."
       )
     );
-  } else if (!open) {
+  } else if (!(await guess_information.get("open"))) {
     message.channel.send(
       errorMessage("Merlin guesses can only be made during in-progress games.")
     );
@@ -39,12 +41,18 @@ async function execute(message, args, user) {
       .map((opt) => opt.toLowerCase())
       .includes(args[0].toLowerCase())
   ) {
-    guessDict[message.author.id + "_" + args[1]] = [
+    //guessDict[message.author.id + "_" + args[1]] = [
+    //  timestamp,
+    //  message.author.id,
+    //  args[0],
+    //  parseInt(args[1]),
+    //];
+    await guess_information.set(message.author.id + "_" + args[1], [
       timestamp,
       message.author.id,
       args[0],
       parseInt(args[1]),
-    ];
+    ]);
     if (!isdm) {
       message.delete();
       message.channel.send(`<@${message.author.id}>'s guess received!`);
@@ -55,12 +63,18 @@ async function execute(message, args, user) {
     args.length === 1 &&
     guessOptions.map((opt) => opt.toLowerCase()).includes(args[0].toLowerCase())
   ) {
-    guessDict[message.author.id] = [
+    //guessDict[message.author.id] = [
+    //  timestamp,
+    //  message.author.id,
+    //  args[0],
+    //  currentGame.number,
+    //];
+    await guess_information.set(message.author.id, [
       timestamp,
       message.author.id,
       args[0],
       currentGame.number,
-    ];
+    ]);
     if (!isdm) {
       message.delete();
       message.channel.send(`<@${message.author.id}>'s guess received!`);

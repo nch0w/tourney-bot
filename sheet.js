@@ -75,7 +75,7 @@ async function getGuessLeaderboard() {
 async function getFantasyLeaderboard() {
   const sheet = doc.sheetsByIndex[6];
   const leaderboard = _.range(5, 46, 1).map((row) => ({
-    mod: '',
+    mod: "",
     team: sheet.getCellByA1(`C${row}`).value,
     name: sheet.getCellByA1(`D${row}`).value,
     score: sheet.getCellByA1(`E${row}`).value,
@@ -136,7 +136,10 @@ async function getSchedule() {
   const sheet = doc.sheetsByIndex[4];
   //await sheet.loadCells("A1:S23");
   const dayGames = [5, 5, 4, 4, 4, 4, 4, 6, 6];
-  console.log(sheet.getCellByA1(`B${dayGames.slice(8, 0).reduce((a, b) => a + b, 0) + 3}`).value);
+  console.log(
+    sheet.getCellByA1(`B${dayGames.slice(8, 0).reduce((a, b) => a + b, 0) + 3}`)
+      .value
+  );
   const dayNames = _.range(0, 9).map(
     (num) =>
       sheet.getCellByA1(
@@ -213,7 +216,7 @@ async function getGames() {
     A: "Anonymous",
     B: "Bullet",
   };
-  const gameNumber = await getGameNumber()
+  const gameNumber = await getGameNumber();
   return _.range(0, gameNumber) //Has to be one more than the number of rows in Inporter
     .map((row) => {
       if (sheet.getCellByA1(`C${row + 4}`).value === null) return null;
@@ -271,7 +274,8 @@ async function getPlayers() {
   const sheet = doc.sheetsByIndex[2];
   const players = [];
   let teamName = "";
-  for (let i = 0; i < 10 * 6 + 1; i++) { //special +1 case for goofy here
+  for (let i = 0; i < 10 * 6 + 1; i++) {
+    //special +1 case for goofy here
     teamName = sheet.getCell(i + 3, 1).value || teamName;
     players.push({
       name: sheet.getCell(i + 3, 2).value,
@@ -369,9 +373,16 @@ async function recordGuess(user, guess, game) {
 
 async function dumpGuesses(dict) {
   const sheet = moddoc.sheetsByIndex[0];
-  var items = Object.keys(dict).map(function (key) {
-    return dict[key];
-  });
+  //var items = Object.keys(dict).map(function (key) {
+  //  return dict[key];
+  //});
+  let items = [];
+  for await (const [key, value] of dict.iterator()) {
+    console.log(key, value);
+    if (!["open", "finalGame", "guessOptions"].includes(key)) {
+      items.push(value);
+    }
+  }
 
   items.sort(function (first, second) {
     return first[0] - second[0];
