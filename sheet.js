@@ -19,11 +19,9 @@ const {
 const doc = new GoogleSpreadsheet(SHEET_PRIVATE_ID);
 const moddoc = new GoogleSpreadsheet(MOD_SHEET_PRIVATE_ID);
 const globaldoc = new GoogleSpreadsheet(GLOBAL_SHEET_PRIVATE_ID);
-const namesdoc = new GoogleSpreadsheet(NAMES_SHEET_PRIVATE_ID);
 doc.useServiceAccountAuth(GOOGLE_API_CREDENTIALS);
 moddoc.useServiceAccountAuth(GOOGLE_API_CREDENTIALS);
-//globaldoc.useServiceAccountAuth(GOOGLE_API_CREDENTIALS);
-//namesdoc.useServiceAccountAuth(GOOGLE_API_CREDENTIALS);
+globaldoc.useServiceAccountAuth(GOOGLE_API_CREDENTIALS);
 
 let updateTime = new Date(new Date().getTime());
 const lineGuessMutex = new Mutex();
@@ -34,16 +32,15 @@ async function loadSheet() {
   await doc.sheetsByIndex[0].loadCells("B3:C14"); //The borders of the Leaderboard on main sheet
   await doc.sheetsByIndex[4].loadCells("B3:F44"); //The borders of the Schedule on main sheet
   await doc.sheetsByIndex[1].loadCells("B2:Y45"); //The relevant portion of the Importer, including the leaderboard
-  await doc.sheetsByIndex[2].loadCells("A1:I64"); //The borders of the Personal Scores Block
+  await doc.sheetsByIndex[2].loadCells("A1:I65"); //The borders of the Personal Scores Block
   await doc.sheetsByIndex[6].loadCells("A5:H45"); //The lefthand portion of the Fantasy League
   await moddoc.loadInfo();
   await moddoc.sheetsByIndex[0].loadCells("A1:G2000");
   await moddoc.sheetsByIndex[1].loadCells("A1:C200");
   await moddoc.sheetsByIndex[2].loadCells("C1:H60");
-  //await namesdoc.loadInfo();
-  //await namesdoc.sheetsByIndex[0].loadCells("J1:R348");
-  //await globaldoc.loadInfo();
-  //await globaldoc.sheetsByIndex[2].loadCells("A1:AZ341");
+  await globaldoc.loadInfo();
+  await globaldoc.sheetsByIndex[3].loadCells("A2:BW176");
+  await globaldoc.sheetsByIndex[6].loadCells("A1:M184");
 }
 
 setTimeout(loadSheet, 0);
@@ -290,38 +287,43 @@ async function getPlayers() {
 }
 
 async function getGlobalPlayer(player) {
-  const names = namesdoc.sheetsByIndex[0];
+  const names = globaldoc.sheetsByIndex[6];
   const namerows = await names.getRows();
-  const sheet = globaldoc.sheetsByIndex[2];
+  const sheet = globaldoc.sheetsByIndex[3];
   const rows = await sheet.getRows();
-  const currentsheet = doc.sheetsByIndex[4];
+  const currentsheet = doc.sheetsByIndex[2];
   let canonName = "";
-  let gName = "";
+  let globalIndex = 0;
   let currentName = "";
   let currentInfo = [];
   let pastInfo = [];
   for (let i = 1; i < namerows.length + 1; i++) {
-    for (let j = 9; j < 18; j++) {
-      // The first number is the index of the current tourney column, the second is the one plus the index of Tourney Name 5
+    for (let j = 9; j < 13; j++) {
+      // The first number is the index of the Name 1 column, the second is the one plus the index of the Name 4 column
+      if (names.getCell(i, j).value === null) {
+        break;
+      }
+      
       if (
-        names.getCell(i, j).value !== null &&
         names.getCell(i, j).value.toLowerCase() === player
       ) {
-        canonName = names.getCell(i, 11).value;
-        gName = names.getCell(i, 10).value;
-        if (names.getCell(i, 9).value !== null) {
-          currentName = names.getCell(i, 9).value;
+        canonName = names.getCell(i, 0).value;
+        globalIndex = i
+        if (names.getCell(i, 7).value !== null) {
+          currentName = names.getCell(i, 7).value;
           let teamName = "";
-          for (let k = 0; k < 13 * 7; k++) {
+          for (let k = 0; k < 10 * 6 + 1; k++) {
+            //+1 for goofy special case
             // It has to be the number of players in each team times seven
-            teamName = currentsheet.getCell(k + 8, 2).value || teamName;
-            if (currentsheet.getCell(k + 8, 3).value === currentName) {
+            teamName = currentsheet.getCell(k + 3, 1).value || teamName;
+            if (currentsheet.getCell(k + 3, 2).value === currentName) {
               currentInfo.push(
                 teamName,
                 ..._.range(3, 9).map(
-                  (entry) => currentsheet.getCell(k + 8, entry).value
+                  (entry) => currentsheet.getCell(k + 3, entry).value
                 )
               );
+              break;
             }
           }
         }
@@ -332,12 +334,10 @@ async function getGlobalPlayer(player) {
       break;
     }
   }
-  for (let i = 5; i < rows.length; i++) {
-    if (sheet.getCell(i + 1, 0).value === gName) {
-      pastInfo.push(
-        ..._.range(0, 52).map((entry) => sheet.getCell(i + 1, entry).value) // Has to be the number of columns in the Global Sheet
-      );
-    }
+  if (globalIndex < rows.length) {
+    pastInfo.push(
+      ..._.range(0, 75).map((entry) => sheet.getCell(globalIndex + 1, entry).value) // Has to be the number of columns in the Global Sheet
+    );
   }
   return [canonName, currentInfo, pastInfo];
 }

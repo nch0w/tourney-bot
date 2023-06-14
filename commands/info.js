@@ -17,10 +17,10 @@ async function execute(message, args, user) {
       name: `${PREFIX}mvp`,
       value: "View the MVP running",
     },
-    //{
-     // name: `${PREFIX}playerstats|ps {player}`,
-    //  value: "View all-time statistics for a player",
-    //},
+    {
+      name: `${PREFIX}playerstats|ps {player}`,
+      value: "View all-time statistics for a player",
+    },
     {
       name: `${PREFIX}guessleaderboard|glb {length}`,
       value: "View the Merlin guessers leaderboard",
@@ -41,10 +41,10 @@ async function execute(message, args, user) {
       name: `${PREFIX}sheet`,
       value: "Send a link to the official tourney Google sheet",
     },
-    //{
-    //  name: `${PREFIX}global`,
-    //  value: "Send a link to the official global tourney Google sheet",
-    //},
+    {
+      name: `${PREFIX}global`,
+      value: "Send a link to the official global tourney Google sheet",
+    },
     //{
     //  name: `${PREFIX}submit`,
     //  value: "Send a link to the Quotes/Gag Awards/Reports form",
