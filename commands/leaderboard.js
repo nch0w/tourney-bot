@@ -11,7 +11,7 @@ async function execute(message, args, user) {
       .setTitle("Leaderboard")
       .setDescription(
         leaderboard
-          .map((entry, i) => `${ranks[i]}. ${entry.name}: ${entry.score}`)
+          .map((entry, i) => `${ranks[i]}\\. ${entry.name}: ${entry.score}`)
           .join("\n")
       )
       .setFooter(`Updated ${user.updateTime}`);

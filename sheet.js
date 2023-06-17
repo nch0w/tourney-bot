@@ -33,7 +33,7 @@ async function loadSheet() {
   await doc.sheetsByIndex[4].loadCells("B3:F44"); //The borders of the Schedule on main sheet
   await doc.sheetsByIndex[1].loadCells("B2:Y45"); //The relevant portion of the Importer, including the leaderboard
   await doc.sheetsByIndex[2].loadCells("A1:I65"); //The borders of the Personal Scores Block
-  await doc.sheetsByIndex[6].loadCells("A5:H45"); //The lefthand portion of the Fantasy League
+  await doc.sheetsByIndex[6].loadCells("A5:H41"); //The lefthand portion of the Fantasy League
   await moddoc.loadInfo();
   await moddoc.sheetsByIndex[0].loadCells("A1:G2000");
   await moddoc.sheetsByIndex[1].loadCells("A1:C200");
@@ -71,7 +71,7 @@ async function getGuessLeaderboard() {
 
 async function getFantasyLeaderboard() {
   const sheet = doc.sheetsByIndex[6];
-  const leaderboard = _.range(5, 46, 1).map((row) => ({
+  const leaderboard = _.range(5, 41, 1).map((row) => ({
     mod: "",
     team: sheet.getCellByA1(`C${row}`).value,
     name: sheet.getCellByA1(`D${row}`).value,
