@@ -9,6 +9,7 @@ async function execute(message, args, user) {
       //open = !open;
       await guess_information.clear();
       await guess_information.set("open", true);
+      await guess_information.set("guessIDs", []);
       //guessDict = {};
       if (args[0] === "final") {
         await guess_information.set("finalGame", [gameNumber - 1, gameNumber]);

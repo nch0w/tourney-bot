@@ -53,6 +53,12 @@ async function execute(message, args, user) {
       args[0],
       parseInt(args[1]),
     ]);
+    await guess_information.set(
+      "guessIDs",
+      (
+        await guess_information.get("guessIDs")
+      ).concat([message.author.id + "_" + args[1]])
+    );
     if (!isdm) {
       message.delete();
       message.channel.send(`<@${message.author.id}>'s guess received!`);
@@ -75,6 +81,10 @@ async function execute(message, args, user) {
       args[0],
       currentGame.number,
     ]);
+    await guess_information.set(
+      "guessIDs",
+      (await guess_information.get("guessIDs")).concat([message.author.id])
+    );
     if (!isdm) {
       message.delete();
       message.channel.send(`<@${message.author.id}>'s guess received!`);

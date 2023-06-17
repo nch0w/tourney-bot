@@ -77,13 +77,16 @@ client.on("message", async (message) => {
   }
 
   if (!(await guess_information.get("open"))) {
-    await team_roles_channels.set("open", false);
+    await guess_information.set("open", false);
   }
   if (!(await guess_information.get("guessOptions"))) {
-    await team_roles_channels.set("guessOptions", false);
+    await guess_information.set("guessOptions", false);
   }
   if (!(await guess_information.get("finalGame"))) {
-    await team_roles_channels.set("finalGame", false);
+    await guess_information.set("finalGame", false);
+  }
+  if (!(await guess_information.get("guessIDs"))) {
+    await guess_information.set("guessIDs", []);
   }
 
   const isAuthorized =

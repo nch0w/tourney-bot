@@ -303,12 +303,10 @@ async function getGlobalPlayer(player) {
       if (names.getCell(i, j).value === null) {
         break;
       }
-      
-      if (
-        names.getCell(i, j).value.toLowerCase() === player
-      ) {
+
+      if (names.getCell(i, j).value.toLowerCase() === player) {
         canonName = names.getCell(i, 0).value;
-        globalIndex = i
+        globalIndex = i;
         if (names.getCell(i, 7).value !== null) {
           currentName = names.getCell(i, 7).value;
           let teamName = "";
@@ -336,7 +334,9 @@ async function getGlobalPlayer(player) {
   }
   if (globalIndex < rows.length) {
     pastInfo.push(
-      ..._.range(0, 75).map((entry) => sheet.getCell(globalIndex + 1, entry).value) // Has to be the number of columns in the Global Sheet
+      ..._.range(0, 75).map(
+        (entry) => sheet.getCell(globalIndex + 1, entry).value
+      ) // Has to be the number of columns in the Global Sheet
     );
   }
   return [canonName, currentInfo, pastInfo];
@@ -376,14 +376,17 @@ async function dumpGuesses(guesses) {
   //var items = Object.keys(dict).map(function (key) {
   //  return dict[key];
   //});
-  console.log(guess_information);
+  let guess_keys = [...new Set(await guess_information.get("guessIDs"))];
   let items = [];
-  for await (const [key, value] of guesses.iterator()) {
-    console.log(key, value);
-    if (!["open", "finalGame", "guessOptions"].includes(key)) {
-      items.push(value);
-    }
+  for (const key of guess_keys) {
+    items.push(await guess_information.get(key));
   }
+  //for await (const [key, value] of guesses.iterator()) {
+  //console.log(key, value);
+  //if (!["open", "finalGame", "guessOptions"].includes(key)) {
+  //  items.push(value);
+  //}
+  //}
 
   items.sort(function (first, second) {
     return first[0] - second[0];
