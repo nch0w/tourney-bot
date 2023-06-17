@@ -371,13 +371,14 @@ async function recordGuess(user, guess, game) {
   release();
 }
 
-async function dumpGuesses(dict) {
+async function dumpGuesses(guesses) {
   const sheet = moddoc.sheetsByIndex[0];
   //var items = Object.keys(dict).map(function (key) {
   //  return dict[key];
   //});
+  console.log(guess_information);
   let items = [];
-  for await (const [key, value] of dict.iterator()) {
+  for await (const [key, value] of guesses.iterator()) {
     console.log(key, value);
     if (!["open", "finalGame", "guessOptions"].includes(key)) {
       items.push(value);
