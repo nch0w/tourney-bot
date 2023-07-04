@@ -79,11 +79,17 @@ client.on("message", async (message) => {
   if (!(await guess_information.get("open"))) {
     await guess_information.set("open", false);
   }
+  if (!(await guess_information.get("openSpecial"))) {
+    await guess_information.set("openSpecial", false);
+  }
   if (!(await guess_information.get("subGameIndicator"))) {
     await guess_information.set("subGameIndicator", false);
   }
   if (!(await guess_information.get("finalGame"))) {
     await guess_information.set("finalGame", false);
+  }
+  if (!(await guess_information.get("specialFinalGame"))) {
+    await guess_information.set("specialFinalGame", false);
   }
 
   const isAuthorized =

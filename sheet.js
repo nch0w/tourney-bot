@@ -32,15 +32,17 @@ const lineGuessMutex = new Mutex();
 async function loadSheet() {
   updateTime = new Date(new Date().getTime());
   await doc.loadInfo();
-  await doc.sheetsByIndex[0].loadCells("Y4:AD17"); //The borders of the Leaderboard on main sheet
+  await doc.sheetsByIndex[8].loadCells("B11:E17"); //The borders of the Leaderboard on main sheet
   await doc.sheetsByIndex[1].loadCells("B1:R18"); //The borders of the Schedule on main sheet
   await doc.sheetsByIndex[6].loadCells("A1:AA70"); //The relevant portion of the Importer, including the leaderboard
   await doc.sheetsByIndex[4].loadCells("A1:O108"); //The borders of the Personal Scores Block
-  await doc.sheetsByIndex[7].loadCells("B5:I69"); //The lefthand portion of the Fantasy League
+  await doc.sheetsByIndex[9].loadCells("B5:I69"); //The lefthand portion of the Fantasy League
   await moddoc.loadInfo();
   await moddoc.sheetsByIndex[0].loadCells("A1:N2000");
   await moddoc.sheetsByIndex[1].loadCells("A1:C200");
   await moddoc.sheetsByIndex[2].loadCells("A1:O75");
+  await moddoc.sheetsByIndex[3].loadCells("A1:N2000");
+  await moddoc.sheetsByIndex[4].loadCells("A1:N2000");
   await namesdoc.loadInfo();
   await namesdoc.sheetsByIndex[0].loadCells("K1:S365");
   await globaldoc.loadInfo();
@@ -55,13 +57,12 @@ function getUpdateTime() {
 }
 
 async function getLeaderboard() {
-  const sheet = doc.sheetsByIndex[1];
-  const sheet2 = doc.sheetsByIndex[5];
+  const sheet = doc.sheetsByIndex[8];
   // await sheet.loadCells("AA2:AL15");
   const leaderboard = _.range(0, 7).map((row) => ({
-    name: sheet.getCellByA1(`Y${3 + row * 2}`).value, //Column has to be leftmost column of leaderboard
-    score: sheet2.getCellByA1(`A${66 + row}`).value, //Number has to be the position of the top score in the Reformat block
-    tiebreakScore: sheet2.getCellByA1(`C${66 + row}`).value, //Same here
+    name: sheet.getCellByA1(`C${11 + row}`).value, //Column has to be leftmost column of leaderboard
+    points: sheet.getCellByA1(`D${11 + row}`).value,
+    wins: sheet.getCellByA1(`E${11 + row}`).value,
   }));
   return leaderboard;
 }
@@ -77,7 +78,7 @@ async function getGuessLeaderboard() {
 }
 
 async function getFantasyLeaderboard() {
-  const sheet = doc.sheetsByIndex[6];
+  const sheet = doc.sheetsByIndex[9];
   const leaderboard = _.range(5, 69, 1).map((row) => ({
     mod: sheet.getCellByA1(`B${row}`).value,
     team: sheet.getCellByA1(`D${row}`).value,
@@ -107,6 +108,8 @@ async function getPersonalStats(player) {
       let game;
       if (Number.isInteger(parseFloat(sheet.getCell(row, 3).value))) {
         game = sheet.getCell(row, 3).value;
+      } else if (parseFloat(sheet.getCell(row, 3).value) < 1) {
+        game = `BG${parseInt(parseFloat(sheet.getCell(row, 3).value) * 10)}`;
       } else {
         const subGameList = ["A", "B", "C"];
         const subGame =
@@ -428,6 +431,28 @@ async function dumpGuesses(guesses) {
   }
 }
 
+async function dumpSpecialGuesses(guesses) {
+  let guess_keys = [...new Set(await guess_information.get("specialGuessIDs"))];
+  let items = [];
+  for (const key of guess_keys) {
+    items.push(await guess_information.get(key));
+  }
+
+  items.sort(function (first, second) {
+    return first[0] - second[0];
+  });
+
+  let sheet;
+  if ((await guess_information.get("specialMode")) === "Anon special") {
+    sheet = moddoc.sheetsByIndex[3];
+  } else {
+    sheet = moddoc.sheetsByIndex[4];
+  }
+  for (const item of items) {
+    await sheet.addRow(item);
+  }
+}
+
 module.exports = {
   getLeaderboard,
   getGuessLeaderboard,
@@ -441,4 +466,5 @@ module.exports = {
   getUpdateTime,
   recordGuess,
   dumpGuesses,
+  dumpSpecialGuesses,
 };

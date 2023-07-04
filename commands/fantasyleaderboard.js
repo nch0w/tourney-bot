@@ -39,9 +39,9 @@ async function execute(message, args, user) {
           .map(
             ppg
               ? (entry, i) =>
-                  `${ranks[i]}. <@${entry.name}>'s ${entry.team}: ${entry.pointsPerGame}`
+                  `${ranks[i]}\\. <@${entry.name}>'s ${entry.team}: ${entry.pointsPerGame}`
               : (entry, i) =>
-                  `${ranks[i]}. <@${entry.name}>'s ${entry.team}: ${entry.score}`
+                  `${ranks[i]}\\. <@${entry.name}>'s ${entry.team}: ${entry.score}`
           )
           .join("\n")
       )

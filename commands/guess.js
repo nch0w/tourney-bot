@@ -26,7 +26,7 @@ async function execute(message, args, user) {
         "Line guesses can only be made in #tournament-vc-text or DMs."
       )
     );
-  } else if (!open) {
+  } else if (!(await guess_information.get("open"))) {
     message.channel.send(
       errorMessage(
         "Line guesses can only be made during in-progress games before the Special Election."
@@ -68,7 +68,7 @@ async function execute(message, args, user) {
     regex.test(args[0]) &&
     !/([1-7hH]).*?\1/.test(args[0])
   ) {
-    if (subGameIndicator) {
+    if (["a", "b", "c"].includes(subGameIndicator)) {
       const subIndicatorList = ["a", "b", "c"];
       await guess_information.set(message.author.id, [
         timestamp,
@@ -76,6 +76,23 @@ async function execute(message, args, user) {
         args[0],
         currentGame.number +
           (1 + subIndicatorList.indexOf(subGameIndicator)) / 10,
+      ]);
+      await guess_information.set(
+        "guessIDs",
+        (await guess_information.get("guessIDs")).concat([message.author.id])
+      );
+      //sheet.recordGuess(
+      //  message.author.id,
+      //  args[0],
+      //  currentGame.number +
+      //    (1 + subIndicatorList.indexOf(subGameIndicator)) / 10
+      //);
+    } else if (subGameIndicator) {
+      await guess_information.set(message.author.id, [
+        timestamp,
+        message.author.id,
+        args[0],
+        0 + parseInt(subGameIndicator) / 10,
       ]);
       await guess_information.set(
         "guessIDs",

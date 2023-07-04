@@ -50,8 +50,16 @@ async function execute(message, args, user) {
       value: "Send a link to the Quotes/Gag Awards/Reports form",
     },
     {
-      name: `${PREFIX}guess {line}`,
+      name: `${PREFIX}guess|g {line}`,
       value: "Submit a guess for a line in a game",
+    },
+    {
+      name: `${PREFIX}guessmerlin|gm {merlin}`,
+      value: "Submit a guess for Merlin in an Avalon SH game",
+    },
+    {
+      name: `${PREFIX}guessteams|gt {teamorder}`,
+      value: "Submit a guess for the teams in a Special anon game",
     },
     {
       name: `${PREFIX}info|help`,
