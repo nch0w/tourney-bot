@@ -1,6 +1,5 @@
 const Discord = require("discord.js");
 const sheet = require("../sheet");
-const { formatDistanceToNow } = require("date-fns");
 const _ = require("lodash");
 const { getGameNumber } = require("../constants");
 
@@ -26,31 +25,28 @@ async function execute(message, args, user) {
 
     for (var team of teams) {
       if (currentGame.number > gameNumber - 2) {
-        message.guild.channels.cache.get(team[1]).send(
-          `Hello, ${team[0]}! The final games will happen ${formatDistanceToNow(
-            currentTime,
-            {
-              addSuffix: true,
-            }
-          )}. Are your players ready?`
-        );
+        message.guild.channels.cache
+          .get(team[1])
+          .send(
+            `Hello, ${team[0]}! The final games will happen <t:${
+              currentTime / 1000
+            }:R>. Are your players ready?`
+          );
       } else if (currentType === "Duo") {
         message.guild.channels.cache
           .get(team[1])
           .send(
-            `Hello, ${team[0]}! The game will happen ${formatDistanceToNow(
-              currentTime,
-              { addSuffix: true }
-            )}. Are your player and coach ready?`
+            `Hello, ${team[0]}! The game will happen <t:${
+              currentTime / 1000
+            }:R>. Are your player and coach ready?`
           );
       } else {
         message.guild.channels.cache
           .get(team[1])
           .send(
-            `Hello, ${team[0]}! The game will happen ${formatDistanceToNow(
-              currentTime,
-              { addSuffix: true }
-            )}. Is your player ready?`
+            `Hello, ${team[0]}! The game will happen <t:${
+              currentTime / 1000
+            }:R>. Is your player ready?`
           );
       }
     }

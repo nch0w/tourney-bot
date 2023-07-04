@@ -12,6 +12,8 @@ async function execute(message, args, user) {
   const timestamp = new Date(new Date().getTime());
   const vcTextTwo = await getTournamentVCTextTwo();
   const gameNumber = await getGameNumber();
+  const subGameIndicator = await guess_information.get("subGameIndicator");
+  const finalGame = await guess_information.get("finalGame");
   if (
     message.channel.id !== "697225108376387724" &&
     message.channel.id !== vcTextTwo.toString() &&
@@ -42,12 +44,18 @@ async function execute(message, args, user) {
     !/([1-7hH]).*?\1/.test(args[0]) &&
     finalGame.includes(parseInt(args[1]))
   ) {
-    guessDict[message.author.id + "_" + args[1]] = [
+    await guess_information.set(message.author.id + "_" + args[1], [
       timestamp,
       message.author.id,
       args[0],
       parseInt(args[1]),
-    ];
+    ]);
+    await guess_information.set(
+      "guessIDs",
+      (
+        await guess_information.get("guessIDs")
+      ).concat([message.author.id + "_" + args[1]])
+    );
     //sheet.recordGuess(message.author.id, args[0], parseInt(args[1]));
     if (!isdm) {
       message.delete();
@@ -62,13 +70,17 @@ async function execute(message, args, user) {
   ) {
     if (subGameIndicator) {
       const subIndicatorList = ["a", "b", "c"];
-      guessDict[message.author.id] = [
+      await guess_information.set(message.author.id, [
         timestamp,
         message.author.id,
         args[0],
         currentGame.number +
           (1 + subIndicatorList.indexOf(subGameIndicator)) / 10,
-      ];
+      ]);
+      await guess_information.set(
+        "guessIDs",
+        (await guess_information.get("guessIDs")).concat([message.author.id])
+      );
       //sheet.recordGuess(
       //  message.author.id,
       //  args[0],
@@ -76,17 +88,16 @@ async function execute(message, args, user) {
       //    (1 + subIndicatorList.indexOf(subGameIndicator)) / 10
       //);
     } else {
-      guessDict[message.author.id] = [
+      await guess_information.set(message.author.id, [
         timestamp,
         message.author.id,
         args[0],
         currentGame.number,
-      ];
-      //sheet.recordGuess(
-      //  message.author.id,
-      //  args[0].toLowerCase(),
-      //  currentGame.number
-      //);
+      ]);
+      await guess_information.set(
+        "guessIDs",
+        (await guess_information.get("guessIDs")).concat([message.author.id])
+      );
     }
     if (!isdm) {
       message.delete();
