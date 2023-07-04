@@ -20,8 +20,10 @@ async function execute(message, args, user) {
     players = players.filter(
       (p) => p.name && p.gamesPlayed > 0 && p.personalScore > 0
     );
-    players.sort((a, b) => b.personalScore - a.personalScore);
-    const ranks = rank(players, "personalScore");
+    players.sort(
+      (a, b) => b.personalScore - a.personalScore || b.winrate - a.winrate
+    );
+    const ranks = rank(players, "personalScore", "winrate");
     const embed = new Discord.MessageEmbed()
       .setTitle("MVP Running (Personal Score)")
       .setDescription(
@@ -30,7 +32,7 @@ async function execute(message, args, user) {
               .slice(0, ranks.length)
               .map(
                 (p, i) =>
-                  `${ranks[i]}. ${p.teamName} - ${p.name} - ${p.personalScore} points `
+                  `${ranks[i]}\\. ${p.teamName} - ${p.name} - ${p.personalScore} points `
               )
               .join("\n")
           : "This list will populate once games have been played."
@@ -43,8 +45,10 @@ async function execute(message, args, user) {
     players = players.filter(
       (p) => p.name && p.gamesPlayed > 0 && p.winrate > 0
     );
-    players.sort((a, b) => b.winrate - a.winrate);
-    const ranks = rank(players, "winrate");
+    players.sort(
+      (a, b) => b.winrate - a.winrate || b.personalScore - a.personalScore
+    );
+    const ranks = rank(players, "winrate", "personalScore");
     const embed = new Discord.MessageEmbed()
       .setTitle("MVP Running (Winrate)")
       .setDescription(
@@ -53,7 +57,7 @@ async function execute(message, args, user) {
               .slice(0, ranks.length)
               .map(
                 (p, i) =>
-                  `${ranks[i]}. ${p.teamName} - ${p.name} - ${(
+                  `${ranks[i]}\\. ${p.teamName} - ${p.name} - ${(
                     p.winrate * 100
                   ).toFixed(1)}% (${p.gamesWon}/${p.gamesPlayed})`
               )

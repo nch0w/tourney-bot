@@ -5,13 +5,13 @@ const { errorMessage, rank } = require("../message-helpers");
 async function execute(message, args, user) {
   try {
     const leaderboard = await sheet.getLeaderboard();
-    leaderboard.sort((a, b) => b.tiebreakScore - a.tiebreakScore);
-    const ranks = rank(leaderboard, "tiebreakScore");
+    leaderboard.sort((a, b) => b.score - a.score);
+    const ranks = rank(leaderboard, "score");
     const embed = new Discord.MessageEmbed()
       .setTitle("Leaderboard")
       .setDescription(
         leaderboard
-          .map((entry, i) => `${ranks[i]}. ${entry.name}: ${entry.score}`)
+          .map((entry, i) => `${ranks[i]}\\. ${entry.name}: ${entry.score}`)
           .join("\n")
       )
       .setFooter(`Updated ${user.updateTime}`);

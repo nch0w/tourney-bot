@@ -17,7 +17,7 @@ async function execute(message, args, user) {
       .setTitle("Personal Guess Record")
       .setDescription(
         guessRecord.map(
-          (entry, i) => `**${entry.game}.** ${entry.line} (${entry.points} pts)`
+          (entry, i) => `**${entry.game}.** ${entry.merlin} (${entry.correct})`
         )
       )
       .addField("Guesser:", `<@${id}>`)

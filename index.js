@@ -25,10 +25,11 @@ if (ENABLE_SENTRY) {
 
 global.authorized_data_setters;
 global.team_roles_channels;
-global.open = false;
-global.subGameIndicator = false;
-global.finalGame = false;
-global.guessDict = false;
+//global.open = false;
+//global.guessOptions = false;
+//global.finalGame = false;
+//global.guessDict = false;
+global.guess_information;
 global.coolDown = false;
 
 if (ENABLE_DB) {
@@ -38,9 +39,13 @@ if (ENABLE_DB) {
   team_roles_channels = new Keyv("mongodb://localhost:27017/tourney-bot", {
     namespace: "team_roles_channels",
   });
+  guess_information = new Keyv("mongodb://localhost:27017/tourney-bot", {
+    namespace: "guess_information",
+  });
 } else {
   authorized_data_setters = new Keyv();
   team_roles_channels = new Keyv();
+  guess_information = new Keyv();
 }
 
 client.commands = new Discord.Collection();
@@ -70,11 +75,25 @@ client.on("message", async (message) => {
   if (!(await team_roles_channels.get("teams"))) {
     await team_roles_channels.set("teams", []);
   }
+
+  if (!(await guess_information.get("open"))) {
+    await guess_information.set("open", false);
+  }
+  if (!(await guess_information.get("guessOptions"))) {
+    await guess_information.set("guessOptions", false);
+  }
+  if (!(await guess_information.get("finalGame"))) {
+    await guess_information.set("finalGame", false);
+  }
+  if (!(await guess_information.get("guessIDs"))) {
+    await guess_information.set("guessIDs", []);
+  }
+
   const isAuthorized =
     (await authorized_data_setters.get("auth")).indexOf(message.author.id) >=
       0 || message.author.id === OWNER;
 
-  if (message.channel.id === "599756425241296897" && !isAuthorized) return; //event-general-chat id
+  //if (message.channel.id === "599756425241296897" && !isAuthorized) return; //event-general-chat id
 
   const args = message.content.slice(PREFIX.length).trim().split(/ +/);
   const commandName = args.shift().toLowerCase();

@@ -26,8 +26,8 @@ async function execute(message, args, user) {
     const embed = new Discord.MessageEmbed()
       .setTitle(
         accuracy
-          ? "Line Guesser Accuracy Leaderboard"
-          : "Line Guesser Leaderboard"
+          ? "Merlin Guesser Accuracy Leaderboard"
+          : "Merlin Guesser Leaderboard"
       )
       .setDescription(
         leaderboard
@@ -35,7 +35,7 @@ async function execute(message, args, user) {
           .filter((entry) => entry.name !== null)
           .map(
             (entry, i) =>
-              `${ranks[i]}. <@${entry.name}> Points: ${
+              `${ranks[i]}\\. <@${entry.name}> Points: ${
                 entry.score
               } Accuracy: ${(entry.acc * 100).toFixed(1)}%`
           )
@@ -43,8 +43,8 @@ async function execute(message, args, user) {
       )
       .setFooter(
         accuracy
-          ? `Use ${PREFIX}glb to view the best line guessers by points.\nUpdated ${user.updateTime}`
-          : `Use ${PREFIX}glb acc to view the best line guessers by accuracy.\nUpdated ${user.updateTime}`
+          ? `Use ${PREFIX}glb to view the best Merlin guessers by points.\nUpdated ${user.updateTime}`
+          : `Use ${PREFIX}glb acc to view the best Merlin guessers by accuracy.\nUpdated ${user.updateTime}`
       );
     message.channel.send(embed);
   } catch (err) {
