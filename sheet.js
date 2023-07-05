@@ -454,6 +454,7 @@ async function dumpSpecialGuesses(guesses) {
 }
 
 module.exports = {
+  loadSheet,
   getLeaderboard,
   getGuessLeaderboard,
   getFantasyLeaderboard,
