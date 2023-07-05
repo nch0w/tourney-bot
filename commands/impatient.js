@@ -2,8 +2,10 @@ const Discord = require("discord.js");
 const sheet = require("../sheet");
 
 async function execute(message, args, user) {
-  await sheet.loadSheet();
-  message.channel.send(`So impatient, wow`);
+  if (user.isAuthorized) {
+    await sheet.loadSheet();
+    message.channel.send(`So impatient, wow`);
+  }
 }
 
 module.exports = {
