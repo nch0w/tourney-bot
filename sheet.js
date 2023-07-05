@@ -34,7 +34,7 @@ async function loadSheet() {
   await doc.loadInfo();
   await doc.sheetsByIndex[8].loadCells("B11:E17"); //The borders of the Leaderboard on main sheet
   await doc.sheetsByIndex[1].loadCells("B1:R18"); //The borders of the Schedule on main sheet
-  await doc.sheetsByIndex[6].loadCells("A1:AA70"); //The relevant portion of the Importer, including the leaderboard
+  await doc.sheetsByIndex[6].loadCells("A1:BH70"); //The relevant portion of the Importer, including the leaderboard
   await doc.sheetsByIndex[4].loadCells("A1:O108"); //The borders of the Personal Scores Block
   await doc.sheetsByIndex[9].loadCells("B6:I75"); //The lefthand portion of the Fantasy League
   await moddoc.loadInfo();
