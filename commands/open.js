@@ -6,6 +6,7 @@ async function execute(message, args, user) {
   const gameNumber = await getGameNumber();
   const games2 = await sheet.getGames();
   const currentGame = games2.find((g) => !g.played);
+  console.log(currentGame);
   if (!(await guess_information.get("open")) && user.isAuthorized) {
     message.channel.send("Guessing Opened!");
     //open = !open;
@@ -15,7 +16,7 @@ async function execute(message, args, user) {
     await guess_information.set("specialGuessIDs", []);
     //guessDict = {};
     if (
-      ["Anon special", "Avalon SH", "Avalon SH+"].includes(currentGame.mode)
+      ["Anonspecial", "AvalonSH", "AvalonSH+"].includes(currentGame.mode)
     ) {
       await guess_information.set("openSpecial", true);
       await guess_information.set("specialMode", currentGame.mode);

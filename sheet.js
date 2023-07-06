@@ -255,6 +255,7 @@ async function getGames() {
         return {
           number,
           played,
+          mode,
         };
       }
 

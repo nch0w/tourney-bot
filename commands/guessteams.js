@@ -27,7 +27,7 @@ async function execute(message, args, user) {
     );
   } else if (
     !(await guess_information.get("openSpecial")) ||
-    currentGame.mode !== "Anon special"
+    currentGame.mode !== "Anonspecial"
   ) {
     message.channel.send(
       errorMessage(
