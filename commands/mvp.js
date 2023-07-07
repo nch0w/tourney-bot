@@ -32,7 +32,7 @@ async function execute(message, args, user) {
               .slice(0, ranks.length)
               .map(
                 (p, i) =>
-                  `${ranks[i]}\\.. ${p.teamName} - ${p.name} - ${p.personalScore} points `
+                  `${ranks[i]}\\. ${p.teamName} - ${p.name} - ${p.personalScore} points `
               )
               .join("\n")
           : "This list will populate once games have been played."

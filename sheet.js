@@ -308,7 +308,7 @@ async function getPlayers() {
   const sheet = doc.sheetsByIndex[4];
   const players = [];
   let teamName = "";
-  for (let i = 0; i < 13 * 7; i++) {
+  for (let i = 10; i < 14 * 7; i++) {
     teamName = sheet.getCell(i + 8, 2).value || teamName;
     players.push({
       name: sheet.getCell(i + 8, 3).value,
