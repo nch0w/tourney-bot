@@ -15,6 +15,7 @@ const {
   getGameNumber,
   getStartDay,
 } = require("./constants");
+const { lastEventId } = require("@sentry/node");
 
 // this is the 4th SH Tourney spreadsheet
 const doc = new GoogleSpreadsheet(SHEET_PRIVATE_ID);
@@ -264,7 +265,7 @@ async function getGames() {
       const hitler = parseInt(sheet.getCell(row, 9).value) - 1;
       const fascist1 = parseInt(sheet.getCell(row, 58).value) - 1;
       const fascist2 = parseInt(sheet.getCell(row, 59).value) - 1;
-      const players = _.range(0, 7).map(
+      let players = _.range(0, 7).map(
         (i) => `${emojis[i]} ${sheet.getCell(row, 13 + i).value}`
       );
       let coaches;
