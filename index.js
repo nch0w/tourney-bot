@@ -102,9 +102,9 @@ client.on("message", async (message) => {
   const commandName = args.shift().toLowerCase();
 
   const updateTime = format(
-    utcToZonedTime(sheet.getUpdateTime(), "America/Los_Angeles"),
+    utcToZonedTime(sheet.getUpdateTime(), "Etc/UTC"),
     "h:mm:ss a zzz",
-    { timeZone: "America/Los_Angeles" }
+    { timeZone: "Etc/UTC" }
   );
 
   const user = {
