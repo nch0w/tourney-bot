@@ -356,12 +356,12 @@ async function getGlobalPlayer(player) {
           let teamName = "";
           for (let k = 0; k < 14 * 7; k++) {
             // It has to be the number of players in each team times seven
-            teamName = currentsheet.getCell(k + 10, 2).value || teamName;
-            if (currentsheet.getCell(k + 10, 3).value === currentName) {
+            teamName = currentsheet.getCell(k + 9, 2).value || teamName;
+            if (currentsheet.getCell(k + 9, 3).value === currentName) {
               currentInfo.push(
                 teamName,
                 ..._.range(3, 9).map(
-                  (entry) => currentsheet.getCell(k + 10, entry).value
+                  (entry) => currentsheet.getCell(k + 9, entry).value
                 )
               );
             }
