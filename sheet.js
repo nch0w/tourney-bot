@@ -36,7 +36,7 @@ async function loadSheet() {
   await doc.sheetsByIndex[8].loadCells("B11:E17"); //The borders of the Leaderboard on main sheet
   await doc.sheetsByIndex[1].loadCells("B1:R18"); //The borders of the Schedule on main sheet
   await doc.sheetsByIndex[6].loadCells("A1:BH70"); //The relevant portion of the Importer, including the leaderboard
-  await doc.sheetsByIndex[4].loadCells("A1:O108"); //The borders of the Personal Scores Block
+  await doc.sheetsByIndex[4].loadCells("A1:O110"); //The borders of the Personal Scores Block
   await doc.sheetsByIndex[9].loadCells("B6:I75"); //The lefthand portion of the Fantasy League
   await moddoc.loadInfo();
   await moddoc.sheetsByIndex[0].loadCells("A1:N2000");
@@ -309,7 +309,7 @@ async function getPlayers() {
   const sheet = doc.sheetsByIndex[4];
   const players = [];
   let teamName = "";
-  for (let i = 0; i < 14 * 7; i++) {
+  for (let i = 0; i < (14 * 7) + 2; i++) {
     teamName = sheet.getCell(i + 9, 2).value || teamName;
     players.push({
       name: sheet.getCell(i + 9, 3).value,
@@ -354,7 +354,7 @@ async function getGlobalPlayer(player) {
         if (names.getCell(i, 10).value !== null) {
           currentName = names.getCell(i, 10).value;
           let teamName = "";
-          for (let k = 0; k < 14 * 7; k++) {
+          for (let k = 0; k < (14 * 7) + 2; k++) {
             // It has to be the number of players in each team times seven
             teamName = currentsheet.getCell(k + 9, 2).value || teamName;
             if (currentsheet.getCell(k + 9, 3).value === currentName) {
