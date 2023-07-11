@@ -425,7 +425,7 @@ async function dumpGuesses(guesses) {
   }
 
   items.sort(function (first, second) {
-    return first[0] - second[0];
+    return (first[0] < second[0]) ? -1 : ((first[0] > second[0]) ? 1 : 0);
   });
 
   for (const item of items) {
@@ -441,11 +441,11 @@ async function dumpSpecialGuesses(guesses) {
   }
 
   items.sort(function (first, second) {
-    return first[0] - second[0];
+    return (first[0] < second[0]) ? -1 : ((first[0] > second[0]) ? 1 : 0);
   });
 
   let sheet;
-  if ((await guess_information.get("specialMode")) === "Anon special") {
+  if ((await guess_information.get("specialMode")) === "Anonspecial") {
     sheet = moddoc.sheetsByIndex[3];
   } else {
     sheet = moddoc.sheetsByIndex[4];
