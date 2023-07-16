@@ -77,7 +77,7 @@ async function scheduleEmbed(dayNumber, footer) {
 async function execute(message, args, user) {
   const currentDate = new Date();
   let dayNumber = Math.min(
-    11,
+    12,
     Math.max(
       1,
       currentDate.getUTCHours() < 9 // day changes at 9AM UTC
