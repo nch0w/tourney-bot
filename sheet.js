@@ -215,6 +215,7 @@ async function getGames() {
   const gameNumber = await getGameNumber();
   return _.range(0, gameNumber) //Has to be one more than the number of rows in Inporter
     .map((row) => {
+      console.log(`C${row + 4}`);
       if (sheet.getCellByA1(`C${row + 4}`).value === null) return null;
       const played =
         sheet.getCellByA1(`Y${row + 4}`).value &&
