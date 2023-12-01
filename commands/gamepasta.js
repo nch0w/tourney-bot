@@ -16,7 +16,7 @@ async function execute(message, args, user) {
     const games2 = await sheet.getGames();
     const currentGame = games2.find((g) => !g.played);
     const schedule = await sheet.getSchedule();
-    const gametypes = _.range(0, 9)
+    const gametypes = _.range(0, 10)
       .map((day) => schedule[day].games)
       .flat();
     const currentType = gametypes

@@ -26,6 +26,19 @@ async function execute(message, args, user) {
         .setFooter(`Updated ${user.updateTime}`);
       return message.channel.send(embed);
     }
+    if (
+      ["sadnixon"].includes(
+        args.join("").toLowerCase()
+      )
+    ) {
+      const embed = new Discord.MessageEmbed()
+        .setTitle("Player Statistics for SadNixon")
+        .setDescription(
+          "**Overall Points:** 420\n**Overall Record:** 0/69 (0%)\n**SH Tourney Wins:** 0"
+        )
+        .setFooter(`Updated ${user.updateTime}`);
+      return message.channel.send(embed);
+    }
     try {
       const playerInfo = await sheet.getGlobalPlayer(
         args.join("").toLowerCase()
@@ -38,11 +51,11 @@ async function execute(message, args, user) {
           )
         );
       }
-      const tourneyNames = ["T1", "T2", "T3", "T4", "T5", "T6", "T7"];
+      const tourneyNames = ["T1", "T2", "T3", "T4", "T5", "T6", "T7", "T8"];
       const wins = playerInfo[2][33] || 0; //Must be the number of the global sheet column for tourney 1sts
       let tourneyIndices = [];
       if (playerInfo[2].length > 0) {
-        for (let i = 0; i < 6; i++) {
+        for (let i = 0; i < 7; i++) {
           // Has to be number of past tournies
           if (playerInfo[2][39 + i * 6]) {
             tourneyIndices.push(i);
@@ -79,11 +92,11 @@ async function execute(message, args, user) {
                       })`
                   )
                   .join("\n") +
-                `\nT7: ${playerInfo[1][0]} - ${
+                `\nT8: ${playerInfo[1][0]} - ${
                   playerInfo[1][6]
                 } pts (${playerInfo[1][2]}/${playerInfo[1][1]})`
               : //Case where player has only present records
-                `**Rookie Tourney**\n\nT7: ${playerInfo[1][0]} - ${
+                `**Rookie Tourney**\n\nT8: ${playerInfo[1][0]} - ${
                   playerInfo[1][6]
                 } pts (${playerInfo[1][2]}/${playerInfo[1][1]})`
             : //Case where player has only past records
