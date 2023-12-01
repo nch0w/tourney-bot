@@ -33,7 +33,7 @@ async function loadSheet() {
   await doc.sheetsByIndex[4].loadCells("B3:F47"); //The borders of the Schedule on main sheet
   await doc.sheetsByIndex[1].loadCells("B2:Y47"); //The relevant portion of the Importer, including the leaderboard
   await doc.sheetsByIndex[2].loadCells("A1:I65"); //The borders of the Personal Scores Block
-  await doc.sheetsByIndex[6].loadCells("A5:H41"); //The lefthand portion of the Fantasy League
+  await doc.sheetsByIndex[6].loadCells("A5:H46"); //The lefthand portion of the Fantasy League
   await moddoc.loadInfo();
   await moddoc.sheetsByIndex[0].loadCells("A1:G2000");
   await moddoc.sheetsByIndex[1].loadCells("A1:C200");
@@ -71,7 +71,7 @@ async function getGuessLeaderboard() {
 
 async function getFantasyLeaderboard() {
   const sheet = doc.sheetsByIndex[6];
-  const leaderboard = _.range(5, 41, 1).map((row) => ({
+  const leaderboard = _.range(5, 46, 1).map((row) => ({
     mod: "",
     team: sheet.getCellByA1(`C${row}`).value,
     name: sheet.getCellByA1(`D${row}`).value,
@@ -133,9 +133,6 @@ async function getSchedule() {
   const sheet = doc.sheetsByIndex[4];
   //await sheet.loadCells("A1:S23");
   const dayGames = [4, 5, 5, 4, 4, 4, 4, 4, 5, 5];
-  console.log(
-    sheet.getCellByA1(`B${dayGames.slice(8, 0).reduce((a, b) => a + b, 0) + 3}`).formattedValue
-  );
   const dayNames = _.range(0, 10).map(
     (num) =>
       sheet.getCellByA1(
@@ -215,7 +212,6 @@ async function getGames() {
   const gameNumber = await getGameNumber();
   return _.range(0, gameNumber) //Has to be one more than the number of rows in Inporter
     .map((row) => {
-      console.log(`C${row + 4}`);
       if (sheet.getCellByA1(`C${row + 4}`).value === null) return null;
       const played =
         sheet.getCellByA1(`Y${row + 4}`).value &&

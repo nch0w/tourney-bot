@@ -26,19 +26,6 @@ async function execute(message, args, user) {
         .setFooter(`Updated ${user.updateTime}`);
       return message.channel.send(embed);
     }
-    if (
-      ["sadnixon"].includes(
-        args.join("").toLowerCase()
-      )
-    ) {
-      const embed = new Discord.MessageEmbed()
-        .setTitle("Player Statistics for SadNixon")
-        .setDescription(
-          "**Overall Points:** 420\n**Overall Record:** 0/69 (0%)\n**SH Tourney Wins:** 0"
-        )
-        .setFooter(`Updated ${user.updateTime}`);
-      return message.channel.send(embed);
-    }
     try {
       const playerInfo = await sheet.getGlobalPlayer(
         args.join("").toLowerCase()
