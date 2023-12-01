@@ -270,7 +270,7 @@ async function getPlayers() {
   const sheet = doc.sheetsByIndex[2];
   const players = [];
   let teamName = "";
-  for (let i = 0; i < 10 * 6 + 1; i++) {
+  for (let i = 0; i < 10 * 6; i++) {
     //special +1 case for goofy here
     teamName = sheet.getCell(i + 3, 1).value || teamName;
     players.push({
