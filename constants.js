@@ -68,6 +68,12 @@ async function getTournamentVCTextTwo() {
   return value ? value : "914274308359090238";
 }
 
+async function getGlobalSheetUpdated() {
+  const value = await sheet_data.get("GLOBAL_UPDATED");
+
+  return value ? value : 0;
+}
+
 module.exports = {
   getSheetURL: getSheetURL,
   getFormURL: getFormURL,
@@ -77,6 +83,7 @@ module.exports = {
   getStartDay: getStartDay,
   getGameNumber: getGameNumber,
   getTournamentVCTextTwo: getTournamentVCTextTwo,
+  getGlobalSheetUpdated: getGlobalSheetUpdated,
   sheet_data: sheet_data,
   GLOBAL_SHEET_URL:
     "https://docs.google.com/spreadsheets/d/1-FqHJLGnPiuKNLkBIgNFMWUB_2VPOFGrEa2bWUhzsCE/",

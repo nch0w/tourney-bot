@@ -13,6 +13,7 @@ const {
   getMonth,
   getTeamEmojis,
   getGameNumber,
+  getGlobalSheetUpdated,
 } = require("./constants");
 
 // this is the 4th SH Tourney spreadsheet
@@ -39,7 +40,7 @@ async function loadSheet() {
   await moddoc.sheetsByIndex[1].loadCells("A1:C200");
   await moddoc.sheetsByIndex[2].loadCells("C1:H60");
   await globaldoc.loadInfo();
-  await globaldoc.sheetsByIndex[3].loadCells("A2:CC185");
+  await globaldoc.sheetsByIndex[3].loadCells("A2:CI191");
   await globaldoc.sheetsByIndex[6].loadCells("A1:N190");
 }
 
@@ -288,6 +289,7 @@ async function getGlobalPlayer(player) {
   const sheet = globaldoc.sheetsByIndex[3];
   const rows = await sheet.getRows();
   const currentsheet = doc.sheetsByIndex[2];
+  const GlobalSheetUpdated = await getGlobalSheetUpdated();
   let canonName = "";
   let globalIndex = 0;
   let currentName = "";
@@ -329,7 +331,7 @@ async function getGlobalPlayer(player) {
   }
   if (globalIndex < rows.length) {
     pastInfo.push(
-      ..._.range(0, 81).map(
+      ..._.range(0, 81 + GlobalSheetUpdated * 6).map(
         (entry) => sheet.getCell(globalIndex + 1, entry).value
       ) // Has to be the number of columns in the Global Sheet
     );
