@@ -36,12 +36,13 @@ async function scheduleEmbed(dayNumber, footer) {
           }:t>`;
           if (
             game.type === "Silent" ||
+            game.type === "Silent+" ||
             game.type === "Bullet" ||
             game.type === "Birthday"
           ) {
             const gameInfos = games.filter((g) => g.number === game.number);
-            const played =
-              gameInfos[0].played && gameInfos[1].played && gameInfos[2].played;
+            const gameInfosPlayed = gameInfos.map((gameInfo) => gameInfo.played);
+            const played = gameInfosPlayed.every(Boolean);
 
             return {
               name: gameHeader,

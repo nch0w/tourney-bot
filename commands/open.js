@@ -17,7 +17,7 @@ async function execute(message, args, user) {
     await guess_information.set("specialGuessIDs", []);
     //guessDict = {};
     if (
-      ["Anonspecial", "AvalonSH", "AvalonSH+"].includes(currentGame.mode)
+      ["Anon.Special", "Anonymous", "AvalonSH", "AvalonSH+", "AvalonSpecial"].includes(currentGame.mode)
     ) {
       await guess_information.set("openSpecial", true);
       await guess_information.set("specialMode", currentGame.mode);

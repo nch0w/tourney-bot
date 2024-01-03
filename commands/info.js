@@ -59,7 +59,7 @@ async function execute(message, args, user) {
     },
     {
       name: `${PREFIX}guessteams|gt {teamorder}`,
-      value: "Submit a guess for the teams in a Special anon game",
+      value: "Submit a guess for the teams in an Anonymous game",
     },
     {
       name: `${PREFIX}info|help`,

@@ -68,8 +68,8 @@ async function execute(message, args, user) {
     regex.test(args[0]) &&
     !/([1-7hH]).*?\1/.test(args[0])
   ) {
-    if (["a", "b", "c"].includes(subGameIndicator)) {
-      const subIndicatorList = ["a", "b", "c"];
+    if (["a", "b", "c", "d"].includes(subGameIndicator)) {
+      const subIndicatorList = ["a", "b", "c", "d"];
       await guess_information.set(message.author.id, [
         timestamp,
         message.author.id,

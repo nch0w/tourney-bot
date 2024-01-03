@@ -27,11 +27,11 @@ async function execute(message, args, user) {
     );
   } else if (
     !(await guess_information.get("openSpecial")) ||
-    currentGame.mode !== "Anonspecial"
+    !["Anon.Special","Anonymous"].includes(currentGame.mode)
   ) {
     message.channel.send(
       errorMessage(
-        "Team guesses can only be made during in-progress Anon Special games."
+        "Team guesses can only be made during in-progress Anonymous games."
       )
     );
   } else if (currentGame.number === gameNumber - 1 && args.length === 1) {
