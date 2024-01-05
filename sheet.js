@@ -130,13 +130,31 @@ async function getPersonalStats(player) {
 
 async function getBestGuess(game) {
   const sheet = moddoc.sheetsByIndex[2];
+  const sheetMerlin = moddoc.sheetsByIndex[4];
   const rows = await sheet.getRows();
+  let guesserList = [];
+  let bestRow = [];
   for (let i = 0; i < 75; i++) {
     if (parseFloat(rows[i]._rawData[0]) === game) {
-      return rows[i]._rawData;
+      bestRow = rows[i]._rawData;
       break;
     }
   }
+  if (bestRow[18] !== "#N/A") {
+    for (let i = 2; i < 2000; i++) {
+      if (sheetMerlin.getCellByA1(`A${i}`).value === null) break;
+      if (
+        sheetMerlin.getCellByA1(`D${i}`).value === game &&
+        sheetMerlin.getCellByA1(`F${i}`).value === 1
+      ) {
+        guesserList.push(sheetMerlin.getCellByA1(`B${i}`).value);
+      }
+    }
+  }
+  return {
+    bestRow,
+    guesserList,
+  };
 }
 
 async function getSchedule() {
