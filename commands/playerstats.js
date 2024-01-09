@@ -20,6 +20,11 @@ async function execute(message, args, user) {
         )
         .setFooter(`Updated ${user.updateTime}`);
       return message.channel.send(embed);
+    } else if (args.join("").toLowerCase() === "tomsy") {
+      const embed = new Discord.MessageEmbed()
+        .setTitle("Who?")
+        .setFooter(`Updated ${user.updateTime}`);
+      return message.channel.send(embed);
     }
     try {
       const playerInfo = await sheet.getGlobalPlayer(
