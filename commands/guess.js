@@ -3,7 +3,7 @@ const sheet = require("../sheet");
 const { errorMessage, rank } = require("../message-helpers");
 const { getTournamentVCTextTwo, getGameNumber } = require("../constants");
 
-const regex = new RegExp("^[1-7hH]{3,4}$");
+const regex = new RegExp("^[1-7][hH]?[1-7][hH]?[1-7][hH]?$");
 
 async function execute(message, args, user) {
   const isdm = message.channel.type === "dm";
