@@ -286,7 +286,7 @@ async function getGames() {
         (i) => `${emojis[i]} ${sheet.getCell(row, 13 + i).value}`
       );
       let coaches;
-      if (mode === "Duo") {
+      if (["Duo","Duo+"].includes(mode)) {
         coaches = _.range(0, 7).map(
           (i) => `${sheet.getCell(row, 20 + i).value}`
         );

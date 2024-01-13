@@ -32,7 +32,7 @@ async function execute(message, args, user) {
               currentTime / 1000
             }:R>. Are your players ready?`
           );
-      } else if (currentType === "Duo") {
+      } else if (["Duo","Duo+"].includes(currentType)) {
         message.guild.channels.cache
           .get(team[1])
           .send(
