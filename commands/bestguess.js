@@ -2,7 +2,7 @@ const Discord = require("discord.js");
 const sheet = require("../sheet");
 const { errorMessage, rank } = require("../message-helpers");
 
-const gamenums = new RegExp("^[0-9]{1,2}[ABCabc]?$|^BG[1-9]$");
+const gamenums = new RegExp("^[0-9]{1,2}[ABCDabcd]?$|^BG[1-9]$");
 
 async function execute(message, args, user) {
   if (args.length !== 1) {
