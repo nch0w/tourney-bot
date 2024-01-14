@@ -37,7 +37,7 @@ const rank = (competitorList, column, secondary = false, limit = 10) => {
 };
 
 const roundToThirds = (points) => {
-  return +(Math.round(points * 3) / 3).toFixed(2);
+  return +(Math.round(points * 12) / 12).toFixed(2);
 };
 
 module.exports = { errorMessage, rank, roundToThirds };
