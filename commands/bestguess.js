@@ -15,8 +15,8 @@ async function execute(message, args, user) {
         let game;
         if (args[0].slice(0, 2).toUpperCase() === "BG") {
           game = parseInt(args[0].slice(-1)) / 10;
-        } else if (["A", "B", "C", "a", "b", "c"].includes(args[0].slice(-1))) {
-          const subIndicatorList = ["a", "b", "c"];
+        } else if (["A", "B", "C", "D", "a", "b", "c", "d"].includes(args[0].slice(-1))) {
+          const subIndicatorList = ["a", "b", "c", "d"];
           game =
             parseInt(args[0].slice(0, -1)) +
             (1 + subIndicatorList.indexOf(args[0].slice(-1).toLowerCase())) /
