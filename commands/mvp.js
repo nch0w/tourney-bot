@@ -1,6 +1,6 @@
 const Discord = require("discord.js");
 const sheet = require("../sheet");
-const { errorMessage, rank } = require("../message-helpers");
+const { errorMessage, rank, roundToThirds } = require("../message-helpers");
 const { PREFIX } = require("../env");
 
 async function execute(message, args, user) {
@@ -59,7 +59,7 @@ async function execute(message, args, user) {
                 (p, i) =>
                   `${ranks[i]}\\. ${p.teamName} - ${p.name} - ${(
                     p.winrate * 100
-                  ).toFixed(1)}% (${p.gamesWon}/${p.gamesPlayed})`
+                  ).toFixed(1)}% (${roundToThirds(p.gamesWon)}/${p.gamesPlayed})`
               )
               .join("\n")
           : "This list will populate once games have been played."
