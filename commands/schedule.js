@@ -30,16 +30,19 @@ async function scheduleEmbed(dayNumber, footer) {
             game.time > currentDate
               ? "Not played yet - starts"
               : "In progress - started"
-          } ${formatDistanceToNow(game.time, {
-            addSuffix: true,
-          })}`;
+          } <t:${game.time / 1000}:R>`;
           const gameHeader = `Game ${game.number} (${game.type}), <t:${
             game.time / 1000
           }:t>`;
-          if (game.type === "Silent" || game.type === "Bullet") {
+          if (
+            game.type === "Silent" ||
+            game.type === "Silent+" ||
+            game.type === "Bullet" ||
+            game.type === "Birthday"
+          ) {
             const gameInfos = games.filter((g) => g.number === game.number);
-            const played =
-              gameInfos[0].played && gameInfos[1].played && gameInfos[2].played;
+            const gameInfosPlayed = gameInfos.map((gameInfo) => gameInfo.played);
+            const played = gameInfosPlayed.every(Boolean);
 
             return {
               name: gameHeader,
@@ -75,7 +78,7 @@ async function scheduleEmbed(dayNumber, footer) {
 async function execute(message, args, user) {
   const currentDate = new Date();
   let dayNumber = Math.min(
-    11,
+    12,
     Math.max(
       1,
       currentDate.getUTCHours() < 9 // day changes at 9AM UTC
@@ -96,7 +99,7 @@ async function execute(message, args, user) {
     return;
   }
 
-  if (dayNumber < 1 || dayNumber > 11) {
+  if (dayNumber < 1 || dayNumber > 12) {
     message.channel.send(
       errorMessage(`Could not find a schedule for day ${dayNumber}.`)
     );
@@ -119,7 +122,7 @@ async function execute(message, args, user) {
       if (reaction.emoji.name === "◀") {
         dayNumber = Math.max(dayNumber - 1, 1);
       } else {
-        dayNumber = Math.min(dayNumber + 1, 11);
+        dayNumber = Math.min(dayNumber + 1, 12);
       }
       const newEmbed = await scheduleEmbed(dayNumber, footer);
       emb.edit(newEmbed);

@@ -14,13 +14,13 @@ if (ENABLE_DB) {
 async function getYear() {
   const value = await sheet_data.get("YEAR");
 
-  return value ? value : 2022;
+  return value ? value : 2024;
 }
 
 async function getMonth() {
   const value = await sheet_data.get("MONTH");
 
-  return value ? value : 10;
+  return value ? value : 0;
 }
 
 async function getTeamEmojis() {
@@ -42,7 +42,7 @@ async function getSheetURL() {
 
   return value
     ? value
-    : "https://docs.google.com/spreadsheets/d/1Yn2JK3QITQA3Av0SpTbNHO7eGjU2YRHjBH6dvh9JxNE/";
+    : "https://docs.google.com/spreadsheets/d/1jAE65MY41x6RoD1ya4PqZeepvDjMMn5TtIQTM8gndC0/";
 }
 
 async function getFormURL() {
@@ -54,13 +54,13 @@ async function getFormURL() {
 async function getStartDay() {
   const value = await sheet_data.get("START_DAY");
 
-  return value ? value : 17;
+  return value ? value : 3;
 }
 
 async function getGameNumber() {
   const value = await sheet_data.get("GAME_NUMBER");
 
-  return value ? value : 48;
+  return value ? value : 50;
 }
 
 async function getTournamentVCTextTwo() {

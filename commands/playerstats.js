@@ -20,6 +20,11 @@ async function execute(message, args, user) {
         )
         .setFooter(`Updated ${user.updateTime}`);
       return message.channel.send(embed);
+    } else if (args.join("").toLowerCase() === "tomsy") {
+      const embed = new Discord.MessageEmbed()
+        .setTitle("Who?")
+        .setFooter(`Updated ${user.updateTime}`);
+      return message.channel.send(embed);
     }
     try {
       const playerInfo = await sheet.getGlobalPlayer(
@@ -33,13 +38,24 @@ async function execute(message, args, user) {
           )
         );
       }
-      const tourneyNames = ["T1", "T2", "T3", "T4", "T5", "T6", "T7", "T8"];
-      const wins = playerInfo[2][5] || 0;
+      const tourneyNames = [
+        "T1",
+        "T2",
+        "T3",
+        "T4",
+        "T5",
+        "T6",
+        "T7",
+        "T8",
+        "T9",
+        "T10",
+      ];
+      const wins = playerInfo[2][6] || 0;
       let tourneyIndices = [];
       if (playerInfo[2].length > 0) {
-        for (let i = 0; i < 8; i++) {
+        for (let i = 0; i < 10; i++) {
           // Has to be number of past tournies
-          if (playerInfo[2][12 + i * 5]) {
+          if (playerInfo[2][13 + i * 5]) {
             tourneyIndices.push(i);
           }
         }
@@ -63,16 +79,16 @@ async function execute(message, args, user) {
                   .map(
                     (entry) =>
                       `${tourneyNames[entry]}: ${
-                        playerInfo[2][12 + entry * 5]
-                      } - ${playerInfo[2][15 + entry * 5]} pts (${roundToThirds(
-                        playerInfo[2][14 + entry * 5]
-                      )}/${playerInfo[2][13 + entry * 5]})`
+                        playerInfo[2][13 + entry * 5]
+                      } - ${playerInfo[2][16 + entry * 5]} pts (${roundToThirds(
+                        playerInfo[2][15 + entry * 5]
+                      )}/${playerInfo[2][14 + entry * 5]})`
                   )
                   .join("\n") +
-                `\nT9: ${playerInfo[1][0]} - ${
+                `\nT11: ${playerInfo[1][0]} - ${
                   playerInfo[1][5]
                 } pts (${roundToThirds(playerInfo[1][3])}/${playerInfo[1][2]})`
-              : `**Rookie Tourney**\n\nT9: ${playerInfo[1][0]} - ${
+              : `**Rookie Tourney**\n\nT11: ${playerInfo[1][0]} - ${
                   playerInfo[1][5]
                 } pts (${roundToThirds(playerInfo[1][3])}/${playerInfo[1][2]})`
             : `**Overall Points:** ${
@@ -86,10 +102,10 @@ async function execute(message, args, user) {
                   .map(
                     (entry) =>
                       `${tourneyNames[entry]}: ${
-                        playerInfo[2][12 + entry * 5]
-                      } - ${playerInfo[2][15 + entry * 5]} pts (${roundToThirds(
-                        playerInfo[2][14 + entry * 5]
-                      )}/${playerInfo[2][13 + entry * 5]})`
+                        playerInfo[2][13 + entry * 5]
+                      } - ${playerInfo[2][16 + entry * 5]} pts (${roundToThirds(
+                        playerInfo[2][15 + entry * 5]
+                      )}/${playerInfo[2][14 + entry * 5]})`
                   )
                   .join("\n")
         )

@@ -16,24 +16,24 @@ async function execute(message, args, user) {
     const games2 = await sheet.getGames();
     const currentGame = games2.find((g) => !g.played);
     const schedule = await sheet.getSchedule();
-    const gametypes = _.range(0, 11)
+    const gametypes = _.range(0, 12)
       .map((day) => schedule[day].games)
       .flat();
     const currentType = gametypes
       .filter((entry) => entry !== null)
       .find((g) => g.number === currentGame.number).type;
     for (var channel of channels) {
-      if (currentType === "VC") {
+      if (["VC", "SpecialVC"].includes(currentType)) {
         message.guild.channels.cache
           .get(channel)
           .send(
-            `The tournament game is about to begin. :warning: :no_entry: Remember to be respectful to all players and not to make comments about the game here or where players can see it, thanks! :warning: :no_entry: If you want to spectate and listen in on the game join the VC GAMES voice channel. Note, that you will be muted in that VC but you will be able to chat in #tournament-vc-text per usual. In an effort to reduce lag, we will be streaming the game in VC. Enjoy!`
+            `The tournament game is about to begin. :warning: :no_entry: Remember to be respectful to all players and not to make comments about the game here or where players can see it, thanks! :warning: :no_entry: If you want to spectate and listen in on the game join the VC GAMES voice channel. Note, that you will be muted in that VC but you will be able to chat in #tournament-vc-text per usual. We will be streaming the game in VC. Enjoy!`
           );
       } else {
         message.guild.channels.cache
           .get(channel)
           .send(
-            `The tournament game is about to begin. :warning: :no_entry: Remember not to make any comment about the game here or where players can see it, thanks! :warning: :no_entry: If you want to spectate and chat please join the Tournament VC and limit all chat to #tournament-vc-text. After the conclusion of the game, please be respectful to all of the players. In an effort to reduce lag, we will be streaming the game in VC. Enjoy!`
+            `The tournament game is about to begin. :warning: :no_entry: Remember not to make any comment about the game here or where players can see it, thanks! :warning: :no_entry: If you want to spectate and chat please join the Tournament VC and limit all chat to #tournament-vc-text. After the conclusion of the game, please be respectful to all of the players. We will be streaming the game in VC. Enjoy!`
           );
       }
     }
