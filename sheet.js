@@ -13,6 +13,7 @@ const {
   getMonth,
   getTeamEmojis,
   getGameNumber,
+  getGlobalSheetUpdated,
 } = require("./constants");
 
 // this is the 4th SH Tourney spreadsheet
@@ -30,17 +31,17 @@ async function loadSheet() {
   updateTime = new Date(new Date().getTime());
   await doc.loadInfo();
   await doc.sheetsByIndex[0].loadCells("B3:C14"); //The borders of the Leaderboard on main sheet
-  await doc.sheetsByIndex[4].loadCells("B3:F44"); //The borders of the Schedule on main sheet
-  await doc.sheetsByIndex[1].loadCells("B2:Y45"); //The relevant portion of the Importer, including the leaderboard
+  await doc.sheetsByIndex[4].loadCells("B3:F47"); //The borders of the Schedule on main sheet
+  await doc.sheetsByIndex[1].loadCells("B2:Y47"); //The relevant portion of the Importer, including the leaderboard
   await doc.sheetsByIndex[2].loadCells("A1:I65"); //The borders of the Personal Scores Block
-  await doc.sheetsByIndex[6].loadCells("A5:H41"); //The lefthand portion of the Fantasy League
+  await doc.sheetsByIndex[6].loadCells("A5:H46"); //The lefthand portion of the Fantasy League
   await moddoc.loadInfo();
   await moddoc.sheetsByIndex[0].loadCells("A1:G2000");
   await moddoc.sheetsByIndex[1].loadCells("A1:C200");
   await moddoc.sheetsByIndex[2].loadCells("C1:H60");
   await globaldoc.loadInfo();
-  await globaldoc.sheetsByIndex[3].loadCells("A2:BW176");
-  await globaldoc.sheetsByIndex[6].loadCells("A1:M184");
+  await globaldoc.sheetsByIndex[3].loadCells("A2:CI191");
+  await globaldoc.sheetsByIndex[6].loadCells("A1:N190");
 }
 
 setTimeout(loadSheet, 0);
@@ -71,7 +72,7 @@ async function getGuessLeaderboard() {
 
 async function getFantasyLeaderboard() {
   const sheet = doc.sheetsByIndex[6];
-  const leaderboard = _.range(5, 41, 1).map((row) => ({
+  const leaderboard = _.range(5, 46, 1).map((row) => ({
     mod: "",
     team: sheet.getCellByA1(`C${row}`).value,
     name: sheet.getCellByA1(`D${row}`).value,
@@ -132,16 +133,12 @@ async function getBestGuess(game) {
 async function getSchedule() {
   const sheet = doc.sheetsByIndex[4];
   //await sheet.loadCells("A1:S23");
-  const dayGames = [5, 5, 4, 4, 4, 4, 4, 6, 6];
-  console.log(
-    sheet.getCellByA1(`B${dayGames.slice(8, 0).reduce((a, b) => a + b, 0) + 3}`)
-      .value
-  );
-  const dayNames = _.range(0, 9).map(
+  const dayGames = [4, 5, 5, 4, 4, 4, 4, 4, 5, 5];
+  const dayNames = _.range(0, 10).map(
     (num) =>
       sheet.getCellByA1(
         `B${dayGames.slice(0, num).reduce((a, b) => a + b, 0) + 3}`
-      ).value
+      ).formattedValue
   );
   const modeNames = {
     R: "Regular",
@@ -271,7 +268,7 @@ async function getPlayers() {
   const sheet = doc.sheetsByIndex[2];
   const players = [];
   let teamName = "";
-  for (let i = 0; i < 10 * 6 + 1; i++) {
+  for (let i = 0; i < 10 * 6; i++) {
     //special +1 case for goofy here
     teamName = sheet.getCell(i + 3, 1).value || teamName;
     players.push({
@@ -292,13 +289,14 @@ async function getGlobalPlayer(player) {
   const sheet = globaldoc.sheetsByIndex[3];
   const rows = await sheet.getRows();
   const currentsheet = doc.sheetsByIndex[2];
+  const GlobalSheetUpdated = await getGlobalSheetUpdated();
   let canonName = "";
   let globalIndex = 0;
   let currentName = "";
   let currentInfo = [];
   let pastInfo = [];
   for (let i = 1; i < namerows.length + 1; i++) {
-    for (let j = 9; j < 13; j++) {
+    for (let j = 10; j < 14; j++) {
       // The first number is the index of the Name 1 column, the second is the one plus the index of the Name 4 column
       if (names.getCell(i, j).value === null) {
         break;
@@ -307,11 +305,10 @@ async function getGlobalPlayer(player) {
       if (names.getCell(i, j).value.toLowerCase() === player) {
         canonName = names.getCell(i, 0).value;
         globalIndex = i;
-        if (names.getCell(i, 7).value !== null) {
-          currentName = names.getCell(i, 7).value;
+        if (names.getCell(i, 8).value !== null) {
+          currentName = names.getCell(i, 8).value;
           let teamName = "";
-          for (let k = 0; k < 10 * 6 + 1; k++) {
-            //+1 for goofy special case
+          for (let k = 0; k < 10 * 6; k++) {
             // It has to be the number of players in each team times seven
             teamName = currentsheet.getCell(k + 3, 1).value || teamName;
             if (currentsheet.getCell(k + 3, 2).value === currentName) {
@@ -334,7 +331,7 @@ async function getGlobalPlayer(player) {
   }
   if (globalIndex < rows.length) {
     pastInfo.push(
-      ..._.range(0, 75).map(
+      ..._.range(0, 81 + GlobalSheetUpdated * 6).map(
         (entry) => sheet.getCell(globalIndex + 1, entry).value
       ) // Has to be the number of columns in the Global Sheet
     );
@@ -389,7 +386,7 @@ async function dumpGuesses(guesses) {
   //}
 
   items.sort(function (first, second) {
-    return first[0] - second[0];
+    return (first[0] < second[0]) ? -1 : ((first[0] > second[0]) ? 1 : 0);
   });
 
   for (const item of items) {

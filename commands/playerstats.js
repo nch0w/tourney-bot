@@ -1,16 +1,14 @@
 const Discord = require("discord.js");
 const sheet = require("../sheet");
+const {
+  getGlobalSheetUpdated,
+} = require("../constants");
 const { errorMessage, rank, roundToThirds } = require("../message-helpers");
 
 async function execute(message, args, user) {
-  //return message.channel.send(
-  //  errorMessage(
-  //    "The Player Stats command is nonfunctional due to lack of a Global Sheet for Avalon."
-  //  )
-  //);
   if (args.length < 1) {
     message.channel.send(
-      errorMessage("Must include a valid player name, like Dev or Gamethrower")
+      errorMessage("Must include a valid player name, like wanglebangle or Tom")
     );
   } else {
     if (
@@ -26,6 +24,7 @@ async function execute(message, args, user) {
         .setFooter(`Updated ${user.updateTime}`);
       return message.channel.send(embed);
     }
+    const GlobalSheetUpdated = await getGlobalSheetUpdated();
     try {
       const playerInfo = await sheet.getGlobalPlayer(
         args.join("").toLowerCase()
@@ -38,12 +37,14 @@ async function execute(message, args, user) {
           )
         );
       }
-      const tourneyNames = ["T1", "T2", "T3", "T4", "T5", "T6", "T7"];
+      const tourneyNames = ["T1", "T2", "T3", "T4", "T5", "T6", "T7", "T8"];
       const wins = playerInfo[2][33] || 0; //Must be the number of the global sheet column for tourney 1sts
       let tourneyIndices = [];
       if (playerInfo[2].length > 0) {
-        for (let i = 0; i < 6; i++) {
-          // Has to be number of past tournies
+        for (let i = 0; i < tourneyNames.length; i++) {
+          if (i === tourneyNames.length - 1 && GlobalSheetUpdated === 0) {
+            break
+          }
           if (playerInfo[2][39 + i * 6]) {
             tourneyIndices.push(i);
           }
@@ -53,7 +54,7 @@ async function execute(message, args, user) {
       const embed = new Discord.MessageEmbed()
         .setTitle(`Player Statistics for ${playerInfo[0]}`)
         .setDescription(
-          playerInfo[1].length > 0
+          playerInfo[1].length > 0 && GlobalSheetUpdated === 0
             ? playerInfo[2].length > 0
               ? //Case where player has both past and present records
                 `**Overall Points:** ${
@@ -79,11 +80,11 @@ async function execute(message, args, user) {
                       })`
                   )
                   .join("\n") +
-                `\nT7: ${playerInfo[1][0]} - ${
+                `\nT8: ${playerInfo[1][0]} - ${
                   playerInfo[1][6]
                 } pts (${playerInfo[1][2]}/${playerInfo[1][1]})`
               : //Case where player has only present records
-                `**Rookie Tourney**\n\nT7: ${playerInfo[1][0]} - ${
+                `**Rookie Tourney**\n\nT8: ${playerInfo[1][0]} - ${
                   playerInfo[1][6]
                 } pts (${playerInfo[1][2]}/${playerInfo[1][1]})`
             : //Case where player has only past records

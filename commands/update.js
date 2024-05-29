@@ -9,7 +9,7 @@ async function execute(message, args, user) {
   try {
     if (user.isAuthorized) {
       if (
-        ["YEAR", "MONTH", "START_DAY", "GAME_NUMBER"].includes(args[0]) &&
+        ["YEAR", "MONTH", "START_DAY", "GAME_NUMBER", "GLOBAL_UPDATED"].includes(args[0]) &&
         Number.isInteger(parseInt(args[1]))
       ) {
         await sheet_data.set(args[0], parseInt(args[1]));
